@@ -102,7 +102,7 @@ class TestPlatformCompatibility:
         ]
 
         for test_path in test_paths:
-            with patch("os.path.exists") as mock_exists:
+            with patch("pathlib.Path.exists") as mock_exists:
                 mock_exists.return_value = True
                 result = validate_xc8_tool(test_path, "cc", "v3.00")
                 assert result is True
@@ -198,7 +198,7 @@ class TestDependencyCompatibility:
         from unittest.mock import MagicMock, call, patch
 
         # Test that mock functionality works
-        with patch("os.path.exists") as mock_exists:
+        with patch("pathlib.Path.exists") as mock_exists:
             mock_exists.return_value = True
             result = validate_xc8_tool("fake_path", "cc", "v3.00")
             assert result is True
@@ -217,7 +217,7 @@ class TestEncodingCompatibility:
         ]
 
         for unicode_path in unicode_paths:
-            with patch("os.path.exists") as mock_exists:
+            with patch("pathlib.Path.exists") as mock_exists:
                 mock_exists.return_value = True
                 result = validate_xc8_tool(unicode_path, "cc", "v3.00")
                 assert result is True

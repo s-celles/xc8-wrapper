@@ -73,7 +73,12 @@ def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path
         raise ValueError(f"Unsupported XC8 tool: {tool_name}")
 
     tool_info = SUPPORTED_XC8_TOOLS[tool_name]
-    executable = tool_info["executable"]
+    # Get platform-appropriate executable name
+    if sys.platform.startswith("win"):
+        executable = tool_info["executable"]  # Keep .exe extension on Windows
+    else:
+        # Remove .exe extension for Unix-like systems (Linux, macOS)
+        executable = tool_info["executable"].replace(".exe", "")
 
     if custom_path:
         # Security validation for custom paths
@@ -84,9 +89,53 @@ def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path
         # Validate version string to prevent injection (allow alphanumeric, dots, hyphens, underscores)
         if not all(c.isalnum() or c in ".-_" for c in version):
             raise ValueError(f"Invalid version format: {version}")
-        xc8_path = rf"C:\Program Files\Microchip\xc8\v{version}\bin"
-        tool_path = os.path.join(xc8_path, executable)
-        return tool_path, f"v{version}"
+
+        # Determine platform-specific installation path
+        if sys.platform.startswith("win"):
+            # Windows: Check both 64-bit and 32-bit Program Files locations
+            possible_paths = [
+                Path("C:/Program Files/Microchip/xc8") / f"v{version}" / "bin",
+                Path("C:/Program Files (x86)/Microchip/xc8") / f"v{version}" / "bin",
+            ]
+            xc8_path = None
+            for path in possible_paths:
+                if path.exists():
+                    xc8_path = path
+                    break
+            if not xc8_path:
+                # Default to the first path even if it doesn't exist (for error reporting)
+                xc8_path = possible_paths[0]
+        elif sys.platform.startswith("darwin"):
+            # macOS: Check /Applications first, then /opt as fallback
+            possible_paths = [
+                Path("/Applications/microchip/xc8") / f"v{version}" / "bin",
+                Path("/opt/microchip/xc8") / f"v{version}" / "bin",
+            ]
+            xc8_path = None
+            for path in possible_paths:
+                if path.exists():
+                    xc8_path = path
+                    break
+            if not xc8_path:
+                # Default to the first path even if it doesn't exist (for error reporting)
+                xc8_path = possible_paths[0]
+        else:
+            # Linux and other Unix-like systems: Check /opt first, then /usr/local as fallback
+            possible_paths = [
+                Path("/opt/microchip/xc8") / f"v{version}" / "bin",
+                Path("/usr/local/microchip/xc8") / f"v{version}" / "bin",
+            ]
+            xc8_path = None
+            for path in possible_paths:
+                if path.exists():
+                    xc8_path = path
+                    break
+            if not xc8_path:
+                # Default to the first path even if it doesn't exist (for error reporting)
+                xc8_path = possible_paths[0]
+
+        tool_path = xc8_path / executable
+        return str(tool_path), f"v{version}"
     else:
         raise ValueError("Either version or custom_path must be provided")
 
@@ -103,15 +152,22 @@ def validate_xc8_tool(tool_path: str, tool_name: str, version_info: str) -> bool
     Returns:
         bool: True if tool is valid, False otherwise
     """
-    if not os.path.exists(tool_path):
+    if not tool_path or not Path(tool_path).exists():
         print_colored(f"✗ XC8 {tool_name} not found: {tool_path}", Colors.RED)
         if "custom path" in version_info:
             print_colored("Check the provided custom path", Colors.YELLOW)
         else:
-            print_colored(
-                f"Install XC8 Compiler {version_info} or use custom path option",
-                Colors.YELLOW,
-            )
+            print_colored(f"Install XC8 Compiler {version_info} or use custom path option", Colors.YELLOW)
+            print_colored("Expected installation locations:", Colors.YELLOW)
+            if sys.platform.startswith("win"):
+                print_colored("  Windows: C:\\Program Files\\Microchip\\xc8\\v{version}\\bin\\", Colors.GRAY)
+                print_colored("           C:\\Program Files (x86)\\Microchip\\xc8\\v{version}\\bin\\", Colors.GRAY)
+            elif sys.platform.startswith("darwin"):
+                print_colored("  macOS: /Applications/microchip/xc8/v{version}/bin/", Colors.GRAY)
+                print_colored("         /opt/microchip/xc8/v{version}/bin/", Colors.GRAY)
+            else:
+                print_colored("  Linux: /opt/microchip/xc8/v{version}/bin/", Colors.GRAY)
+                print_colored("         /usr/local/microchip/xc8/v{version}/bin/", Colors.GRAY)
         return False
 
     print_colored(f"✓ XC8 {tool_name} {version_info} found", Colors.GREEN)
@@ -198,20 +254,24 @@ def _validate_path_security(path: str) -> bool:
     Returns:
         bool: True if path is safe, False otherwise
     """
-    # Convert to absolute path to resolve any relative references
-    abs_path = os.path.abspath(path)
+    try:
+        # Convert to absolute path to resolve any relative references
+        abs_path = Path(path).resolve()
 
-    # Check for path traversal attempts
-    if ".." in path or path.startswith("/") and not path.startswith(abs_path):
-        return False
-
-    # Additional checks for suspicious patterns
-    suspicious_patterns = ["../", "..\\", "//", "\\\\"]
-    for pattern in suspicious_patterns:
-        if pattern in path:
+        # Check for path traversal attempts
+        if ".." in path:
             return False
 
-    return True
+        # Additional checks for suspicious patterns
+        suspicious_patterns = ["../", "..\\", "//", "\\\\"]
+        for pattern in suspicious_patterns:
+            if pattern in path:
+                return False
+
+        return True
+    except (OSError, ValueError):
+        # Invalid path
+        return False
 
 
 def handle_cc_tool(args: Any) -> None:
@@ -337,8 +397,8 @@ def handle_cc_tool(args: Any) -> None:
     print_colored(f"\n=== XC8 CC COMPILATION for {args.cpu} ===", Colors.CYAN)
 
     # Check source file
-    source_file = os.path.join(SOURCE_DIR, MAIN_C_FILE)
-    if not os.path.exists(source_file):
+    source_file = Path(SOURCE_DIR) / MAIN_C_FILE
+    if not source_file.exists():
         print_colored(f"✗ Source file not found: {source_file}", Colors.RED)
         print_colored("Make sure your source file exists in the source directory", Colors.YELLOW)
         sys.exit(1)
@@ -346,8 +406,9 @@ def handle_cc_tool(args: Any) -> None:
     print_colored(f"✓ Source file found: {source_file}", Colors.GREEN)
 
     # Create build directory
-    if not os.path.exists(BUILD_DIR):
-        os.makedirs(BUILD_DIR)
+    build_dir_path = Path(BUILD_DIR)
+    if not build_dir_path.exists():
+        build_dir_path.mkdir(parents=True, exist_ok=True)
         print_colored(f"✓ Created build directory: {BUILD_DIR}", Colors.GREEN)
 
     print_colored("\nCompilation in progress...", Colors.YELLOW)
@@ -355,8 +416,8 @@ def handle_cc_tool(args: Any) -> None:
     print_colored("  - Tool: XC8 CC (xc8-cc.exe)", Colors.GRAY)
     print_colored(f"  - Version: {version_info}", Colors.GRAY)
     print_colored(f"  - Target MCU: {args.cpu}", Colors.GRAY)
-    print_colored(f"  - Source: {os.path.join(SOURCE_DIR, MAIN_C_FILE)}", Colors.GRAY)
-    print_colored(f"  - Output: {os.path.join(BUILD_DIR, OUTPUT_HEX)}", Colors.GRAY)
+    print_colored(f"  - Source: {source_file}", Colors.GRAY)
+    print_colored(f"  - Output: {build_dir_path / OUTPUT_HEX}", Colors.GRAY)
 
     # Compilation parameters for target microcontroller
     compile_args = [xc8_cc_path, f"-mcpu={args.cpu}"]
@@ -364,8 +425,8 @@ def handle_cc_tool(args: Any) -> None:
     compile_args.extend(
         [
             "-o",
-            os.path.join(BUILD_DIR, OUTPUT_P1),
-            os.path.join(SOURCE_DIR, MAIN_C_FILE),
+            str(build_dir_path / OUTPUT_P1),
+            str(source_file),
         ]
     )
 
@@ -378,20 +439,20 @@ def handle_cc_tool(args: Any) -> None:
 
     # Linking parameters
     link_args = [xc8_cc_path, f"-mcpu={args.cpu}"]
-    link_args.extend([f"-Wl,-Map={os.path.join(BUILD_DIR, OUTPUT_MAP)}"])
+    link_args.extend([f"-Wl,-Map={build_dir_path / OUTPUT_MAP}"])
     link_args.extend(link_flags)
 
     # Add memory summary - use custom path if provided, otherwise default
     if hasattr(args, "memorysummary") and args.memorysummary:
         link_args.append(f"--memorysummary={args.memorysummary}")
     else:
-        link_args.append(f"--memorysummary={os.path.join(BUILD_DIR, MEMORY_FILE)}")
+        link_args.append(f"--memorysummary={build_dir_path / MEMORY_FILE}")
 
     link_args.extend(
         [
             "-o",
-            os.path.join(BUILD_DIR, OUTPUT_ELF),
-            os.path.join(BUILD_DIR, OUTPUT_P1),
+            str(build_dir_path / OUTPUT_ELF),
+            str(build_dir_path / OUTPUT_P1),
         ]
     )
 
@@ -403,14 +464,14 @@ def handle_cc_tool(args: Any) -> None:
         sys.exit(1)
 
     # Check if HEX file was created
-    hex_file = os.path.join(BUILD_DIR, OUTPUT_HEX)
-    if os.path.exists(hex_file):
-        hex_size = os.path.getsize(hex_file)
+    hex_file = build_dir_path / OUTPUT_HEX
+    if hex_file.exists():
+        hex_size = hex_file.stat().st_size
         print_colored(f"\n✓ HEX file generated: {OUTPUT_HEX} ({hex_size} bytes)", Colors.GREEN)
 
         print_colored("\nGenerated files:", Colors.BLUE)
         try:
-            for file_path in Path(BUILD_DIR).iterdir():
+            for file_path in build_dir_path.iterdir():
                 if file_path.is_file():
                     size = file_path.stat().st_size
                     print_colored(f"  {file_path.name} - {size} bytes", Colors.GRAY)
@@ -424,7 +485,7 @@ def handle_cc_tool(args: Any) -> None:
             Colors.GREEN,
         )
         print_colored(
-            f"File ready for programming: {os.path.join(BUILD_DIR, OUTPUT_HEX)}",
+            f"File ready for programming: {hex_file}",
             Colors.WHITE,
         )
         print_colored("Next step: Upload with upload script", Colors.CYAN)

@@ -147,16 +147,21 @@ class TestScalability:
         """Test handling of large argument lists"""
         with patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate, patch(
             "xc8_wrapper.core.get_xc8_tool_path"
-        ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run, patch("os.path.exists") as mock_exists, patch(
-            "xc8_wrapper.core.os.path.getsize"
-        ) as mock_getsize:
+        ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run, patch(
+            "pathlib.Path.exists"
+        ) as mock_exists, patch(
+            "pathlib.Path.mkdir"
+        ) as mock_mkdir, patch(
+            "pathlib.Path.stat"
+        ) as mock_stat:
 
             # Setup mocks
             mock_get_path.return_value = (r"C:\xc8\bin\xc8-cc.exe", "v3.00")
             mock_validate.return_value = True
             mock_exists.return_value = True
+            mock_mkdir.return_value = None
+            mock_stat.return_value = MagicMock(st_size=1024)
             mock_run.return_value = MagicMock(returncode=0)
-            mock_getsize.return_value = 1024  # Mock file size
 
             # Create large argument list
             large_args = ["--cpu", "PIC16F876A", "--xc8-version", "3.00"]

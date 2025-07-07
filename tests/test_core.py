@@ -6,6 +6,7 @@ Comprehensive test suite for the XC8 wrapper core functionality.
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 
@@ -30,10 +31,24 @@ class TestXC8ToolPath:
     def test_get_xc8_tool_path_with_version(self):
         """Test getting tool path with version"""
         path, version_info = get_xc8_tool_path("cc", version="3.00")
-        # Use os.path.join to create platform-appropriate path
-        expected_path = os.path.join(r"C:\Program Files\Microchip\xc8\v3.00\bin", "xc8-cc.exe")
-        assert path == expected_path
+
+        # Verify the version info is correct
         assert version_info == "v3.00"
+
+        # Verify the path contains the expected components
+        assert "xc8" in path.lower()
+        assert "v3.00" in path
+        assert "bin" in path
+
+        # Verify platform-specific executable name
+        if sys.platform.startswith("win"):
+            assert path.endswith("xc8-cc.exe")
+            # Should be one of the Windows paths
+            assert ("Program Files" in path and "Microchip" in path) or ("Program Files (x86)" in path and "Microchip" in path)
+        else:
+            assert path.endswith("xc8-cc")
+            # Should be one of the Unix paths
+            assert ("opt/microchip" in path) or ("Applications/microchip" in path) or ("usr/local/microchip" in path)
 
     def test_get_xc8_tool_path_with_custom_path(self):
         """Test getting tool path with custom path"""
@@ -56,14 +71,14 @@ class TestXC8ToolPath:
 class TestValidateXC8Tool:
     """Test XC8 tool validation"""
 
-    @patch("os.path.exists")
+    @patch("pathlib.Path.exists")
     def test_validate_xc8_tool_exists(self, mock_exists):
         """Test validation when tool exists"""
         mock_exists.return_value = True
         result = validate_xc8_tool("fake_path", "cc", "v3.00")
         assert result is True
 
-    @patch("os.path.exists")
+    @patch("pathlib.Path.exists")
     def test_validate_xc8_tool_not_exists(self, mock_exists):
         """Test validation when tool doesn't exist"""
         mock_exists.return_value = False
@@ -139,17 +154,32 @@ class TestHandleCCTool:
     @patch("xc8_wrapper.core.validate_xc8_tool")
     @patch("xc8_wrapper.core.get_xc8_tool_path")
     @patch("xc8_wrapper.core.run_command")
-    @patch("os.path.exists")
-    @patch("os.path.getsize")
-    @patch("os.makedirs")
-    def test_handle_cc_tool_success(self, mock_makedirs, mock_getsize, mock_exists, mock_run, mock_get_path, mock_validate):
+    @patch("pathlib.Path.exists")
+    @patch("pathlib.Path.stat")
+    @patch("pathlib.Path.mkdir")
+    @patch("pathlib.Path.iterdir")
+    def test_handle_cc_tool_success(
+        self, mock_iterdir, mock_mkdir, mock_stat, mock_exists, mock_run, mock_get_path, mock_validate
+    ):
         """Test successful CC tool handling"""
         # Setup mocks
         mock_get_path.return_value = (r"C:\xc8\bin\xc8-cc.exe", "v3.00")
         mock_validate.return_value = True
         mock_exists.return_value = True
         mock_run.return_value = True
-        mock_getsize.return_value = 1024
+
+        # Mock stat result for file size
+        stat_result = MagicMock()
+        stat_result.st_size = 1024
+        mock_stat.return_value = stat_result
+
+        # Mock directory listing
+        mock_file = MagicMock()
+        mock_file.name = "main.hex"
+        mock_file.is_file.return_value = True
+        mock_file.is_dir.return_value = False
+        mock_file.stat.return_value = stat_result
+        mock_iterdir.return_value = [mock_file]
 
         # Create test args
         args = MagicMock()
@@ -160,14 +190,26 @@ class TestHandleCCTool:
         args.build_dir = "build"
         args.main_c_file = "main.c"
         args.output_hex = "main.hex"
+        args.output_elf = "main.elf"
+        args.output_p1 = "main.p1"
+        args.output_map = "main.map"
+        args.memory_file = "memoryfile.xml"
         args.optimize = None
         args.define = []
+        args.undefine = []
         args.include = []
+        args.keep_comments = False
+        args.preprocess_only = False
+        args.list_headers = False
+        args.list_macros = False
         args.compile_only = False
+        args.assembly_only = False
         args.verbose = False
-        args.suppress_warnings = None
+        args.suppress_warnings = False
+        args.save_temps = False
         args.std = None
         args.compile_flag = []
+        args.link_flag = []
 
         # Test
         handle_cc_tool(args)

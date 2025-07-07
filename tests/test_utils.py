@@ -42,17 +42,17 @@ class TestEdgeCases:
         """Test validation with spaces in path"""
         path_with_spaces = r"C:\Program Files\Microchip\xc8\v3.00\bin\xc8-cc.exe"
 
-        with patch("os.path.exists") as mock_exists:
+        with patch("pathlib.Path.exists") as mock_exists:
             mock_exists.return_value = True
             result = validate_xc8_tool(path_with_spaces, "cc", "v3.00")
             assert result is True
-            mock_exists.assert_called_once_with(path_with_spaces)
+            mock_exists.assert_called_once()
 
     def test_validate_xc8_tool_with_unicode_path(self):
         """Test validation with unicode characters in path"""
         unicode_path = r"C:\Användare\xc8\bin\xc8-cc.exe"
 
-        with patch("os.path.exists") as mock_exists:
+        with patch("pathlib.Path.exists") as mock_exists:
             mock_exists.return_value = True
             result = validate_xc8_tool(unicode_path, "cc", "v3.00")
             assert result is True
@@ -170,14 +170,14 @@ class TestFileSystemOperations:
 
     def test_validate_xc8_tool_with_relative_path(self):
         """Test validation with relative path"""
-        with patch("os.path.exists") as mock_exists:
+        with patch("pathlib.Path.exists") as mock_exists:
             mock_exists.return_value = True
             result = validate_xc8_tool("./xc8-cc.exe", "cc", "v3.00")
             assert result is True
 
     def test_validate_xc8_tool_with_nonexistent_path(self):
         """Test validation with non-existent path"""
-        with patch("os.path.exists") as mock_exists:
+        with patch("pathlib.Path.exists") as mock_exists:
             mock_exists.return_value = False
             result = validate_xc8_tool("/nonexistent/path/xc8-cc.exe", "cc", "v3.00")
             assert result is False
@@ -209,10 +209,9 @@ class TestErrorHandling:
 
     def test_validate_xc8_tool_with_none_path(self):
         """Test validation with None path"""
-        with patch("os.path.exists") as mock_exists:
-            mock_exists.return_value = False
-            result = validate_xc8_tool(None, "cc", "v3.00")
-            assert result is False
+        # No need to mock since we handle None before calling Path.exists()
+        result = validate_xc8_tool(None, "cc", "v3.00")
+        assert result is False
 
 
 if __name__ == "__main__":
