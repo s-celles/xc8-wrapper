@@ -1,22 +1,6 @@
----
-layout: default
-title: FAQ
-nav_order: 6
----
-
 # Frequently Asked Questions
-{: .no_toc }
 
 Common questions and solutions for XC8 Wrapper.
-{: .fs-6 .fw-300 }
-
-## Table of contents
-{: .no_toc .text-delta }
-
-1. TOC
-{:toc}
-
----
 
 ## Installation Questions
 

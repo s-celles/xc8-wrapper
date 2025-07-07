@@ -1,5 +1,6 @@
----
-layout: default
+# Getting Started
+
+Step-by-step guide to get up and running with XC8 Wrapper.t
 title: Getting Started
 nav_order: 3
 ---

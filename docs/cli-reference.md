@@ -1,22 +1,6 @@
----
-layout: default
-title: CLI Reference
-nav_order: 4
----
-
 # CLI Reference
-{: .no_toc }
 
 Complete reference for the XC8 Wrapper command-line interface.
-{: .fs-6 .fw-300 }
-
-## Table of contents
-{: .no_toc .text-delta }
-
-1. TOC
-{:toc}
-
----
 
 ## Basic Syntax
 

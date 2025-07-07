@@ -58,24 +58,12 @@ theme:
 # Navigation structure
 nav:
   - Home: index.md
-  - Getting Started:
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quick-start.md
-    - Your First Project: getting-started/first-project.md
-  - User Guide:
-    - CLI Reference: user-guide/cli-reference.md
-    - Configuration: user-guide/configuration.md
-    - Compilation Options: user-guide/compilation.md
-    - Debugging: user-guide/debugging.md
-  - Examples:
-    - Basic Projects: examples/basic.md
-    - Advanced Usage: examples/advanced.md
-    - Integration: examples/integration.md
-  - Developer Guide:
-    - Contributing: development/contributing.md
-    - Development Setup: development/setup.md
-    - Testing: development/testing.md
-    - API Reference: development/api.md
+  - Installation: installation.md
+  - Getting Started: getting-started.md
+  - CLI Reference: cli-reference.md
+  - Examples: examples.md
+  - FAQ: faq.md
+  - Development: development.md
 
 # Extensions
 markdown_extensions:

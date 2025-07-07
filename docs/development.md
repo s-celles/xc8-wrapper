@@ -1,22 +1,6 @@
----
-layout: default
-title: Development
-nav_order: 7
----
-
 # Development Guide
-{: .no_toc }
 
 Guide for contributing to and developing XC8 Wrapper.
-{: .fs-6 .fw-300 }
-
-## Table of contents
-{: .no_toc .text-delta }
-
-1. TOC
-{:toc}
-
----
 
 ## Getting Started with Development
 

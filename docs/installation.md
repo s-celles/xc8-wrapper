@@ -1,22 +1,6 @@
----
-layout: default
-title: Installation
-nav_order: 2
----
-
 # Installation Guide
-{: .no_toc }
 
 This guide covers all the ways to install and set up XC8 Wrapper on your system.
-{: .fs-6 .fw-300 }
-
-## Table of contents
-{: .no_toc .text-delta }
-
-1. TOC
-{:toc}
-
----
 
 ## Requirements
 

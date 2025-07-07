@@ -1,22 +1,6 @@
----
-layout: default
-title: Examples
-nav_order: 5
----
-
 # Examples
-{: .no_toc }
 
 Real-world usage examples and patterns for XC8 Wrapper.
-{: .fs-6 .fw-300 }
-
-## Table of contents
-{: .no_toc .text-delta }
-
-1. TOC
-{:toc}
-
----
 
 ## Basic Examples
 

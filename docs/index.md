@@ -1,24 +1,12 @@
----
-layout: default
-title: Home
-nav_order: 1
-description: "XC8 Wrapper - Modern, secure, cross-platform wrapper for Microchip XC8 compiler"
-permalink: /
----
-
 # XC8 Wrapper Documentation
-{: .fs-9 }
 
 A modern, secure, and cross-platform wrapper for the Microchip XC8 compiler toolchain.
-{: .fs-6 .fw-300 }
 
-[Get started now](#getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
-[View it on GitHub](https://github.com/s-celles/xc8-wrapper){: .btn .fs-5 .mb-4 .mb-md-0 }
+[Get started now](#getting-started){ .md-button .md-button--primary }
+[View it on GitHub](https://github.com/s-celles/xc8-wrapper){ .md-button }
 
----
-
-{: .warning }
-> This project is currently in active development. APIs may change between versions.
+!!! warning
+    This project is currently in active development. APIs may change between versions.
 
 ## What is XC8 Wrapper?
 

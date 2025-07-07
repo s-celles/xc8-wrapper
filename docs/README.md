@@ -1,24 +1,14 @@
----
-layout: default
-title: Home
-nav_order: 1
-description: "XC8 Wrapper - Modern, secure, cross-platform wrapper for Microchip XC8 compiler"
-permalink: /
----
-
 # XC8 Wrapper Documentation
-{: .fs-9 }
 
 A modern, secure, and cross-platform wrapper for the Microchip XC8 compiler toolchain.
-{: .fs-6 .fw-300 }
 
-[Get started now](#getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
-[View it on GitHub](https://github.com/s-celles/xc8-wrapper){: .btn .fs-5 .mb-4 .mb-md-0 }
+[Get started now](#getting-started){ .md-button .md-button--primary }
+[View it on GitHub](https://github.com/s-celles/xc8-wrapper){ .md-button }
 
 ---
 
-{: .warning }
-> This project is currently in active development. APIs may change between versions.
+!!! warning
+    This project is currently in active development. APIs may change between versions.
 
 ## What is XC8 Wrapper?
 
@@ -51,10 +41,10 @@ xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A -O2 --verbose
 
 ## Getting Started
 
-1. **[Install XC8 Wrapper](installation.html)** - Complete installation guide
-2. **[Create your first project](getting-started.html)** - Step-by-step tutorial
-3. **[Learn the CLI](cli-reference.html)** - Complete command reference
-4. **[See examples](examples.html)** - Real-world usage patterns
+1. **[Install XC8 Wrapper](installation.md)** - Complete installation guide
+2. **[Create your first project](getting-started.md)** - Step-by-step tutorial
+3. **[Learn the CLI](cli-reference.md)** - Complete command reference
+4. **[See examples](examples.md)** - Real-world usage patterns
 
 ## Features
 
@@ -83,7 +73,7 @@ xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A -O2 --verbose
 
 ## Contributing
 
-We welcome contributions! Please see our [Development Guide](development.html) for information on how to contribute to this project.
+We welcome contributions! Please see our [Development Guide](development.md) for information on how to contribute to this project.
 
 ---
 
