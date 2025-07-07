@@ -96,4 +96,4 @@ We welcome contributions! Please see our [Development Guide](development.md) for
 - 📖 **Documentation**: You're reading it!
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/s-celles/xc8-wrapper/issues)
 - 💡 **Feature Requests**: [GitHub Discussions](https://github.com/s-celles/xc8-wrapper/discussions)
-- 📧 **Contact**: [s.celles@gmail.com](mailto:s.celles@gmail.com)
+- 📧 **Contact**: [s-celles](https://linktr.ee/SebastienCelles)
