@@ -1,12 +1,24 @@
+---
+layout: default
+title: Home
+nav_order: 1
+description: "XC8 Wrapper - Modern, secure, cross-platform wrapper for Microchip XC8 compiler"
+permalink: /
+---
+
 # XC8 Wrapper Documentation
+{: .fs-9 }
 
 A modern, secure, and cross-platform wrapper for the Microchip XC8 compiler toolchain.
+{: .fs-6 .fw-300 }
 
-[![CI](https://github.com/s-celles/xc8-wrapper/actions/workflows/ci.yml/badge.svg)](https://github.com/s-celles/xc8-wrapper/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/s-celles/xc8-wrapper/branch/main/graph/badge.svg)](https://codecov.io/gh/s-celles/xc8-wrapper)
-[![PyPI version](https://badge.fury.io/py/xc8-wrapper.svg)](https://badge.fury.io/py/xc8-wrapper)
-[![Python versions](https://img.shields.io/pypi/pyversions/xc8-wrapper.svg)](https://pypi.org/project/xc8-wrapper/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[Get started now](#getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[View it on GitHub](https://github.com/s-celles/xc8-wrapper){: .btn .fs-5 .mb-4 .mb-md-0 }
+
+---
+
+{: .warning }
+> This project is currently in active development. APIs may change between versions.
 
 ## What is XC8 Wrapper?
 
@@ -33,23 +45,27 @@ pip install xc8-wrapper
 # Compile a simple PIC project
 xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A
 
-# Compile with custom source directory
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A --source-dir my_project --main-c-file main.c
-
-# Use optimization and verbose output
+# Compile with optimization and verbose output
 xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A -O2 --verbose
 ```
 
-## Navigation
+## Getting Started
 
-- [📋 **Installation Guide**](installation.md) - Complete installation instructions
-- [🚀 **Getting Started**](getting-started.md) - Your first project with XC8 Wrapper
-- [📚 **CLI Reference**](cli-reference.md) - Complete command-line interface documentation
-- [🔧 **Configuration**](configuration.md) - Advanced configuration and customization
-- [💻 **Development**](development.md) - Contributing and development setup
-- [❓ **FAQ**](faq.md) - Frequently asked questions
-- [📖 **Examples**](examples.md) - Real-world usage examples
-- [🔗 **API Reference**](api-reference.md) - Python API documentation
+1. **[� Install XC8 Wrapper](installation.html)** - Complete installation guide
+2. **[🚀 Create your first project](getting-started.html)** - Step-by-step tutorial with LED blink example
+3. **[� Learn the CLI](cli-reference.html)** - Complete command reference
+4. **[💡 See examples](examples.html)** - Real-world usage patterns and integrations
+
+## Documentation
+
+| Section | Description |
+|---------|-------------|
+| [� Installation](installation.html) | Installing XC8 Wrapper and XC8 compiler |
+| [� Getting Started](getting-started.html) | Your first PIC project tutorial |
+| [📖 CLI Reference](cli-reference.html) | Complete command-line documentation |
+| [� Examples](examples.html) | Real-world usage examples and patterns |
+| [❓ FAQ](faq.html) | Frequently asked questions and solutions |
+| [🛠️ Development](development.html) | Contributing and development guide |
 
 ## Features Overview
 

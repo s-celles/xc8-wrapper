@@ -46,9 +46,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/s-celles/xc8-wrapper"
+Homepage = "https://s-celles.github.io/xc8-wrapper/"
+Documentation = "https://s-celles.github.io/xc8-wrapper/"
 Repository = "https://github.com/s-celles/xc8-wrapper"
 Issues = "https://github.com/s-celles/xc8-wrapper/issues"
+Changelog = "https://github.com/s-celles/xc8-wrapper/blob/main/CHANGELOG.md"
 
 [project.scripts]
 xc8-wrapper = "xc8_wrapper.cli:main"
