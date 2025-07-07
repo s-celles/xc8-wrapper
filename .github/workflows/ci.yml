@@ -50,10 +50,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
-    - name: Run platform diagnostics
-      run: |
-        python diagnose_platform.py
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -66,6 +62,16 @@ jobs:
         PYTHONIOENCODING: utf-8
         PYTHONLEGACYWINDOWSSTDIO: 1
         # Additional environment variables for macOS
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
+
+    - name: Run platform diagnostics
+      run: |
+        python diagnose_platform.py
+      env:
+        # Fix encoding issues on all platforms
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
         LC_ALL: en_US.UTF-8
         LANG: en_US.UTF-8
 
