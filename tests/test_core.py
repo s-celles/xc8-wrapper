@@ -30,7 +30,8 @@ class TestXC8ToolPath:
     def test_get_xc8_tool_path_with_version(self):
         """Test getting tool path with version"""
         path, version_info = get_xc8_tool_path("cc", version="3.00")
-        expected_path = r"C:\Program Files\Microchip\xc8\v3.00\bin\xc8-cc.exe"
+        # Use os.path.join to create platform-appropriate path
+        expected_path = os.path.join(r"C:\Program Files\Microchip\xc8\v3.00\bin", "xc8-cc.exe")
         assert path == expected_path
         assert version_info == "v3.00"
 
