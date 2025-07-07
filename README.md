@@ -129,7 +129,6 @@ pre-commit install
 # Run hooks manually
 pre-commit run --all-files
 ```
-```
 
 ## Important Legal Notice
 
