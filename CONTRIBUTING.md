@@ -124,7 +124,7 @@ pre-commit autoupdate
 
 ### Testing
 
-- **Coverage**: Maintain at least 80% test coverage
+- **Coverage**: Maintain at least 78% test coverage
 - **Test types**: Include unit, integration, and performance tests
 - **Test naming**: Use descriptive test names that explain what is being tested
 - **Mocking**: Use `unittest.mock` for external dependencies

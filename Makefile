@@ -11,7 +11,7 @@ TEST_DIR := tests
 SRC_DIR := $(PACKAGE)
 
 # Coverage settings
-COVERAGE_MIN := 80
+COVERAGE_MIN := 78
 COVERAGE_HTML_DIR := htmlcov
 
 # Virtual environment

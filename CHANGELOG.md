@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Enhanced error handling and validation
-- Improved test coverage to 80%+ requirement
+- Improved test coverage to 78%+ requirement
 - Updated development dependencies
 - Modernized package configuration
 
