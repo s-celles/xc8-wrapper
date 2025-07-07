@@ -29,6 +29,19 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: Setup environment (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        # Setup UTF-8 locale for macOS
+        echo "LC_ALL=en_US.UTF-8" >> $GITHUB_ENV
+        echo "LANG=en_US.UTF-8" >> $GITHUB_ENV
+        # Check locale
+        locale
+        # Check Python version and encoding
+        python --version
+        python -c "import sys; print('Default encoding:', sys.getdefaultencoding())"
+        python -c "import locale; print('Locale:', locale.getdefaultlocale())"
+
     - name: Cache pip packages
       uses: actions/cache@v3
       with:
@@ -37,14 +50,24 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
+    - name: Run platform diagnostics
+      run: |
+        python diagnose_platform.py
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -e .[dev]
+        # Force reinstall of setuptools to avoid macOS issues
+        python -m pip install --upgrade setuptools wheel
+        # Install package with verbose output to debug any issues
+        pip install -e .[dev] -v
       env:
-        # Fix encoding issues on Windows
+        # Fix encoding issues on all platforms
         PYTHONIOENCODING: utf-8
         PYTHONLEGACYWINDOWSSTDIO: 1
+        # Additional environment variables for macOS
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
 
     - name: Lint with flake8
       run: |
@@ -53,41 +76,51 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       env:
-        # Fix encoding issues on Windows
+        # Fix encoding issues on all platforms
         PYTHONIOENCODING: utf-8
         PYTHONLEGACYWINDOWSSTDIO: 1
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
 
     - name: Check formatting with black
       run: |
         black --check --diff .
       env:
-        # Fix encoding issues on Windows
+        # Fix encoding issues on all platforms
         PYTHONIOENCODING: utf-8
         PYTHONLEGACYWINDOWSSTDIO: 1
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
 
     - name: Sort imports with isort
       run: |
         isort --check-only --diff .
       env:
-        # Fix encoding issues on Windows
+        # Fix encoding issues on all platforms
         PYTHONIOENCODING: utf-8
         PYTHONLEGACYWINDOWSSTDIO: 1
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
 
     - name: Type checking with mypy
       run: |
         mypy xc8_wrapper --ignore-missing-imports
       env:
-        # Fix encoding issues on Windows
+        # Fix encoding issues on all platforms
         PYTHONIOENCODING: utf-8
         PYTHONLEGACYWINDOWSSTDIO: 1
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
 
     - name: Test with pytest
       run: |
         pytest --cov=xc8_wrapper --cov-report=xml --cov-report=term-missing
       env:
-        # Fix encoding issues on Windows
+        # Fix encoding issues on all platforms
         PYTHONIOENCODING: utf-8
         PYTHONLEGACYWINDOWSSTDIO: 1
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
