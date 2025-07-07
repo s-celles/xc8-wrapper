@@ -1,23 +1,18 @@
 # Getting Started
 
-Step-by-step guide to get up and running with XC8 Wrapper.t
-title: Getting Started
-nav_order: 3
----
-
-# Getting Started
-{: .no_toc }
+Step-by-step guide to get up and running with XC8 Wrapper.
 
 This guide will walk you through creating your first PIC microcontroller project using XC8 Wrapper.
-{: .fs-6 .fw-300 }
 
-## Table of contents
-{: .no_toc .text-delta }
+## Table of Contents
 
-1. TOC
-{:toc}
-
----
+- [Prerequisites](#prerequisites)
+- [Your First Project](#your-first-project)
+- [Common Usage Patterns](#common-usage-patterns)
+- [Popular PIC Microcontrollers](#popular-pic-microcontrollers)
+- [Project Templates](#project-templates)
+- [Next Steps](#next-steps)
+- [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 

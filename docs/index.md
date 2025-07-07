@@ -1,33 +1,15 @@
 # XC8 Wrapper Documentation
 
-A modern, 1. **[📦1. **[📦1.3. **[| [📦 Installation](installation.md) | Installing XC8 Wrapper and XC8 compiler |
-| [🚀 Getting Started](getting-started.md) | Your first PIC project tutorial |
-| [�📖 CLI Reference](cli-reference.md) | Complete command-line documentation |
-| [💡 Examples](examples.md) | Real-world usage examples and patterns |
-| [❓ FAQ](faq.md) | Frequently asked questions and solutions |
-| [🛠️ Development](development.md) | Contributing and development guide |n the CLI](cli-reference.md)** - Complete command reference**[📦 Install XC8 Wrapper](installation.md)** - Complete installation guideIns| [📦 | [🚀 Getting Started](getting-started.md) | Your first PIC project tutorial |nstallation](installation/) | Installing XC8 Wrapper and XC8 compiler |
-| [🚀 Getting Started](getting-started/) | Your first PIC project tutorial |
-| [📖 CLI Reference](cli-reference/) | Complete command-line documentation |
-| [💡 Examples](examples/) | Real-world usage examples and patterns |
-| [❓ FAQ](faq/) | Frequently asked questions and solutions |
-| [🛠️ Development](development/) | Contributing and development guide |C8 Wrapper](installation/)** - Complete installation guide
-2. **[🚀 Create your first project](getting-started/)** - Step-by-step tutorial with LED blink example
-3. **[📖 Learn the CLI](cli-reference/)** - Complete command reference
-4. **[💡 See examples](examples/)** - Real-world usage patterns and integrations| [📦 Installation](installation.md) | Installing XC8 Wrapper and XC8 compiler |
-| [🚀 Getting Started](getting-started.md) | Your first PIC project tutorial |
-| [📖 CLI Reference](cli-reference.md) | Complete command-line documentation |
-| [💡 Examples](examples.md) | Real-world usage examples and patterns |
-| [❓ FAQ](faq.md) | Frequently asked questions and solutions |
-| [🛠️ Development](development.md) | Contributing and development guide |C8 Wrapper](installation/)** - Complete installation guide
-2. **[🚀 Create your first project](getting-started/)** - Step-by-step tutorial with LED blink example
-3. **[📖 Learn the CLI](cli-reference/)** - Complete command reference
-4. **[💡 See examples](examples/)** - Real-world usage patterns and integrationsre, and cross-platform wrapper for the Microchip XC8 compiler toolchain.
+A modern, secure, and cross-platform wrapper for the Microchip XC8 compiler toolchain.
 
 [Get started now](#getting-started){ .md-button .md-button--primary }
 [View it on GitHub](https://github.com/s-celles/xc8-wrapper){ .md-button }
 
 !!! warning
     This project is currently in active development. APIs may change between versions.
+
+!!! info "AI-Generated Content Notice"
+A significant portion of this project's content (including code, documentation, and examples) has been generated using AI assistance. Please review all code and documentation carefully before use in production environments. We recommend thorough testing and validation of any AI-generated components.
 
 ## What is XC8 Wrapper?
 
@@ -60,21 +42,21 @@ xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A -O2 --verbose
 
 ## Getting Started
 
-1. **[� Install XC8 Wrapper](installation.html)** - Complete installation guide
+1. **[📦 Install XC8 Wrapper](installation.md)** - Complete installation guide
 2. **[🚀 Create your first project](getting-started.md)** - Step-by-step tutorial with LED blink example
-3. **[� Learn the CLI](cli-reference.html)** - Complete command reference
+3. **[📖 Learn the CLI](cli-reference.md)** - Complete command reference
 4. **[💡 See examples](examples.md)** - Real-world usage patterns and integrations
 
 ## Documentation
 
 | Section | Description |
 |---------|-------------|
-| [� Installation](installation.html) | Installing XC8 Wrapper and XC8 compiler |
-| [� Getting Started](getting-started.html) | Your first PIC project tutorial |
-| [📖 CLI Reference](cli-reference.html) | Complete command-line documentation |
-| [� Examples](examples.html) | Real-world usage examples and patterns |
-| [❓ FAQ](faq.html) | Frequently asked questions and solutions |
-| [🛠️ Development](development.html) | Contributing and development guide |
+| [📦 Installation](installation.md) | Installing XC8 Wrapper and XC8 compiler |
+| [🚀 Getting Started](getting-started.md) | Your first PIC project tutorial |
+| [📖 CLI Reference](cli-reference.md) | Complete command-line documentation |
+| [💡 Examples](examples.md) | Real-world usage examples and patterns |
+| [❓ FAQ](faq.md) | Frequently asked questions and solutions |
+| [🛠️ Development](development.md) | Contributing and development guide |
 
 ## Features Overview
 
