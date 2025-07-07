@@ -29,7 +29,7 @@
 📊 **Comprehensive Testing** - 81 tests with 88%+ coverage for reliability
 🚀 **CI/CD Ready** - Pre-configured GitHub Actions for professional workflows
 
-## � Why Choose XC8 Wrapper?
+## 🤔 Why Choose XC8 Wrapper?
 
 > Transform your PIC development experience from complex command-line juggling to elegant, automated workflows.
 
@@ -50,7 +50,7 @@
 - 🏭 **Teams & Organizations** - Standardized build processes and CI/CD integration
 - 🔬 **Researchers** - Reproducible builds and automated testing
 
-## �🏆 Project Quality Metrics
+## 🏆 Project Quality Metrics
 
 <div align="center">
 
