@@ -61,26 +61,30 @@ class TestEdgeCases:
 class TestPlatformSpecific:
     """Test platform-specific behavior"""
 
-    @patch("os.name", "nt")
+    @patch("sys.platform", "win32")
     def test_windows_path_handling(self):
         """Test Windows-specific path handling"""
-        path, version_info = get_xc8_tool_path("cc", version="3.00")
+        with patch("pathlib.Path.exists") as mock_exists:
+            mock_exists.return_value = False  # Force default path selection
+            path, version_info = get_xc8_tool_path("cc", version="3.00")
 
-        # Should use Windows path format
-        assert path.startswith("C:")
-        assert "\\" in path
-        assert path.endswith("xc8-cc.exe")
+            # Should use Windows path format
+            assert "Program Files" in path
+            assert path.endswith("xc8-cc.exe")
+            assert version_info == "v3.00"
 
-    @patch("os.name", "posix")
+    @patch("sys.platform", "linux")
     def test_posix_path_handling(self):
         """Test POSIX-specific path handling"""
-        # This would need actual POSIX path logic in the core module
-        # For now, just test that it doesn't crash
-        try:
+        with patch("pathlib.Path.exists") as mock_exists:
+            mock_exists.return_value = False  # Force default path selection
             path, version_info = get_xc8_tool_path("cc", version="3.00")
-            assert isinstance(path, str)
-        except Exception:
-            # Expected if POSIX support isn't implemented yet
+
+            # Should use Linux path format (normalize path separators for cross-platform testing)
+            normalized_path = path.replace("\\", "/")
+            assert "/opt/microchip/xc8" in normalized_path or "/usr/local/microchip/xc8" in normalized_path
+            assert path.endswith("xc8-cc")  # No .exe on Linux
+            assert version_info == "v3.00"
             pass
 
 
