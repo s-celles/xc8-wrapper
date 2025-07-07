@@ -20,14 +20,14 @@
 
 ## ✨ Features
 
-🎯 **Complete XC8 Integration** - Full wrapper around xc8-cc.exe with all compiler flags
-🌈 **Beautiful Output** - Colored terminal output for better readability
-⚡ **High Performance** - Optimized for fast compilation workflows
-🔒 **Enterprise Security** - Comprehensive security validation and input sanitization
-🛠️ **Flexible Configuration** - Extensive customization options for any project
-🌍 **Cross-Platform** - Works seamlessly on Windows, Linux, and macOS
-📊 **Comprehensive Testing** - 81 tests with 88%+ coverage for reliability
-🚀 **CI/CD Ready** - Pre-configured GitHub Actions for professional workflows
+- 🎯 **Complete XC8 Integration** - Full wrapper around xc8-cc.exe with all compiler flags
+- 🌈 **Beautiful Output** - Colored terminal output for better readability
+- ⚡ **High Performance** - Optimized for fast compilation workflows
+- 🔒 **Enterprise Security** - Comprehensive security validation and input sanitization
+- 🛠️ **Flexible Configuration** - Extensive customization options for any project
+- 🌍 **Cross-Platform** - Works seamlessly on Windows, Linux, and macOS
+- 📊 **Comprehensive Testing** - 81 tests with 88%+ coverage for reliability
+- 🚀 **CI/CD Ready** - Pre-configured GitHub Actions for professional workflows
 
 ## 🤔 Why Choose XC8 Wrapper?
 
