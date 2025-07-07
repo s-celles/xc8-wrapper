@@ -23,13 +23,13 @@ def print_colored(text: str, color: str) -> None:
 
 # Color constants
 class Colors:
-    RED = Fore.RED
-    GREEN = Fore.GREEN
-    YELLOW = Fore.YELLOW
-    BLUE = Fore.BLUE
-    CYAN = Fore.CYAN
-    WHITE = Fore.WHITE
-    GRAY = Fore.LIGHTBLACK_EX
+    RED: str = Fore.RED
+    GREEN: str = Fore.GREEN
+    YELLOW: str = Fore.YELLOW
+    BLUE: str = Fore.BLUE
+    CYAN: str = Fore.CYAN
+    WHITE: str = Fore.WHITE
+    GRAY: str = Fore.LIGHTBLACK_EX
 
 
 # Supported XC8 tools

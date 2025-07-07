@@ -9,25 +9,15 @@ import argparse
 import sys
 from typing import List, Optional
 
-from colorama import Fore, Style, init
+from colorama import init
 
-from .core import SUPPORTED_XC8_TOOLS, handle_cc_tool
+from .core import SUPPORTED_XC8_TOOLS, Colors, handle_cc_tool, print_colored
 
 # Initialize colorama for cross-platform support
 init(autoreset=True)
 
 # Version information
 __version__ = "0.1.0"
-
-
-def print_colored(text: str, color: str) -> None:
-    """Print text with specified color using colorama"""
-    print(f"{color}{text}{Style.RESET_ALL}")
-
-
-# Color constants
-class Colors:
-    CYAN = Fore.CYAN
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
