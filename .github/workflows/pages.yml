@@ -7,6 +7,7 @@ on:
     branches: ["main"]
     paths:
       - "docs/**"
+      - "mkdocs.yml"
       - ".github/workflows/pages.yml"
 
   # Allows you to run this workflow manually from the Actions tab
@@ -49,13 +50,12 @@ jobs:
 
       - name: Build with MkDocs
         run: |
-          cd docs
           mkdocs build --site-dir _site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./docs/_site
+          path: ./_site
 
   # Deployment job
   deploy:
