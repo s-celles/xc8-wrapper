@@ -68,6 +68,9 @@ plugins:
   - jekyll-default-layout
   - jekyll-titles-from-headings
   - jekyll-relative-links
+  - jekyll-github-metadata
+  - jekyll-sitemap
+  - jekyll-seo-tag
 
 # Kramdown settings
 kramdown:
@@ -88,5 +91,9 @@ exclude:
   - LICENSE.txt
   - lib/
   - bin/
-  - README.md
   - Rakefile
+  - vendor/
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - .DS_Store
