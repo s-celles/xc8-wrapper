@@ -161,7 +161,7 @@ xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 --verbose
 
 ### Q: How do I contribute to XC8 Wrapper?
 
-**A:** See our [Development Guide](development.html):
+**A:** See our [Development Guide](development.md):
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -244,8 +244,8 @@ XC8 Wrapper doesn't include or redistribute any Microchip software.
 
 ## Still Have Questions?
 
-- 📚 Check the [Getting Started](getting-started.html) guide
-- 📖 Read the [CLI Reference](cli-reference.html)
-- 🔍 Browse [Examples](examples.html)
+- 📚 Check the [Getting Started](getting-started.md) guide
+- 📖 Read the [CLI Reference](cli-reference.md)
+- 🔍 Browse [Examples](examples.md)
 - 🐛 Report issues on [GitHub](https://github.com/s-celles/xc8-wrapper/issues)
 - 💬 Start a [discussion](https://github.com/s-celles/xc8-wrapper/discussions)

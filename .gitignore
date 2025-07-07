@@ -48,6 +48,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# MkDocs build directory
+_site/
+
 # Translations
 *.mo
 *.pot

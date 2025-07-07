@@ -323,6 +323,6 @@ xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 -Og
 
 ## Next Steps
 
-- Check out the [CLI Reference](cli-reference.html) for complete command documentation
-- Read the [Getting Started](getting-started.html) guide for step-by-step tutorials
-- Visit the [FAQ](faq.html) for answers to common questions
+- Check out the [CLI Reference](cli-reference.md) for complete command documentation
+- Read the [Getting Started](getting-started.md) guide for step-by-step tutorials
+- Visit the [FAQ](faq.md) for answers to common questions
