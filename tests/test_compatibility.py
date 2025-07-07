@@ -22,9 +22,9 @@ class TestPythonVersionCompatibility:
         """Test that current Python version is supported"""
         major, minor = sys.version_info[:2]
 
-        # Package supports Python 3.8+
+        # Package supports Python 3.9+
         assert major == 3, f"Python {major}.{minor} not supported"
-        assert minor >= 8, f"Python {major}.{minor} not supported, minimum is 3.8"
+        assert minor >= 9, f"Python {major}.{minor} not supported, minimum is 3.9"
 
     def test_string_formatting_compatibility(self):
         """Test that string formatting works across Python versions"""

@@ -13,13 +13,13 @@ jobs:
       matrix:
         # Windows first (primary development platform), then Linux, then macOS
         os: [windows-latest, ubuntu-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
         include:
           # Test development Python versions
           - os: ubuntu-latest
             python-version: '3.13-dev'
           - os: ubuntu-latest
-            python-version: 'pypy-3.8'
+            python-version: 'pypy-3.9'
           - os: ubuntu-latest
             python-version: 'pypy-3.9'
 
