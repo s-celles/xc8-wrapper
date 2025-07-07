@@ -5,11 +5,12 @@ This module contains the main functions for interacting with the XC8 toolchain.
 """
 
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
-from typing import Tuple, List, Optional
-from colorama import init, Fore, Style
+from typing import List, Optional, Tuple
+
+from colorama import Fore, Style, init
 
 # Initialize colorama for cross-platform support
 init(autoreset=True)
@@ -52,9 +53,7 @@ SUPPORTED_XC8_TOOLS = {
 }
 
 
-def get_xc8_tool_path(
-    tool_name: str, version: Optional[str] = None, custom_path: Optional[str] = None
-) -> Tuple[str, str]:
+def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path: Optional[str] = None) -> Tuple[str, str]:
     """
     Get the path to a specific XC8 tool
 
@@ -67,7 +66,8 @@ def get_xc8_tool_path(
         tuple: (tool_path, version_info_string)
 
     Raises:
-        ValueError: If tool_name is not supported or if neither version nor custom_path is provided
+        ValueError: If tool_name is not supported or if neither version nor
+                   custom_path is provided
     """
     if tool_name not in SUPPORTED_XC8_TOOLS:
         raise ValueError(f"Unsupported XC8 tool: {tool_name}")
@@ -162,9 +162,7 @@ def handle_cc_tool(args) -> None:
     """
     # Validate that either version or path is provided
     if not args.xc8_version and not args.xc8_path:
-        print_colored(
-            "✗ Either --xc8-version or --xc8-path must be provided", Colors.RED
-        )
+        print_colored("✗ Either --xc8-version or --xc8-path must be provided", Colors.RED)
         sys.exit(1)
 
     # Validate that CPU is provided for cc tool
@@ -174,9 +172,7 @@ def handle_cc_tool(args) -> None:
 
     # Get XC8 CC tool path
     try:
-        xc8_cc_path, version_info = get_xc8_tool_path(
-            "cc", args.xc8_version, args.xc8_path
-        )
+        xc8_cc_path, version_info = get_xc8_tool_path("cc", args.xc8_version, args.xc8_path)
     except ValueError as e:
         print_colored(f"✗ {e}", Colors.RED)
         sys.exit(1)
@@ -280,9 +276,7 @@ def handle_cc_tool(args) -> None:
     source_file = os.path.join(SOURCE_DIR, MAIN_C_FILE)
     if not os.path.exists(source_file):
         print_colored(f"✗ Source file not found: {source_file}", Colors.RED)
-        print_colored(
-            "Make sure your source file exists in the source directory", Colors.YELLOW
-        )
+        print_colored("Make sure your source file exists in the source directory", Colors.YELLOW)
         sys.exit(1)
 
     print_colored(f"✓ Source file found: {source_file}", Colors.GREEN)
@@ -292,9 +286,9 @@ def handle_cc_tool(args) -> None:
         os.makedirs(BUILD_DIR)
         print_colored(f"✓ Created build directory: {BUILD_DIR}", Colors.GREEN)
 
-    print_colored(f"\nCompilation in progress...", Colors.YELLOW)
+    print_colored("\nCompilation in progress...", Colors.YELLOW)
     print_colored("Configuration:", Colors.BLUE)
-    print_colored(f"  - Tool: XC8 CC (xc8-cc.exe)", Colors.GRAY)
+    print_colored("  - Tool: XC8 CC (xc8-cc.exe)", Colors.GRAY)
     print_colored(f"  - Version: {version_info}", Colors.GRAY)
     print_colored(f"  - Target MCU: {args.cpu}", Colors.GRAY)
     print_colored(f"  - Source: {os.path.join(SOURCE_DIR, MAIN_C_FILE)}", Colors.GRAY)
@@ -338,7 +332,7 @@ def handle_cc_tool(args) -> None:
     )
 
     # Linking step
-    print_colored(f"\nStep 2: Linking...", Colors.YELLOW)
+    print_colored("\nStep 2: Linking...", Colors.YELLOW)
     if not run_command(link_args, "Linking"):
         print_colored("\n✗ Linking failed", Colors.RED)
         print_colored("Check compilation output for errors", Colors.YELLOW)
@@ -348,9 +342,7 @@ def handle_cc_tool(args) -> None:
     hex_file = os.path.join(BUILD_DIR, OUTPUT_HEX)
     if os.path.exists(hex_file):
         hex_size = os.path.getsize(hex_file)
-        print_colored(
-            f"\n✓ HEX file generated: {OUTPUT_HEX} ({hex_size} bytes)", Colors.GREEN
-        )
+        print_colored(f"\n✓ HEX file generated: {OUTPUT_HEX} ({hex_size} bytes)", Colors.GREEN)
 
         print_colored("\nGenerated files:", Colors.BLUE)
         try:
@@ -371,7 +363,7 @@ def handle_cc_tool(args) -> None:
             f"File ready for programming: {os.path.join(BUILD_DIR, OUTPUT_HEX)}",
             Colors.WHITE,
         )
-        print_colored(f"Next step: Upload with upload script", Colors.CYAN)
+        print_colored("Next step: Upload with upload script", Colors.CYAN)
     else:
         print_colored("\n✗ HEX file not generated", Colors.RED)
         print_colored("Check compilation and linking output for errors", Colors.YELLOW)

@@ -1,5 +1,12 @@
 # XC8 Wrapper
 
+[![CI](https://github.com/s-celles/xc8-wrapper/actions/workflows/ci.yml/badge.svg)](https://github.com/s-celles/xc8-wrapper/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/s-celles/xc8-wrapper/branch/main/graph/badge.svg)](https://codecov.io/gh/s-celles/xc8-wrapper)
+[![PyPI version](https://badge.fury.io/py/xc8-wrapper.svg)](https://badge.fury.io/py/xc8-wrapper)
+[![Python versions](https://img.shields.io/pypi/pyversions/xc8-wrapper.svg)](https://pypi.org/project/xc8-wrapper/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 A Python wrapper for Microchip's XC8 toolchain for PIC microcontrollers.
 
 ## Installation
@@ -48,11 +55,80 @@ pip install -e .[dev]
 # Run tests
 pytest
 
+# Run tests with coverage
+pytest --cov=xc8_wrapper --cov-report=term-missing
+
+# Run quick tests
+python run_tests.py
+
 # Format code
 black .
 
 # Type checking
 mypy .
+
+# Run all linting
+flake8 xc8_wrapper tests
+
+# Run pre-commit hooks
+pre-commit run --all-files
+```
+
+## Testing
+
+The package includes comprehensive test coverage:
+
+### Quick Testing
+```bash
+# Run the quick test script
+python run_tests.py
+```
+
+### Detailed Testing
+```bash
+# Run all tests with coverage
+pytest --cov=xc8_wrapper --cov-report=html
+
+# Run specific test categories
+pytest tests/test_core.py -v
+pytest tests/test_cli.py -v
+pytest tests/test_integration.py -v
+
+# Run tests in parallel
+pytest -n auto
+
+# Run tests with specific markers
+pytest -m "unit" -v
+pytest -m "integration" -v
+```
+
+### Continuous Integration
+This project uses GitHub Actions for CI/CD:
+
+- **Automated Testing**: Tests run on Python 3.8-3.12 across Windows, macOS, and Linux
+- **Code Quality**: Automatic linting, formatting, and type checking
+- **Security**: Dependency vulnerability scanning
+- **Coverage**: Code coverage reporting with Codecov integration
+
+### Test Structure
+```
+tests/
+├── test_core.py          # Core functionality tests
+├── test_cli.py           # CLI interface tests
+├── test_integration.py   # Integration tests
+└── test_utils.py         # Utility and edge case tests
+```
+
+### Pre-commit Hooks
+Set up pre-commit hooks for development:
+
+```bash
+# Install pre-commit hooks
+pre-commit install
+
+# Run hooks manually
+pre-commit run --all-files
+```
 ```
 
 ## Important Legal Notice

@@ -1,15 +1,29 @@
 """
-Tests for XC8 Wrapper
+Tests for XC8 Wrapper Core Module
 
-Basic test suite for the XC8 wrapper functionality.
+Comprehensive test suite for the XC8 wrapper core functionality.
 """
 
-import pytest
 import os
-from unittest.mock import patch, MagicMock
-from xc8_wrapper.core import get_xc8_tool_path, validate_xc8_tool, SUPPORTED_XC8_TOOLS
+import subprocess
+from pathlib import Path
+from unittest.mock import MagicMock, call, patch
+
+import pytest
+
+from xc8_wrapper.core import (
+    SUPPORTED_XC8_TOOLS,
+    Colors,
+    get_xc8_tool_path,
+    handle_cc_tool,
+    print_colored,
+    run_command,
+    validate_xc8_tool,
+)
 
 
+@pytest.mark.unit
+@pytest.mark.core
 class TestXC8ToolPath:
     """Test XC8 tool path resolution"""
 
@@ -34,9 +48,7 @@ class TestXC8ToolPath:
 
     def test_get_xc8_tool_path_no_version_or_path(self):
         """Test error when neither version nor path is provided"""
-        with pytest.raises(
-            ValueError, match="Either version or custom_path must be provided"
-        ):
+        with pytest.raises(ValueError, match="Either version or custom_path must be provided"):
             get_xc8_tool_path("cc")
 
 
@@ -71,6 +83,135 @@ class TestConstants:
         assert "description" in cc_tool
         assert "default_operation" in cc_tool
         assert cc_tool["executable"] == "xc8-cc.exe"
+
+
+class TestPrintColored:
+    """Test colored output functionality"""
+
+    @patch("builtins.print")
+    def test_print_colored_basic(self, mock_print):
+        """Test basic colored printing"""
+        print_colored("Test message", Colors.RED)
+        mock_print.assert_called_once()
+
+    @patch("builtins.print")
+    def test_print_colored_with_different_colors(self, mock_print):
+        """Test colored printing with different colors"""
+        colors = [Colors.RED, Colors.GREEN, Colors.YELLOW, Colors.BLUE, Colors.CYAN]
+        for color in colors:
+            print_colored("Test", color)
+        assert mock_print.call_count == len(colors)
+
+
+class TestRunCommand:
+    """Test command execution functionality"""
+
+    @patch("subprocess.run")
+    def test_run_command_success(self, mock_run):
+        """Test successful command execution"""
+        mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
+
+        result = run_command(["echo", "test"], "Test command")
+        assert result is True
+        mock_run.assert_called_once()
+
+    @patch("subprocess.run")
+    def test_run_command_failure(self, mock_run):
+        """Test failed command execution"""
+        mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="Error")
+
+        result = run_command(["false"], "Test command")
+        assert result is False
+
+    @patch("subprocess.run")
+    def test_run_command_with_exception(self, mock_run):
+        """Test command execution with exception"""
+        mock_run.side_effect = FileNotFoundError("Command not found")
+
+        result = run_command(["nonexistent"], "Test command")
+        assert result is False
+
+
+class TestHandleCCTool:
+    """Test CC tool handling functionality"""
+
+    @patch("xc8_wrapper.core.validate_xc8_tool")
+    @patch("xc8_wrapper.core.get_xc8_tool_path")
+    @patch("xc8_wrapper.core.run_command")
+    @patch("os.path.exists")
+    @patch("os.path.getsize")
+    @patch("os.makedirs")
+    def test_handle_cc_tool_success(self, mock_makedirs, mock_getsize, mock_exists, mock_run, mock_get_path, mock_validate):
+        """Test successful CC tool handling"""
+        # Setup mocks
+        mock_get_path.return_value = (r"C:\xc8\bin\xc8-cc.exe", "v3.00")
+        mock_validate.return_value = True
+        mock_exists.return_value = True
+        mock_run.return_value = True
+        mock_getsize.return_value = 1024
+
+        # Create test args
+        args = MagicMock()
+        args.cpu = "PIC16F876A"
+        args.xc8_version = "3.00"
+        args.xc8_path = None
+        args.source_dir = "src"
+        args.build_dir = "build"
+        args.main_c_file = "main.c"
+        args.output_hex = "main.hex"
+        args.optimize = None
+        args.define = []
+        args.include = []
+        args.compile_only = False
+        args.verbose = False
+        args.suppress_warnings = None
+        args.std = None
+        args.compile_flag = []
+
+        # Test
+        handle_cc_tool(args)
+
+        # Verify calls
+        mock_get_path.assert_called_once()
+        mock_validate.assert_called_once()
+        mock_run.assert_called()
+
+    @patch("xc8_wrapper.core.get_xc8_tool_path")
+    @patch("xc8_wrapper.core.validate_xc8_tool")
+    def test_handle_cc_tool_invalid_tool(self, mock_validate, mock_get_path):
+        """Test CC tool handling with invalid tool"""
+        mock_get_path.return_value = (r"C:\xc8\bin\xc8-cc.exe", "v3.00")
+        mock_validate.return_value = False
+
+        args = MagicMock()
+        args.cpu = "PIC16F876A"
+        args.xc8_version = "3.00"
+        args.xc8_path = None
+
+        with pytest.raises(SystemExit):
+            handle_cc_tool(args)
+
+    @patch("os.path.exists")
+    def test_handle_cc_tool_missing_source_dir(self, mock_exists):
+        """Test CC tool handling with missing source directory"""
+
+        def exists_side_effect(path):
+            # Return False only for source directory, True for other paths
+            if "src" in path and "main.c" in path:
+                return False
+            return True
+
+        mock_exists.side_effect = exists_side_effect
+
+        args = MagicMock()
+        args.cpu = "PIC16F876A"
+        args.xc8_version = "3.00"
+        args.xc8_path = None
+        args.source_dir = "nonexistent"
+        args.main_c_file = "main.c"
+
+        with pytest.raises(SystemExit):
+            handle_cc_tool(args)
 
 
 if __name__ == "__main__":
