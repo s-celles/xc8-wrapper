@@ -11,7 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Windows first (primary development platform), then Linux, then macOS
+        os: [windows-latest, ubuntu-latest, macos-latest]
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         exclude:
           # Reduce the matrix size by excluding some combinations
@@ -40,6 +41,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e .[dev]
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Lint with flake8
       run: |
@@ -47,22 +52,42 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Check formatting with black
       run: |
         black --check --diff .
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Sort imports with isort
       run: |
         isort --check-only --diff .
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Type checking with mypy
       run: |
         mypy xc8_wrapper --ignore-missing-imports
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Test with pytest
       run: |
         pytest --cov=xc8_wrapper --cov-report=xml --cov-report=term-missing
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3

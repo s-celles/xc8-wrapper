@@ -18,7 +18,17 @@ def run_command(cmd, description):
     print(f"Command: {' '.join(cmd)}")
     print(f"{'='*60}")
 
-    result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603
+    # Set environment variables to fix encoding issues on Windows
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONLEGACYWINDOWSSTDIO"] = "1"
+
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, env=env, encoding="utf-8", errors="replace")  # nosec B603
+    except UnicodeDecodeError:
+        # Fallback to running without capture if encoding fails
+        result = subprocess.run(cmd, env=env)  # nosec B603
+        return result.returncode == 0
 
     if result.returncode == 0:
         print(f"✅ {description} - PASSED")

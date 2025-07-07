@@ -11,7 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Windows first (primary development platform), then Linux, then macOS
+        os: [windows-latest, ubuntu-latest, macos-latest]
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         include:
           # Test development Python versions
@@ -43,22 +44,42 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e .[dev]
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Run comprehensive tests
       run: |
         pytest tests/ -v --cov=xc8_wrapper --cov-report=xml --cov-report=term-missing
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Run performance tests
       run: |
         pytest tests/test_performance.py -v
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Run compatibility tests
       run: |
         pytest tests/test_compatibility.py -v
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Run stress tests
       run: |
         pytest tests/ -v --count=5  # Run tests 5 times to catch intermittent issues
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Test with different locales
       if: matrix.os != 'windows-latest'
@@ -81,6 +102,10 @@ jobs:
 
         print('Memory leak test completed successfully')
         "
+      env:
+        # Fix encoding issues on Windows
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: 1
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
