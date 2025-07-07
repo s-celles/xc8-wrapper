@@ -32,17 +32,17 @@ xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A
 - **⚡ Smart XC8 detection** - automatically finds your compiler installation
 - **🧪 Well tested** with comprehensive test suite (88%+ coverage)
 
-## � Documentation
+## 📚 Documentation
 
 **Complete documentation is available at:**
 **🌐 [https://s-celles.github.io/xc8-wrapper/](https://s-celles.github.io/xc8-wrapper/)**
 
 ### Quick Links
-- [� Installation Guide](https://s-celles.github.io/xc8-wrapper/installation.html)
-- [🚀 Getting Started Tutorial](https://s-celles.github.io/xc8-wrapper/getting-started.html)
-- [📖 CLI Reference](https://s-celles.github.io/xc8-wrapper/cli-reference.html)
+- [📦 Installation Guide](https://s-celles.github.io/xc8-wrapper/installation/)
+- [🚀 Getting Started Tutorial](https://s-celles.github.io/xc8-wrapper/getting-started/)
+- [📖 CLI Reference](https://s-celles.github.io/xc8-wrapper/cli-reference/)
 
-## �️ Requirements
+## 📋 Requirements
 
 - **Python**: 3.9+
 - **XC8 Compiler**: 2.xx, 3.xx, or 4.xx (must be installed separately)
