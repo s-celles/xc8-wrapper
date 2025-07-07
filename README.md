@@ -20,13 +20,13 @@
 
 ## ✨ Features
 
-🎯 **Complete XC8 Integration** - Full wrapper around xc8-cc.exe with all compiler flags
-🌈 **Beautiful Output** - Colored terminal output for better readability
-⚡ **High Performance** - Optimized for fast compilation workflows
-🔒 **Enterprise Security** - Comprehensive security validation and input sanitization
-🛠️ **Flexible Configuration** - Extensive customization options for any project
-🌍 **Cross-Platform** - Works seamlessly on Windows, Linux, and macOS
-📊 **Comprehensive Testing** - 81 tests with 88%+ coverage for reliability
+🎯 **Complete XC8 Integration** - Full wrapper around xc8-cc.exe with all compiler flags  
+🌈 **Beautiful Output** - Colored terminal output for better readability  
+⚡ **High Performance** - Optimized for fast compilation workflows  
+🔒 **Enterprise Security** - Comprehensive security validation and input sanitization  
+🛠️ **Flexible Configuration** - Extensive customization options for any project  
+🌍 **Cross-Platform** - Works seamlessly on Windows, Linux, and macOS  
+📊 **Comprehensive Testing** - 81 tests with 88%+ coverage for reliability  
 🚀 **CI/CD Ready** - Pre-configured GitHub Actions for professional workflows
 
 ## 🤔 Why Choose XC8 Wrapper?
@@ -246,7 +246,7 @@ The Python wrapper code in this package is released under the **MIT License** (s
 ### 🎯 Your Responsibility
 **You are responsible for obtaining proper licenses for the Microchip XC8 compiler tools that this wrapper interfaces with.**
 
-**Wrapper Code**: MIT License (see LICENSE file)
+**Wrapper Code**: MIT License (see LICENSE file)  
 **Microchip XC8 Tools**: Proprietary Microchip licenses (separate licensing required)
 
 ---
