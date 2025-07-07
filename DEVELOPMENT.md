@@ -8,7 +8,7 @@ This directory contains the XC8 Wrapper package development environment.
 # Install in development mode
 pip install -e .
 
-# Install with development dependencies  
+# Install with development dependencies
 pip install -e .[dev]
 
 # Run tests

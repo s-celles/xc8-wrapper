@@ -6,7 +6,7 @@ This script sets up the development environment for the XC8 wrapper project.
 """
 
 import os
-import subprocess
+import subprocess  # nosec B404
 import sys
 from pathlib import Path
 
@@ -33,7 +33,7 @@ def run_command(cmd, description, check=True):
     print(f"   Command: {' '.join(cmd)}")
 
     try:
-        result = subprocess.run(cmd, check=check, capture_output=True, text=True)
+        result = subprocess.run(cmd, check=check, capture_output=True, text=True)  # nosec B603
         if result.returncode == 0:
             print_colored(f"✅ {description} - Success", Colors.GREEN)
             return True
@@ -64,7 +64,7 @@ def check_python_version():
 def check_git():
     """Check if git is available"""
     try:
-        result = subprocess.run(["git", "--version"], capture_output=True, text=True)
+        result = subprocess.run(["git", "--version"], capture_output=True, text=True)  # nosec B603 B607
         if result.returncode == 0:
             print_colored("✅ Git is available", Colors.GREEN)
             return True

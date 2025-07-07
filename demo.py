@@ -5,7 +5,7 @@ Demo script for XC8 Wrapper Package
 This script demonstrates how to use the XC8 wrapper package.
 """
 
-from xc8_wrapper import get_xc8_tool_path, SUPPORTED_XC8_TOOLS, Colors, print_colored
+from xc8_wrapper import SUPPORTED_XC8_TOOLS, Colors, get_xc8_tool_path, print_colored
 
 
 def demo_tool_path_resolution():
@@ -21,7 +21,7 @@ def demo_tool_path_resolution():
     try:
         print_colored("\nResolving tool path with version:", Colors.BLUE)
         path, version_info = get_xc8_tool_path("cc", version="3.00")
-        print_colored(f"  Tool: xc8-cc.exe", Colors.GRAY)
+        print_colored("  Tool: xc8-cc.exe", Colors.GRAY)
         print_colored(f"  Path: {path}", Colors.GRAY)
         print_colored(f"  Version: {version_info}", Colors.GRAY)
     except Exception as e:
@@ -32,7 +32,7 @@ def demo_tool_path_resolution():
         print_colored("\nResolving tool path with custom path:", Colors.BLUE)
         custom_path = r"C:\custom\path\xc8-cc.exe"
         path, version_info = get_xc8_tool_path("cc", custom_path=custom_path)
-        print_colored(f"  Tool: xc8-cc.exe", Colors.GRAY)
+        print_colored("  Tool: xc8-cc.exe", Colors.GRAY)
         print_colored(f"  Path: {path}", Colors.GRAY)
         print_colored(f"  Version: {version_info}", Colors.GRAY)
     except Exception as e:

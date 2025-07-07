@@ -5,7 +5,8 @@ Quick test runner for development
 Run this script to quickly test the package during development.
 """
 
-import subprocess
+import os
+import subprocess  # nosec B404
 import sys
 from pathlib import Path
 
@@ -17,7 +18,7 @@ def run_command(cmd, description):
     print(f"Command: {' '.join(cmd)}")
     print(f"{'='*60}")
 
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603
 
     if result.returncode == 0:
         print(f"✅ {description} - PASSED")
@@ -39,7 +40,7 @@ def main():
     print("=" * 60)
 
     # Change to project directory
-    project_dir = Path(__file__).parent
+    os.chdir(Path(__file__).parent)
 
     # List of tests to run
     tests = [
