@@ -82,8 +82,10 @@ xc8-wrapper --tool cc --cpu PIC16F877A \
 ### Q: XC8 Wrapper can't find my XC8 installation on Linux/macOS
 
 **A:** Standard locations checked:
-- `/opt/microchip/xc8/`
-- `/usr/local/microchip/xc8/`
+- `/opt/microchip/bin/`
+- `/usr/local/microchip/bin/`
+- `/opt/microchip/xc8/v{version}/bin/` (versioned alternative)
+- `/usr/local/microchip/xc8/v{version}/bin/` (versioned alternative)
 - `/Applications/microchip/xc8/` (macOS)
 
 For custom installations:
