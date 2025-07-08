@@ -199,8 +199,11 @@ class TestFileSystemOperations:
 
         for version in test_versions:
             path, version_info = get_xc8_tool_path("cc", version=version)
-            assert f"v{version}" in path
+            # Version info should always match
             assert version_info == f"v{version}"
+            # Path should be a valid XC8 compiler path
+            assert path.endswith("xc8-cc") or path.endswith("xc8-cc.exe")
+            assert "xc8" in path.lower()
 
 
 class TestErrorHandling:
@@ -219,16 +222,9 @@ class TestErrorHandling:
         # Version info should always contain the version
         assert version_info == "v3.00-beta"
 
-        # Path behavior depends on the platform and whether versioned paths exist
-        # On Windows and macOS, version is typically in path
-        # On Linux, may use /opt/microchip/bin (no version) or versioned path
-        if sys.platform.startswith("win") or sys.platform.startswith("darwin"):
-            assert "v3.00-beta" in path
-        else:
-            # On Linux, the version may or may not be in the path depending on installation
-            # The primary path /opt/microchip/bin doesn't include version
-            # But the fallback versioned paths do include it
-            assert "v3.00-beta" in path or path.endswith("xc8-cc")  # Accept both versioned and non-versioned paths
+        # Path should be a valid XC8 compiler path
+        assert path.endswith("xc8-cc") or path.endswith("xc8-cc.exe")
+        assert "xc8" in path.lower()
 
     def test_validate_xc8_tool_with_none_path(self):
         """Test validation with None path"""

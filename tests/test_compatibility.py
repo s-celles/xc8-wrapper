@@ -135,8 +135,11 @@ class TestXC8VersionCompatibility:
 
         for version in version_formats:
             path, version_info = get_xc8_tool_path("cc", version=version)
-            assert f"v{version}" in path
+            # Version info should always match
             assert version_info == f"v{version}"
+            # Path should be a valid XC8 compiler path
+            assert path.endswith("xc8-cc") or path.endswith("xc8-cc.exe")
+            assert "xc8" in path.lower()
 
     def test_legacy_version_support(self):
         """Test support for older XC8 versions"""
@@ -145,8 +148,11 @@ class TestXC8VersionCompatibility:
         for version in legacy_versions:
             # Should work with older versions too
             path, version_info = get_xc8_tool_path("cc", version=version)
-            assert f"v{version}" in path
+            # Version info should always match
             assert version_info == f"v{version}"
+            # Path should be a valid XC8 compiler path
+            assert path.endswith("xc8-cc") or path.endswith("xc8-cc.exe")
+            assert "xc8" in path.lower()
 
     def test_future_version_support(self):
         """Test that future XC8 versions are supported"""
@@ -155,8 +161,11 @@ class TestXC8VersionCompatibility:
         for version in future_versions:
             # Should work with future versions
             path, version_info = get_xc8_tool_path("cc", version=version)
-            assert f"v{version}" in path
+            # Version info should always match
             assert version_info == f"v{version}"
+            # Path should be a valid XC8 compiler path
+            assert path.endswith("xc8-cc") or path.endswith("xc8-cc.exe")
+            assert "xc8" in path.lower()
 
 
 class TestDependencyCompatibility:

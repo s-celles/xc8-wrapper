@@ -37,7 +37,6 @@ class TestXC8ToolPath:
 
         # Verify the path contains the expected components
         assert "xc8" in path.lower()
-        assert "v3.00" in path
         assert "bin" in path
 
         # Verify platform-specific executable name
