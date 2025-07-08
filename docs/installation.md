@@ -141,8 +141,10 @@ XC8 Wrapper automatically detects XC8 installations in these standard locations:
 - `/opt/microchip/xc8/v{version}/bin/`
 
 #### Linux
-- `/opt/microchip/xc8/v{version}/bin/`
-- `/usr/local/microchip/xc8/v{version}/bin/`
+- `/opt/microchip/bin/`
+- `/usr/local/microchip/bin/`
+- `/opt/microchip/xc8/v{version}/bin/` (alternative versioned path)
+- `/usr/local/microchip/xc8/v{version}/bin/` (alternative versioned path)
 
 ## Virtual Environment Setup (Recommended)
 

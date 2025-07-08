@@ -120,10 +120,12 @@ def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path
                 # Default to the first path even if it doesn't exist (for error reporting)
                 xc8_path = possible_paths[0]
         else:
-            # Linux and other Unix-like systems: Check /opt first, then /usr/local as fallback
+            # Linux and other Unix-like systems: Check standard installation paths
             possible_paths = [
-                Path("/opt/microchip/xc8") / f"v{version}" / "bin",
-                Path("/usr/local/microchip/xc8") / f"v{version}" / "bin",
+                Path("/opt/microchip/bin"),
+                Path("/usr/local/microchip/bin"),
+                Path("/opt/microchip/xc8") / f"v{version}" / "bin",  # Alternative versioned path
+                Path("/usr/local/microchip/xc8") / f"v{version}" / "bin",  # Alternative versioned path
             ]
             xc8_path = None
             for path in possible_paths:
@@ -166,8 +168,9 @@ def validate_xc8_tool(tool_path: str, tool_name: str, version_info: str) -> bool
                 print_colored("  macOS: /Applications/microchip/xc8/v{version}/bin/", Colors.GRAY)
                 print_colored("         /opt/microchip/xc8/v{version}/bin/", Colors.GRAY)
             else:
-                print_colored("  Linux: /opt/microchip/xc8/v{version}/bin/", Colors.GRAY)
-                print_colored("         /usr/local/microchip/xc8/v{version}/bin/", Colors.GRAY)
+                print_colored("  Linux: /opt/microchip/bin/", Colors.GRAY)
+                print_colored("         /usr/local/microchip/bin/", Colors.GRAY)
+                print_colored("         /opt/microchip/xc8/v{version}/bin/ (alternative)", Colors.GRAY)
         return False
 
     print_colored(f"✓ XC8 {tool_name} {version_info} found", Colors.GREEN)
