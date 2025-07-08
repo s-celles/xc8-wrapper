@@ -94,7 +94,8 @@ def _get_platform_executable_name(base_name: str) -> str:
     """
     if sys.platform.startswith("win"):
         return f"{base_name}.exe"
-    return base_name
+    else:
+        return base_name
 
 
 def _find_existing_xc8_path(possible_paths: List[Path]) -> Optional[Path]:
