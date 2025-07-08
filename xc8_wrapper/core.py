@@ -5,6 +5,7 @@ This module contains the main functions for interacting with the XC8 toolchain.
 """
 
 import os
+import re
 import subprocess  # nosec B404 - Required for executing XC8 compiler tools
 import sys
 from pathlib import Path
@@ -14,6 +15,26 @@ from colorama import Fore, Style, init
 
 # Initialize colorama for cross-platform support
 init(autoreset=True)
+
+
+# Known XC8 versions that actually exist (highest to lowest)
+XC8_KNOWN_VERSIONS = [
+    "3.00",
+    "2.50",
+    "2.46",
+    "2.45",
+    "2.41",
+    "2.40",
+    "2.36",
+    "2.35",
+    "2.32",
+    "2.31",
+    "2.30",
+    "2.20",
+    "2.10",
+    "2.05",
+    "2.00",
+]
 
 
 def print_colored(text: str, color: str) -> None:
@@ -306,6 +327,89 @@ def _validate_path_security(path: str) -> bool:
     except (OSError, ValueError):
         # Invalid path
         return False
+
+
+def scan_for_xc8_versions() -> List[str]:
+    """
+    Scan the system for installed XC8 versions by checking installation directories
+
+    Returns:
+        List of version strings found, sorted from highest to lowest
+    """
+    found_versions = set()
+
+    # Get platform-specific base paths
+    if sys.platform.startswith("win"):
+        base_paths = [
+            Path("C:/Program Files/Microchip/xc8"),
+            Path("C:/Program Files (x86)/Microchip/xc8"),
+        ]
+        compiler_name = "xc8-cc.exe"
+    elif sys.platform.startswith("darwin"):
+        base_paths = [
+            Path("/Applications/microchip/xc8"),
+            Path("/opt/microchip/xc8"),
+        ]
+        compiler_name = "xc8-cc"
+    else:
+        base_paths = [
+            Path("/opt/microchip/xc8"),
+            Path("/usr/local/microchip/xc8"),
+        ]
+        compiler_name = "xc8-cc"
+
+    # Scan each base path for version directories using elegant glob patterns
+    for base_path in base_paths:
+        if not base_path.exists():
+            continue
+
+        try:
+            # Use glob to find version directories (e.g., v2.40, v3.00)
+            for version_dir in base_path.glob("v*"):
+                if not version_dir.is_dir():
+                    continue
+
+                version = version_dir.name[1:]  # Remove 'v' prefix
+
+                # Validate version format (e.g., "2.40", "3.00")
+                if re.match(r"^\d+\.\d+$", version):
+                    # Check if the version directory contains the compiler using glob
+                    compiler_paths = list(version_dir.glob(f"bin/{compiler_name}"))
+                    if compiler_paths and compiler_paths[0].exists():
+                        found_versions.add(version)
+
+        except (OSError, PermissionError):
+            # Skip directories we can't access
+            continue
+
+    # Convert to sorted list (highest version first)
+    try:
+        return sorted(found_versions, key=lambda v: [int(x) for x in v.split(".")], reverse=True)
+    except ValueError:
+        # Fallback to string sorting if version parsing fails
+        return sorted(found_versions, reverse=True)
+
+
+def get_all_xc8_versions_to_try() -> List[str]:
+    """
+    Get all XC8 versions to try, combining known versions with scanned versions
+
+    Returns:
+        List of version strings to try, sorted from highest to lowest
+    """
+    # Start with known versions
+    versions = set(XC8_KNOWN_VERSIONS)
+
+    # Add any versions found by scanning the system
+    scanned_versions = scan_for_xc8_versions()
+    versions.update(scanned_versions)
+
+    # Convert to sorted list (highest version first)
+    try:
+        return sorted(versions, key=lambda v: [int(x) for x in v.split(".")], reverse=True)
+    except ValueError:
+        # Fallback to string sorting if version parsing fails
+        return sorted(versions, reverse=True)
 
 
 def handle_cc_tool(args: Any) -> None:

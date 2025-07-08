@@ -81,6 +81,40 @@ xc8-wrapper ar x mylib.a --xc8-version 3.00
 - [🚀 Getting Started Tutorial](https://s-celles.github.io/xc8-wrapper/getting-started/)
 - [📖 CLI Reference](https://s-celles.github.io/xc8-wrapper/cli-reference/)
 
+## 🧪 Testing XC8 Compilation
+
+This package includes comprehensive compilation tests to ensure XC8 works correctly:
+
+### Check XC8 Installation
+```bash
+# Check if XC8 is installed
+python install_xc8.py --check
+
+# Show download URL for your platform
+python install_xc8.py --url
+
+# Install XC8 if needed (Linux/macOS)
+python install_xc8.py --install --version 3.00
+```
+
+### Run Compilation Tests
+```bash
+# Run all tests (skips compilation tests if XC8 not installed)
+pytest
+
+# Run only compilation tests
+pytest tests/test_compilation.py -v
+
+# Enable XC8 auto-install in CI (Linux only)
+INSTALL_XC8=true pytest tests/test_compilation.py
+```
+
+### Example PIC Program
+The package includes a simple LED blink example (`examples/simple_blink/main.c`) that demonstrates:
+- Proper configuration bits for PIC16F876A
+- Port configuration and LED control
+- Delay functions and infinite loops
+
 ## 📋 Requirements
 
 - **Python**: 3.9+
