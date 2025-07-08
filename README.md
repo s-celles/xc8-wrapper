@@ -45,7 +45,7 @@ xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A
 ## 📋 Requirements
 
 - **Python**: 3.9+
-- **XC8 Compiler**: 2.xx, 3.xx, or 4.xx (must be installed separately)
+- **XC8 Compiler**: 2.xx, 3.xx, ... (must be installed separately)
 - **OS**: Windows, macOS, or Linux
 
 ## ⚖️ License
