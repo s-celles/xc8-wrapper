@@ -101,6 +101,11 @@ class TestMainFunction:
         except SystemExit:
             pass
 
+    def test_main_with_unsupported_tool(self):
+        """Test main function with unsupported tool"""
+        with pytest.raises(SystemExit):
+            main(["unsupported_tool", "--some-arg"])
+
 
 class TestPrintColored:
     """Test colored output functionality in CLI"""
@@ -183,16 +188,6 @@ class TestArgumentValidation:
         assert args.verbose
         assert args.update
         assert args.index
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])
-
-    @patch("sys.exit")
-    def test_main_with_unsupported_tool(self, mock_exit):
-        """Test main function with unsupported tool"""
-        main(["--tool", "unsupported", "--cpu", "PIC16F876A", "--xc8-version", "3.00"])
-        mock_exit.assert_called_once_with(1)
 
 
 if __name__ == "__main__":
