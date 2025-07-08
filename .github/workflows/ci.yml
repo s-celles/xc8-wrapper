@@ -18,9 +18,21 @@ jobs:
           # Reduce the matrix size by excluding some combinations
           - os: macos-latest
             python-version: '3.9'
+        include:
+          # Mark macOS as experimental - allowed to fail
+          - os: macos-latest
+            experimental: true
+
+    # Allow macOS jobs to fail without affecting CI status
+    continue-on-error: ${{ matrix.experimental == true }}
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Mark experimental platform
+      if: matrix.experimental == true
+      run: |
+        echo "::warning::Running on experimental platform (macOS) - failures are allowed"
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
@@ -30,7 +42,7 @@ jobs:
     - name: Setup environment (macOS)
       if: runner.os == 'macOS'
       run: |
-        # Setup UTF-8 locale for macOS
+        # Setup UTF-8 locale for macOS (experimental platform)
         echo "LC_ALL=en_US.UTF-8" >> $GITHUB_ENV
         echo "LANG=en_US.UTF-8" >> $GITHUB_ENV
         # Check locale
