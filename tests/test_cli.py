@@ -31,7 +31,7 @@ class TestArgumentParser:
     def test_parser_default_values(self):
         """Test parser default values"""
         parser = create_argument_parser()
-        args = parser.parse_args(["--cpu", "PIC16F876A", "--xc8-version", "3.00"])
+        args = parser.parse_args(["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00"])
 
         assert args.tool == "cc"
         assert args.build_dir == "build"
@@ -50,7 +50,7 @@ class TestMainFunction:
 
         # Test that it doesn't raise an exception
         try:
-            main(["--cpu", "PIC16F876A", "--xc8-version", "3.00"])
+            main(["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00"])
             mock_handle_cc.assert_called_once()
         except SystemExit:
             # SystemExit is expected in some cases
@@ -69,8 +69,19 @@ class TestMainFunction:
         mock_handle_cc.return_value = None
 
         try:
-            main(["--tool", "cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00"])
+            main(["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00"])
             mock_handle_cc.assert_called_once()
+        except SystemExit:
+            pass
+
+    @patch("xc8_wrapper.cli.handle_ar_tool")
+    def test_main_with_ar_tool(self, mock_handle_ar):
+        """Test main function with ar tool"""
+        mock_handle_ar.return_value = None
+
+        try:
+            main(["ar", "r", "mylib.a", "file1.o", "file2.o", "--xc8-version", "3.00"])
+            mock_handle_ar.assert_called_once()
         except SystemExit:
             pass
 
@@ -85,7 +96,7 @@ class TestMainFunction:
         mock_handle_cc.return_value = None
 
         try:
-            main(["--cpu", "PIC16F876A", "--xc8-version", "3.00", "-O2", "-DDEBUG=1"])
+            main(["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00", "-O2", "-DDEBUG=1"])
             mock_handle_cc.assert_called_once()
         except SystemExit:
             pass
@@ -116,16 +127,14 @@ class TestArgumentValidation:
         """Test that required arguments are enforced"""
         parser = create_argument_parser()
 
-        # Test missing required arguments - should not raise since no arguments are truly required
-        args = parser.parse_args([])
-        # Verify default values are set
-        assert args.tool == "cc"
-        assert args.build_dir == "build"
+        # Test missing required arguments - should raise since tool is required
+        with pytest.raises(SystemExit):
+            args = parser.parse_args([])
 
     def test_parser_cpu_argument(self):
         """Test CPU argument parsing"""
         parser = create_argument_parser()
-        args = parser.parse_args(["--cpu", "PIC18F4550", "--xc8-version", "3.00"])
+        args = parser.parse_args(["cc", "--cpu", "PIC18F4550", "--xc8-version", "3.00"])
         assert args.cpu == "PIC18F4550"
 
     def test_parser_optimization_levels(self):
@@ -133,22 +142,47 @@ class TestArgumentValidation:
         parser = create_argument_parser()
 
         for opt_level in ["0", "1", "2", "3", "s"]:
-            args = parser.parse_args(["--cpu", "PIC16F876A", "--xc8-version", "3.00", "-O", opt_level])
+            args = parser.parse_args(["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00", "-O", opt_level])
             assert args.optimize == opt_level
 
     def test_parser_define_arguments(self):
         """Test preprocessor define arguments"""
         parser = create_argument_parser()
-        args = parser.parse_args(["--cpu", "PIC16F876A", "--xc8-version", "3.00", "-D", "DEBUG=1", "-D", "VERSION=100"])
+        args = parser.parse_args(["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00", "-D", "DEBUG=1", "-D", "VERSION=100"])
         assert "DEBUG=1" in args.define
         assert "VERSION=100" in args.define
 
     def test_parser_include_arguments(self):
         """Test include directory arguments"""
         parser = create_argument_parser()
-        args = parser.parse_args(["--cpu", "PIC16F876A", "--xc8-version", "3.00", "-I", "./include", "-I", "../common"])
+        args = parser.parse_args(["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00", "-I", "./include", "-I", "../common"])
         assert "./include" in args.include
         assert "../common" in args.include
+
+    def test_parser_ar_arguments(self):
+        """Test ar tool argument parsing"""
+        parser = create_argument_parser()
+        args = parser.parse_args(["ar", "r", "mylib.a", "file1.o", "file2.o", "--xc8-version", "3.00"])
+        assert args.tool == "ar"
+        assert args.operation == "r"
+        assert args.archive == "mylib.a"
+        assert "file1.o" in args.files
+        assert "file2.o" in args.files
+
+    def test_parser_ar_operations(self):
+        """Test ar operation choices"""
+        parser = create_argument_parser()
+        for operation in ["r", "c", "d", "t", "x"]:
+            args = parser.parse_args(["ar", operation, "test.a", "--xc8-version", "3.00"])
+            assert args.operation == operation
+
+    def test_parser_ar_modifiers(self):
+        """Test ar modifier flags"""
+        parser = create_argument_parser()
+        args = parser.parse_args(["ar", "-v", "-u", "-s", "r", "test.a", "file.o", "--xc8-version", "3.00"])
+        assert args.verbose
+        assert args.update
+        assert args.index
 
 
 if __name__ == "__main__":

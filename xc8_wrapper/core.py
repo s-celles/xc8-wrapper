@@ -39,12 +39,12 @@ SUPPORTED_XC8_TOOLS = {
         "description": "C compiler, assembler, and linker",
         "default_operation": "compile_and_link",
     },
+    "ar": {
+        "executable": "xc8-ar",
+        "description": "archiver/librarian",
+        "default_operation": "archive",
+    },
     # Future tools can be added here:
-    # "ar": {
-    #     "executable": "xc8-ar",
-    #     "description": "archiver/librarian",
-    #     "default_operation": "archive"
-    # },
     # "clangd": {
     #     "executable": "xc8-clangd",
     #     "description": "language server",
@@ -231,6 +231,8 @@ def run_command(cmd: List[str], description: str) -> bool:
     allowed_executables = [
         "xc8-cc.exe",
         "xc8-cc",
+        "xc8-ar.exe",
+        "xc8-ar",
         "xc8.exe",
         "xc8",
         # Test executables - allow for testing purposes
@@ -525,3 +527,102 @@ def handle_cc_tool(args: Any) -> None:
         print_colored("\n✗ HEX file not generated", Colors.RED)
         print_colored("Check compilation and linking output for errors", Colors.YELLOW)
         sys.exit(1)
+
+
+def handle_ar_tool(args: Any) -> None:
+    """
+    Handle xc8-ar.exe archiver operations
+
+    Args:
+        args: Parsed command line arguments
+
+    Raises:
+        SystemExit: If operation fails or requirements are not met
+    """
+    # Validate that either version or path is provided
+    if not args.xc8_version and not args.xc8_path:
+        print_colored("✗ Either --xc8-version or --xc8-path must be provided", Colors.RED)
+        sys.exit(1)
+
+    # Get XC8 AR tool path
+    try:
+        xc8_ar_path, version_info = get_xc8_tool_path("ar", args.xc8_version, args.xc8_path)
+    except ValueError as e:
+        print_colored(f"✗ {e}", Colors.RED)
+        sys.exit(1)
+
+    # Validate XC8 AR tool
+    if not validate_xc8_tool(xc8_ar_path, "ar", version_info):
+        sys.exit(1)
+
+    print_colored("\n=== XC8 AR ARCHIVER ===", Colors.CYAN)
+    print_colored("Configuration:", Colors.BLUE)
+    print_colored("  - Tool: XC8 AR (xc8-ar.exe)", Colors.GRAY)
+    print_colored(f"  - Version: {version_info}", Colors.GRAY)
+    print_colored(f"  - Operation: {args.operation}", Colors.GRAY)
+    print_colored(f"  - Archive: {args.archive}", Colors.GRAY)
+
+    # Build archiver command
+    ar_args = [xc8_ar_path]
+
+    # Add operation and modifiers
+    operation_flags = args.operation
+    if args.verbose:
+        operation_flags += "v"
+    if args.update:
+        operation_flags += "u"
+    if args.index:
+        operation_flags += "s"
+
+    ar_args.append(operation_flags)
+    ar_args.append(args.archive)
+
+    # Add files if provided
+    if args.files:
+        ar_args.extend(args.files)
+        print_colored(f"  - Files: {', '.join(args.files)}", Colors.GRAY)
+
+    # Validate operation-specific requirements
+    if args.operation in ["r", "c", "d"] and not args.files:
+        print_colored("✗ Files must be specified for create, replace, or delete operations", Colors.RED)
+        sys.exit(1)
+
+    # Special handling for different operations
+    operation_names = {
+        "r": "Adding/replacing files in archive",
+        "c": "Creating new archive",
+        "d": "Deleting files from archive",
+        "t": "Listing archive contents",
+        "x": "Extracting files from archive",
+    }
+
+    operation_name = operation_names.get(args.operation, f"Performing operation '{args.operation}'")
+    print_colored(f"\n{operation_name}...", Colors.YELLOW)
+
+    # Run the archiver command
+    if not run_command(ar_args, operation_name):
+        print_colored(f"\n✗ Archive operation '{args.operation}' failed", Colors.RED)
+        sys.exit(1)
+
+    # Success message based on operation
+    if args.operation in ["r", "c"]:
+        print_colored(f"\n✓ Archive '{args.archive}' created/updated successfully", Colors.GREEN)
+
+        # Check if archive file exists and show size
+        archive_path = Path(args.archive)
+        if archive_path.exists():
+            archive_size = archive_path.stat().st_size
+            print_colored(f"Archive size: {archive_size} bytes", Colors.GRAY)
+
+        print_colored(f"\n🎉 SUCCESS! Archive operation completed with XC8 AR {version_info}!", Colors.GREEN)
+
+    elif args.operation == "d":
+        print_colored(f"\n✓ Files deleted from archive '{args.archive}' successfully", Colors.GREEN)
+        print_colored(f"\n🎉 SUCCESS! Archive operation completed with XC8 AR {version_info}!", Colors.GREEN)
+
+    elif args.operation == "t":
+        print_colored("\n✓ Archive contents listed successfully", Colors.GREEN)
+
+    elif args.operation == "x":
+        print_colored(f"\n✓ Files extracted from archive '{args.archive}' successfully", Colors.GREEN)
+        print_colored(f"\n🎉 SUCCESS! Archive operation completed with XC8 AR {version_info}!", Colors.GREEN)

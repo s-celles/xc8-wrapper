@@ -38,7 +38,7 @@ class TestIntegration:
 
             # Test CLI calling core functionality
             try:
-                main(["--cpu", "PIC16F876A", "--xc8-version", "3.00"])
+                main(["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00"])
             except SystemExit:
                 # Expected when tool execution completes
                 pass
@@ -80,6 +80,7 @@ int main() {
                 try:
                     main(
                         [
+                            "cc",
                             "--cpu",
                             "PIC16F876A",
                             "--xc8-version",
@@ -131,6 +132,7 @@ int main() {
             try:
                 main(
                     [
+                        "cc",
                         "--cpu",
                         "PIC18F4550",
                         "--xc8-version",

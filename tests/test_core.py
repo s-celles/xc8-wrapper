@@ -16,6 +16,7 @@ from xc8_wrapper.core import (
     SUPPORTED_XC8_TOOLS,
     Colors,
     get_xc8_tool_path,
+    handle_ar_tool,
     handle_cc_tool,
     print_colored,
     run_command,
@@ -254,6 +255,83 @@ class TestHandleCCTool:
 
         with pytest.raises(SystemExit):
             handle_cc_tool(args)
+
+
+class TestHandleArTool:
+    """Test handle_ar_tool function"""
+
+    @patch("xc8_wrapper.core.get_xc8_tool_path")
+    @patch("xc8_wrapper.core.validate_xc8_tool")
+    @patch("xc8_wrapper.core.run_command")
+    def test_handle_ar_tool_success(self, mock_run, mock_validate, mock_get_path):
+        """Test successful ar tool execution"""
+        # Setup mocks
+        mock_get_path.return_value = (r"C:\xc8\bin\xc8-ar.exe", "v3.00")
+        mock_validate.return_value = True
+        mock_run.return_value = True
+
+        # Create mock args
+        args = MagicMock()
+        args.xc8_version = "3.00"
+        args.xc8_path = None
+        args.operation = "r"
+        args.archive = "mylib.a"
+        args.files = ["file1.o", "file2.o"]
+        args.verbose = False
+        args.update = False
+        args.index = False
+
+        # Should not raise exception
+        handle_ar_tool(args)
+
+        # Verify mocks were called
+        mock_get_path.assert_called_once_with("ar", "3.00", None)
+        mock_validate.assert_called_once()
+        mock_run.assert_called_once()
+
+    @patch("xc8_wrapper.core.get_xc8_tool_path")
+    def test_handle_ar_tool_missing_version_and_path(self, mock_get_path):
+        """Test ar tool with missing version and path"""
+        args = MagicMock()
+        args.xc8_version = None
+        args.xc8_path = None
+
+        with pytest.raises(SystemExit):
+            handle_ar_tool(args)
+
+    @patch("xc8_wrapper.core.get_xc8_tool_path")
+    @patch("xc8_wrapper.core.validate_xc8_tool")
+    def test_handle_ar_tool_invalid_tool(self, mock_validate, mock_get_path):
+        """Test ar tool with invalid tool path"""
+        mock_get_path.return_value = (r"C:\nonexistent\xc8-ar.exe", "v3.00")
+        mock_validate.return_value = False
+
+        args = MagicMock()
+        args.xc8_version = "3.00"
+        args.xc8_path = None
+
+        with pytest.raises(SystemExit):
+            handle_ar_tool(args)
+
+    @patch("xc8_wrapper.core.get_xc8_tool_path")
+    @patch("xc8_wrapper.core.validate_xc8_tool")
+    def test_handle_ar_tool_missing_files_for_create(self, mock_validate, mock_get_path):
+        """Test ar tool with missing files for create operation"""
+        mock_get_path.return_value = (r"C:\xc8\bin\xc8-ar.exe", "v3.00")
+        mock_validate.return_value = True
+
+        args = MagicMock()
+        args.xc8_version = "3.00"
+        args.xc8_path = None
+        args.operation = "r"  # requires files
+        args.archive = "mylib.a"
+        args.files = []  # no files provided
+        args.verbose = False
+        args.update = False
+        args.index = False
+
+        with pytest.raises(SystemExit):
+            handle_ar_tool(args)
 
 
 if __name__ == "__main__":

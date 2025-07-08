@@ -164,7 +164,7 @@ class TestScalability:
             mock_run.return_value = MagicMock(returncode=0)
 
             # Create large argument list
-            large_args = ["--cpu", "PIC16F876A", "--xc8-version", "3.00"]
+            large_args = ["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00"]
 
             # Add many defines
             for i in range(100):
