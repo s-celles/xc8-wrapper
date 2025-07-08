@@ -97,7 +97,7 @@ class TestConstants:
         assert "executable" in cc_tool
         assert "description" in cc_tool
         assert "default_operation" in cc_tool
-        assert cc_tool["executable"] == "xc8-cc.exe"
+        assert cc_tool["executable"] == "xc8-cc"
 
 
 class TestPrintColored:

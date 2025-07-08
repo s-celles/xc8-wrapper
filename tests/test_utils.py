@@ -166,8 +166,9 @@ class TestConstants:
             # Tool info should be a dictionary
             assert isinstance(tool_info, dict)
 
-            # Executable should end with .exe (for Windows)
-            assert tool_info["executable"].endswith(".exe")
+            # Executable should be a non-empty string (platform-agnostic)
+            assert isinstance(tool_info["executable"], str)
+            assert len(tool_info["executable"]) > 0
 
             # Description should be non-empty
             assert len(tool_info["description"]) > 0

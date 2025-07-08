@@ -35,18 +35,18 @@ class Colors:
 # Supported XC8 tools
 SUPPORTED_XC8_TOOLS = {
     "cc": {
-        "executable": "xc8-cc.exe",
+        "executable": "xc8-cc",
         "description": "C compiler, assembler, and linker",
         "default_operation": "compile_and_link",
     },
     # Future tools can be added here:
     # "ar": {
-    #     "executable": "xc8-ar.exe",
+    #     "executable": "xc8-ar",
     #     "description": "archiver/librarian",
     #     "default_operation": "archive"
     # },
     # "clangd": {
-    #     "executable": "xc8-clangd.exe",
+    #     "executable": "xc8-clangd",
     #     "description": "language server",
     #     "default_operation": "language_server"
     # }
@@ -74,11 +74,9 @@ def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path
 
     tool_info = SUPPORTED_XC8_TOOLS[tool_name]
     # Get platform-appropriate executable name
+    executable = tool_info["executable"]
     if sys.platform.startswith("win"):
-        executable = tool_info["executable"]  # Keep .exe extension on Windows
-    else:
-        # Remove .exe extension for Unix-like systems (Linux, macOS)
-        executable = tool_info["executable"].replace(".exe", "")
+        executable += ".exe"  # Add .exe extension on Windows
 
     if custom_path:
         # Security validation for custom paths
