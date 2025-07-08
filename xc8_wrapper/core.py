@@ -53,6 +53,66 @@ SUPPORTED_XC8_TOOLS = {
 }
 
 
+def _get_platform_xc8_paths(version: str) -> List[Path]:
+    """
+    Get platform-specific XC8 installation paths in order of preference
+
+    Args:
+        version: XC8 version string (e.g., '3.00')
+
+    Returns:
+        List of Path objects representing possible installation locations
+    """
+    if sys.platform.startswith("win"):
+        return [
+            Path("C:/Program Files/Microchip/xc8") / f"v{version}" / "bin",
+            Path("C:/Program Files (x86)/Microchip/xc8") / f"v{version}" / "bin",
+        ]
+    elif sys.platform.startswith("darwin"):
+        return [
+            Path("/Applications/microchip/xc8") / f"v{version}" / "bin",
+            Path("/opt/microchip/xc8") / f"v{version}" / "bin",
+        ]
+    else:
+        return [
+            Path("/opt/microchip/bin"),
+            Path("/usr/local/microchip/bin"),
+            Path("/opt/microchip/xc8") / f"v{version}" / "bin",
+            Path("/usr/local/microchip/xc8") / f"v{version}" / "bin",
+        ]
+
+
+def _get_platform_executable_name(base_name: str) -> str:
+    """
+    Get platform-appropriate executable name
+
+    Args:
+        base_name: Base executable name (e.g., 'xc8-cc')
+
+    Returns:
+        Platform-appropriate executable name
+    """
+    if sys.platform.startswith("win"):
+        return f"{base_name}.exe"
+    return base_name
+
+
+def _find_existing_xc8_path(possible_paths: List[Path]) -> Optional[Path]:
+    """
+    Find the first existing path from a list of possible paths
+
+    Args:
+        possible_paths: List of Path objects to check
+
+    Returns:
+        First existing path, or None if none exist
+    """
+    for path in possible_paths:
+        if path.exists():
+            return path
+    return None
+
+
 def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path: Optional[str] = None) -> Tuple[str, str]:
     """
     Get the path to a specific XC8 tool
@@ -73,71 +133,49 @@ def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path
         raise ValueError(f"Unsupported XC8 tool: {tool_name}")
 
     tool_info = SUPPORTED_XC8_TOOLS[tool_name]
-    # Get platform-appropriate executable name
-    executable = tool_info["executable"]
-    if sys.platform.startswith("win"):
-        executable += ".exe"  # Add .exe extension on Windows
+    executable = _get_platform_executable_name(tool_info["executable"])
 
     if custom_path:
-        # Security validation for custom paths
         if not _validate_path_security(custom_path):
             raise ValueError(f"Invalid path provided: {custom_path}")
         return custom_path, "custom path"
     elif version:
-        # Validate version string to prevent injection (allow alphanumeric, dots, hyphens, underscores)
         if not all(c.isalnum() or c in ".-_" for c in version):
             raise ValueError(f"Invalid version format: {version}")
 
-        # Determine platform-specific installation path
-        if sys.platform.startswith("win"):
-            # Windows: Check both 64-bit and 32-bit Program Files locations
-            possible_paths = [
-                Path("C:/Program Files/Microchip/xc8") / f"v{version}" / "bin",
-                Path("C:/Program Files (x86)/Microchip/xc8") / f"v{version}" / "bin",
-            ]
-            xc8_path = None
-            for path in possible_paths:
-                if path.exists():
-                    xc8_path = path
-                    break
-            if not xc8_path:
-                # Default to the first path even if it doesn't exist (for error reporting)
-                xc8_path = possible_paths[0]
-        elif sys.platform.startswith("darwin"):
-            # macOS: Check /Applications first, then /opt as fallback
-            possible_paths = [
-                Path("/Applications/microchip/xc8") / f"v{version}" / "bin",
-                Path("/opt/microchip/xc8") / f"v{version}" / "bin",
-            ]
-            xc8_path = None
-            for path in possible_paths:
-                if path.exists():
-                    xc8_path = path
-                    break
-            if not xc8_path:
-                # Default to the first path even if it doesn't exist (for error reporting)
-                xc8_path = possible_paths[0]
-        else:
-            # Linux and other Unix-like systems: Check standard installation paths
-            possible_paths = [
-                Path("/opt/microchip/bin"),
-                Path("/usr/local/microchip/bin"),
-                Path("/opt/microchip/xc8") / f"v{version}" / "bin",  # Alternative versioned path
-                Path("/usr/local/microchip/xc8") / f"v{version}" / "bin",  # Alternative versioned path
-            ]
-            xc8_path = None
-            for path in possible_paths:
-                if path.exists():
-                    xc8_path = path
-                    break
-            if not xc8_path:
-                # Default to the first path even if it doesn't exist (for error reporting)
-                xc8_path = possible_paths[0]
+        possible_paths = _get_platform_xc8_paths(version)
+        xc8_path = _find_existing_xc8_path(possible_paths)
+
+        if not xc8_path:
+            xc8_path = possible_paths[0]
 
         tool_path = xc8_path / executable
         return str(tool_path), f"v{version}"
     else:
         raise ValueError("Either version or custom_path must be provided")
+
+
+def _print_installation_paths(version: str) -> None:
+    """
+    Print expected installation paths for the current platform
+
+    Args:
+        version: XC8 version string for path formatting
+    """
+    print_colored("Expected installation locations:", Colors.YELLOW)
+
+    possible_paths = _get_platform_xc8_paths(version)
+
+    if sys.platform.startswith("win"):
+        platform_name = "Windows"
+    elif sys.platform.startswith("darwin"):
+        platform_name = "macOS"
+    else:
+        platform_name = "Linux"
+
+    for i, path in enumerate(possible_paths):
+        prefix = f"  {platform_name}: " if i == 0 else f"  {' ' * len(platform_name)}: "
+        print_colored(f"{prefix}{path}/", Colors.GRAY)
 
 
 def validate_xc8_tool(tool_path: str, tool_name: str, version_info: str) -> bool:
@@ -158,17 +196,9 @@ def validate_xc8_tool(tool_path: str, tool_name: str, version_info: str) -> bool
             print_colored("Check the provided custom path", Colors.YELLOW)
         else:
             print_colored(f"Install XC8 Compiler {version_info} or use custom path option", Colors.YELLOW)
-            print_colored("Expected installation locations:", Colors.YELLOW)
-            if sys.platform.startswith("win"):
-                print_colored("  Windows: C:\\Program Files\\Microchip\\xc8\\v{version}\\bin\\", Colors.GRAY)
-                print_colored("           C:\\Program Files (x86)\\Microchip\\xc8\\v{version}\\bin\\", Colors.GRAY)
-            elif sys.platform.startswith("darwin"):
-                print_colored("  macOS: /Applications/microchip/xc8/v{version}/bin/", Colors.GRAY)
-                print_colored("         /opt/microchip/xc8/v{version}/bin/", Colors.GRAY)
-            else:
-                print_colored("  Linux: /opt/microchip/bin/", Colors.GRAY)
-                print_colored("         /usr/local/microchip/bin/", Colors.GRAY)
-                print_colored("         /opt/microchip/xc8/v{version}/bin/ (alternative)", Colors.GRAY)
+            # Extract version from version_info string for path formatting
+            version = version_info.replace("v", "") if version_info.startswith("v") else version_info
+            _print_installation_paths(version)
         return False
 
     print_colored(f"✓ XC8 {tool_name} {version_info} found", Colors.GREEN)
