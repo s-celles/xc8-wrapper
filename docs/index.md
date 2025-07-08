@@ -1,4 +1,4 @@
-# XC8 Wrapper Documentation
+# 🔧 XC8 Wrapper Documentation
 
 A modern, secure, and cross-platform wrapper for the Microchip XC8 compiler toolchain.
 
@@ -11,7 +11,7 @@ A modern, secure, and cross-platform wrapper for the Microchip XC8 compiler tool
 !!! info "AI-Generated Content Notice"
 A significant portion of this project's content (including code, documentation, and examples) has been generated using AI assistance. Please review all code and documentation carefully before use in production environments. We recommend thorough testing and validation of any AI-generated components.
 
-## What is XC8 Wrapper?
+## 🌟 What is XC8 Wrapper?
 
 XC8 Wrapper is a Python-based command-line tool that provides a modern, user-friendly interface to the Microchip XC8 compiler. It simplifies PIC microcontroller development by offering:
 
@@ -22,15 +22,15 @@ XC8 Wrapper is a Python-based command-line tool that provides a modern, user-fri
 - **⚡ Smart XC8 detection** that finds your compiler installation automatically
 - **🧪 Comprehensive testing** with 78%+ code coverage
 
-## Quick Start
+## 🚀 Quick Start
 
-### Installation
+### 📦 Installation
 
 ```bash
 pip install xc8-wrapper
 ```
 
-### Basic Usage
+### 💻 Basic Usage
 
 ```bash
 # Compile a simple PIC project
@@ -80,18 +80,40 @@ xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A -O2 --verbose
 ## Requirements
 
 - **Python**: 3.9 or higher
-- **XC8 Compiler**: Any version (2.xx, 3.xx, 4.xx)
+- **XC8 Compiler**: Any version (2.xx, 3.xx, ...)
 - **Operating System**: Windows, macOS, or Linux
 
-## License
+## Related Projects
+
+### 🔧 IPECMD Wrapper
+Complete your PIC development workflow with our companion project:
+
+- **📦 Repository**: [s-celles/ipecmd-wrapper](https://github.com/s-celles/ipecmd-wrapper)
+- **📚 Documentation**: [s-celles.github.io/ipecmd-wrapper](https://s-celles.github.io/ipecmd-wrapper/)
+- **🎯 Purpose**: Modern Python wrapper for MPLAB IPE command-line programming tool
+
+**Perfect Combination**: Use XC8 Wrapper to compile your PIC code, then use IPECMD Wrapper to program it to your microcontroller!
+
+```bash
+# Complete workflow example
+pip install xc8-wrapper ipecmd-wrapper
+
+# 1. Compile with XC8 Wrapper
+xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A
+
+# 2. Program with IPECMD Wrapper
+ipecmd-wrapper -P 16F877A -T PK3 -F dist/main.hex -W 5.0
+```
+
+## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/s-celles/xc8-wrapper/blob/main/LICENSE) file for details.
 
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions! Please see our [Development Guide](development.md) for information on how to contribute to this project.
 
-## Support
+## 💬 Support
 
 - 📖 **Documentation**: You're reading it!
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/s-celles/xc8-wrapper/issues)
