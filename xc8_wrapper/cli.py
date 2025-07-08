@@ -7,7 +7,7 @@ This module provides the main entry point for the XC8 toolchain wrapper.
 
 import argparse
 import sys
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from colorama import init
 
@@ -44,9 +44,9 @@ def create_base_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def create_cc_subparser(subparsers) -> argparse.ArgumentParser:
+def create_cc_subparser(subparsers: Any) -> argparse.ArgumentParser:
     """Create argument parser for xc8-cc tool"""
-    cc_parser = subparsers.add_parser("cc", help="C compiler, assembler, and linker")
+    cc_parser: argparse.ArgumentParser = subparsers.add_parser("cc", help="C compiler, assembler, and linker")
 
     # Required arguments for cc tool
     cc_parser.add_argument("--cpu", required=True, help="Target microcontroller")
@@ -137,9 +137,11 @@ def create_cc_subparser(subparsers) -> argparse.ArgumentParser:
     return cc_parser
 
 
-def create_ar_subparser(subparsers) -> argparse.ArgumentParser:
+def create_ar_subparser(subparsers: Any) -> argparse.ArgumentParser:
     """Create argument parser for xc8-ar tool"""
-    ar_parser = subparsers.add_parser("ar", help="Archiver/librarian for creating and managing library archives")
+    ar_parser: argparse.ArgumentParser = subparsers.add_parser(
+        "ar", help="Archiver/librarian for creating and managing library archives"
+    )
 
     # Tool path/version arguments (inherited from base)
     ar_parser.add_argument(
