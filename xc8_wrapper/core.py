@@ -33,7 +33,9 @@ SUPPORTED_XC8_TOOLS = {
 }
 
 
-def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path: Optional[str] = None) -> Tuple[str, str]:
+def get_xc8_tool_path(
+    tool_name: str, version: Optional[str] = None, custom_path: Optional[str] = None
+) -> Tuple[str, str]:
     """
     Get the path to a specific XC8 tool
 
@@ -64,7 +66,8 @@ def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path
             raise ValueError(f"Invalid path provided: {custom_path}")
         return custom_path, "custom path"
     elif version:
-        # Validate version string to prevent injection (allow alphanumeric, dots, hyphens, underscores)
+        # Validate version string to prevent injection
+        # (allow alphanumeric, dots, hyphens, underscores)
         if not all(c.isalnum() or c in ".-_" for c in version):
             raise ValueError(f"Invalid version format: {version}")
 
@@ -81,7 +84,8 @@ def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path
                     xc8_path = path
                     break
             if not xc8_path:
-                # Default to the first path even if it doesn't exist (for error reporting)
+                # Default to the first path even if it doesn't exist
+                # (for error reporting)
                 xc8_path = possible_paths[0]
         elif sys.platform.startswith("darwin"):
             # macOS: Check /Applications first, then /opt as fallback
@@ -95,15 +99,20 @@ def get_xc8_tool_path(tool_name: str, version: Optional[str] = None, custom_path
                     xc8_path = path
                     break
             if not xc8_path:
-                # Default to the first path even if it doesn't exist (for error reporting)
+                # Default to the first path even if it doesn't exist
+                # (for error reporting)
                 xc8_path = possible_paths[0]
         else:
             # Linux and other Unix-like systems: Check standard installation paths
             possible_paths = [
                 Path("/opt/microchip/bin"),
                 Path("/usr/local/microchip/bin"),
-                Path("/opt/microchip/xc8") / f"v{version}" / "bin",  # Alternative versioned path
-                Path("/usr/local/microchip/xc8") / f"v{version}" / "bin",  # Alternative versioned path
+                Path("/opt/microchip/xc8")
+                / f"v{version}"
+                / "bin",  # Alternative versioned path
+                Path("/usr/local/microchip/xc8")
+                / f"v{version}"
+                / "bin",  # Alternative versioned path
             ]
             xc8_path = None
             for path in possible_paths:
@@ -137,11 +146,17 @@ def validate_xc8_tool(tool_path: str, tool_name: str, version_info: str) -> bool
         if "custom path" in version_info:
             log.warning("Check the provided custom path")
         else:
-            log.warning(f"Install XC8 Compiler {version_info} or use custom path option")
+            log.warning(
+                f"Install XC8 Compiler {version_info} or use custom path option"
+            )
             log.warning("Expected installation locations:")
             if sys.platform.startswith("win"):
-                log.info("  Windows: C:\\Program Files\\Microchip\\xc8\\v{version}\\bin\\")
-                log.info("           C:\\Program Files (x86)\\Microchip\\xc8\\v{version}\\bin\\")
+                log.info(
+                    "  Windows: C:\\Program Files\\Microchip\\xc8\\v{version}\\bin\\"
+                )
+                log.info(
+                    "           C:\\Program Files (x86)\\Microchip\\xc8\\v{version}\\bin\\"
+                )
             elif sys.platform.startswith("darwin"):
                 log.info("  macOS: /Applications/microchip/xc8/v{version}/bin/")
                 log.info("         /opt/microchip/xc8/v{version}/bin/")
@@ -193,7 +208,10 @@ def run_command(cmd: List[str], description: str) -> bool:
 
     # Check if the executable name (basename) is in our allowed list
     exe_name = os.path.basename(executable)
-    if not any(exe_name.startswith(allowed) or allowed in exe_name for allowed in allowed_executables):
+    if not any(
+        exe_name.startswith(allowed) or allowed in exe_name
+        for allowed in allowed_executables
+    ):
         log.error(f"Security error: Unauthorized executable: {exe_name}")
         return False
 
@@ -205,7 +223,9 @@ def run_command(cmd: List[str], description: str) -> bool:
 
     try:
         # nosec B603 - subprocess call is secure: shell=False, validated executable, no user input injection
-        result = subprocess.run(cmd, capture_output=True, text=True, shell=False, timeout=300)  # nosec
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, shell=False, timeout=300
+        )  # nosec
 
         # Print output if any
         if result.stdout:
@@ -277,7 +297,9 @@ def handle_cc_tool(args: Any) -> None:
 
     # Get XC8 CC tool path
     try:
-        xc8_cc_path, version_info = get_xc8_tool_path("cc", args.xc8_version, args.xc8_path)
+        xc8_cc_path, version_info = get_xc8_tool_path(
+            "cc", args.xc8_version, args.xc8_path
+        )
     except ValueError as e:
         log.error(str(e))
         sys.exit(1)
@@ -461,7 +483,9 @@ def handle_cc_tool(args: Any) -> None:
         except Exception as e:
             log.error(f"Error listing files: {e}")
 
-        log.info(f"\n🎉 SUCCESS! PIC {args.cpu} project compiled with XC8 CC {version_info}!")
+        log.info(
+            f"\n🎉 SUCCESS! PIC {args.cpu} project compiled with XC8 CC {version_info}!"
+        )
         log.info(f"File ready for programming: {hex_file}")
         log.info("Next step: Upload with upload script")
     else:

@@ -23,7 +23,9 @@ class TestIntegration:
         """Test integration between CLI and core modules"""
         with patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate, patch(
             "xc8_wrapper.core.get_xc8_tool_path"
-        ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run, patch("os.path.exists") as mock_exists, patch(
+        ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run, patch(
+            "os.path.exists"
+        ) as mock_exists, patch(
             "os.path.getsize"
         ) as mock_getsize, patch(
             "os.makedirs"

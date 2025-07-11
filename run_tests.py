@@ -24,7 +24,14 @@ def run_command(cmd, description):
     env["PYTHONLEGACYWINDOWSSTDIO"] = "1"
 
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, env=env, encoding="utf-8", errors="replace")  # nosec B603
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            env=env,
+            encoding="utf-8",
+            errors="replace",
+        )  # nosec B603
     except UnicodeDecodeError:
         # Fallback to running without capture if encoding fails
         result = subprocess.run(cmd, env=env)  # nosec B603
@@ -55,12 +62,31 @@ def main():
     # List of tests to run
     tests = [
         (["python", "-m", "pytest", "tests/", "-v"], "Unit Tests"),
-        (["python", "-m", "pytest", "tests/", "--cov=xc8_wrapper", "--cov-report=term-missing"], "Coverage Test"),
-        (["python", "-c", "import xc8_wrapper; print('Import successful')"], "Import Test"),
+        (
+            [
+                "python",
+                "-m",
+                "pytest",
+                "tests/",
+                "--cov=xc8_wrapper",
+                "--cov-report=term-missing",
+            ],
+            "Coverage Test",
+        ),
+        (
+            ["python", "-c", "import xc8_wrapper; print('Import successful')"],
+            "Import Test",
+        ),
         (["python", "demo.py"], "Demo Script"),
-        (["python", "-m", "flake8", "xc8_wrapper", "--count", "--statistics"], "Linting"),
+        (
+            ["python", "-m", "flake8", "xc8_wrapper", "--count", "--statistics"],
+            "Linting",
+        ),
         (["python", "-m", "black", "--check", "xc8_wrapper"], "Code Formatting Check"),
-        (["python", "-m", "mypy", "xc8_wrapper", "--ignore-missing-imports"], "Type Checking"),
+        (
+            ["python", "-m", "mypy", "xc8_wrapper", "--ignore-missing-imports"],
+            "Type Checking",
+        ),
     ]
 
     results = []

@@ -18,18 +18,24 @@ class TestEdgeCases:
 
     def test_get_xc8_tool_path_empty_version(self):
         """Test error with empty version string"""
-        with pytest.raises(ValueError, match="Either version or custom_path must be provided"):
+        with pytest.raises(
+            ValueError, match="Either version or custom_path must be provided"
+        ):
             get_xc8_tool_path("cc", version="")
 
     def test_get_xc8_tool_path_none_values(self):
         """Test error with None values"""
-        with pytest.raises(ValueError, match="Either version or custom_path must be provided"):
+        with pytest.raises(
+            ValueError, match="Either version or custom_path must be provided"
+        ):
             get_xc8_tool_path("cc", version=None, custom_path=None)
 
     def test_get_xc8_tool_path_both_provided(self):
         """Test behavior when both version and custom_path are provided"""
         custom_path = r"C:\custom\path\xc8-cc.exe"
-        path, version_info = get_xc8_tool_path("cc", version="3.00", custom_path=custom_path)
+        path, version_info = get_xc8_tool_path(
+            "cc", version="3.00", custom_path=custom_path
+        )
 
         # custom_path should take precedence
         assert path == custom_path

@@ -23,10 +23,14 @@ __version__ = "0.1.0"
 
 def create_base_parser() -> argparse.ArgumentParser:
     """Create the base argument parser with common arguments"""
-    parser = argparse.ArgumentParser(description="XC8 toolchain wrapper for PIC microcontrollers", prog="xc8-wrapper")
+    parser = argparse.ArgumentParser(
+        description="XC8 toolchain wrapper for PIC microcontrollers", prog="xc8-wrapper"
+    )
 
     # Version argument
-    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
+    )
 
     # Tool selection
     parser.add_argument(
@@ -40,14 +44,18 @@ def create_base_parser() -> argparse.ArgumentParser:
         "--xc8-version",
         help="XC8 toolchain version to use (ignored if --xc8-path is provided)",
     )
-    parser.add_argument("--xc8-path", help="Full path to XC8 tool executable (overrides --xc8-version)")
+    parser.add_argument(
+        "--xc8-path", help="Full path to XC8 tool executable (overrides --xc8-version)"
+    )
 
     return parser
 
 
 def create_cc_subparser(subparsers: Any) -> argparse.ArgumentParser:
     """Create argument parser for xc8-cc tool"""
-    cc_parser: argparse.ArgumentParser = subparsers.add_parser("cc", help="C compiler, assembler, and linker")
+    cc_parser: argparse.ArgumentParser = subparsers.add_parser(
+        "cc", help="C compiler, assembler, and linker"
+    )
 
     # Required arguments for cc tool
     cc_parser.add_argument("--cpu", required=True, help="Target microcontroller")
@@ -57,7 +65,9 @@ def create_cc_subparser(subparsers: Any) -> argparse.ArgumentParser:
         "--xc8-version",
         help="XC8 toolchain version to use (ignored if --xc8-path is provided)",
     )
-    cc_parser.add_argument("--xc8-path", help="Full path to XC8 tool executable (overrides --xc8-version)")
+    cc_parser.add_argument(
+        "--xc8-path", help="Full path to XC8 tool executable (overrides --xc8-version)"
+    )
 
     # Preprocessor arguments
     cc_parser.add_argument(
@@ -84,9 +94,15 @@ def create_cc_subparser(subparsers: Any) -> argparse.ArgumentParser:
         action="store_true",
         help="Tell the preprocessor not to discard comments",
     )
-    cc_parser.add_argument("-E", "--preprocess-only", action="store_true", help="Preprocess only")
-    cc_parser.add_argument("-H", "--list-headers", action="store_true", help="List included header files")
-    cc_parser.add_argument("-dM", "--list-macros", action="store_true", help="List all defined macros")
+    cc_parser.add_argument(
+        "-E", "--preprocess-only", action="store_true", help="Preprocess only"
+    )
+    cc_parser.add_argument(
+        "-H", "--list-headers", action="store_true", help="List included header files"
+    )
+    cc_parser.add_argument(
+        "-dM", "--list-macros", action="store_true", help="List all defined macros"
+    )
 
     # Compiler mode arguments
     cc_parser.add_argument(
@@ -95,10 +111,18 @@ def create_cc_subparser(subparsers: Any) -> argparse.ArgumentParser:
         action="store_true",
         help="Compile/assemble to intermediate/object file",
     )
-    cc_parser.add_argument("-S", "--assembly-only", action="store_true", help="Compile to assembly file")
-    cc_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    cc_parser.add_argument("-w", "--suppress-warnings", action="store_true", help="Suppress all warnings")
-    cc_parser.add_argument("--save-temps", action="store_true", help="Do not delete intermediate files")
+    cc_parser.add_argument(
+        "-S", "--assembly-only", action="store_true", help="Compile to assembly file"
+    )
+    cc_parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Verbose output"
+    )
+    cc_parser.add_argument(
+        "-w", "--suppress-warnings", action="store_true", help="Suppress all warnings"
+    )
+    cc_parser.add_argument(
+        "--save-temps", action="store_true", help="Do not delete intermediate files"
+    )
 
     # Optimization arguments
     cc_parser.add_argument(
@@ -109,7 +133,9 @@ def create_cc_subparser(subparsers: Any) -> argparse.ArgumentParser:
     )
 
     # Language standard arguments
-    cc_parser.add_argument("--std", help="Specify language standard (c89, c90, c99, c11, etc.)")
+    cc_parser.add_argument(
+        "--std", help="Specify language standard (c89, c90, c99, c11, etc.)"
+    )
 
     # Advanced compilation flags (for anything not covered above)
     cc_parser.add_argument(
@@ -122,13 +148,27 @@ def create_cc_subparser(subparsers: Any) -> argparse.ArgumentParser:
         action="append",
         help="Add additional linking flag (can be used multiple times)",
     )
-    cc_parser.add_argument("--build-dir", default="build", help="Build directory (default: build)")
-    cc_parser.add_argument("--source-dir", default="src", help="Source directory (default: src)")
-    cc_parser.add_argument("--main-c-file", default="main.c", help="Main C file (default: main.c)")
-    cc_parser.add_argument("--output-hex", default="main.hex", help="Output HEX file (default: main.hex)")
-    cc_parser.add_argument("--output-elf", default="main.elf", help="Output ELF file (default: main.elf)")
-    cc_parser.add_argument("--output-p1", default="main.p1", help="Output P1 file (default: main.p1)")
-    cc_parser.add_argument("--output-map", default="main.map", help="Output MAP file (default: main.map)")
+    cc_parser.add_argument(
+        "--build-dir", default="build", help="Build directory (default: build)"
+    )
+    cc_parser.add_argument(
+        "--source-dir", default="src", help="Source directory (default: src)"
+    )
+    cc_parser.add_argument(
+        "--main-c-file", default="main.c", help="Main C file (default: main.c)"
+    )
+    cc_parser.add_argument(
+        "--output-hex", default="main.hex", help="Output HEX file (default: main.hex)"
+    )
+    cc_parser.add_argument(
+        "--output-elf", default="main.elf", help="Output ELF file (default: main.elf)"
+    )
+    cc_parser.add_argument(
+        "--output-p1", default="main.p1", help="Output P1 file (default: main.p1)"
+    )
+    cc_parser.add_argument(
+        "--output-map", default="main.map", help="Output MAP file (default: main.map)"
+    )
     cc_parser.add_argument(
         "--memory-file",
         default="memoryfile.xml",
@@ -149,7 +189,9 @@ def create_ar_subparser(subparsers: Any) -> argparse.ArgumentParser:
         "--xc8-version",
         help="XC8 toolchain version to use (ignored if --xc8-path is provided)",
     )
-    ar_parser.add_argument("--xc8-path", help="Full path to XC8 tool executable (overrides --xc8-version)")
+    ar_parser.add_argument(
+        "--xc8-path", help="Full path to XC8 tool executable (overrides --xc8-version)"
+    )
 
     # Archiver operation arguments
     ar_parser.add_argument(
@@ -165,9 +207,15 @@ def create_ar_subparser(subparsers: Any) -> argparse.ArgumentParser:
     ar_parser.add_argument("files", nargs="*", help="Object files (.o, .p1) to process")
 
     # Modifiers
-    ar_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    ar_parser.add_argument("-u", "--update", action="store_true", help="Update only newer files")
-    ar_parser.add_argument("-s", "--index", action="store_true", help="Write an object-file index")
+    ar_parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Verbose output"
+    )
+    ar_parser.add_argument(
+        "-u", "--update", action="store_true", help="Update only newer files"
+    )
+    ar_parser.add_argument(
+        "-s", "--index", action="store_true", help="Write an object-file index"
+    )
 
     return ar_parser
 
@@ -175,13 +223,19 @@ def create_ar_subparser(subparsers: Any) -> argparse.ArgumentParser:
 def create_argument_parser() -> argparse.ArgumentParser:
     """Create and configure the hierarchical argument parser"""
     # Create main parser with tool selection
-    parser = argparse.ArgumentParser(description="XC8 toolchain wrapper for PIC microcontrollers", prog="xc8-wrapper")
+    parser = argparse.ArgumentParser(
+        description="XC8 toolchain wrapper for PIC microcontrollers", prog="xc8-wrapper"
+    )
 
     # Version argument at top level
-    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
+    )
 
     # Create subparsers for each tool
-    subparsers = parser.add_subparsers(dest="tool", help="XC8 tool to use", required=True)
+    subparsers = parser.add_subparsers(
+        dest="tool", help="XC8 tool to use", required=True
+    )
 
     # Add tool-specific subparsers
     create_cc_subparser(subparsers)
@@ -210,7 +264,9 @@ def main(argv: Optional[List[str]] = None) -> None:
         sys.exit(1)
     else:
         log.error(f"Tool '{args.tool}' is not yet implemented")
-        log.warning(f"Currently supported tools: {', '.join(SUPPORTED_XC8_TOOLS.keys())}")
+        log.warning(
+            f"Currently supported tools: {', '.join(SUPPORTED_XC8_TOOLS.keys())}"
+        )
         sys.exit(1)
 
 

@@ -257,7 +257,9 @@ class TestEncodingCompatibility:
         encodings = ["utf-8", "latin-1", "cp1252"]
 
         for encoding in encodings:
-            with tempfile.NamedTemporaryFile(mode="w", encoding=encoding, delete=False) as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding=encoding, delete=False
+            ) as f:
                 f.write("// Test file\n")
                 f.write("int main() { return 0; }\n")
                 temp_path = f.name

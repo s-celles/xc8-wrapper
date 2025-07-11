@@ -40,11 +40,17 @@ class TestXC8ToolPath:
         if sys.platform.startswith("win"):
             assert path.endswith("xc8-cc.exe")
             # Should be one of the Windows paths
-            assert ("Program Files" in path and "Microchip" in path) or ("Program Files (x86)" in path and "Microchip" in path)
+            assert ("Program Files" in path and "Microchip" in path) or (
+                "Program Files (x86)" in path and "Microchip" in path
+            )
         else:
             assert path.endswith("xc8-cc")
             # Should be one of the Unix paths
-            assert ("opt/microchip" in path) or ("Applications/microchip" in path) or ("usr/local/microchip" in path)
+            assert (
+                ("opt/microchip" in path)
+                or ("Applications/microchip" in path)
+                or ("usr/local/microchip" in path)
+            )
 
     def test_get_xc8_tool_path_with_custom_path(self):
         """Test getting tool path with custom path"""
@@ -60,7 +66,9 @@ class TestXC8ToolPath:
 
     def test_get_xc8_tool_path_no_version_or_path(self):
         """Test error when neither version nor path is provided"""
-        with pytest.raises(ValueError, match="Either version or custom_path must be provided"):
+        with pytest.raises(
+            ValueError, match="Either version or custom_path must be provided"
+        ):
             get_xc8_tool_path("cc")
 
 
@@ -137,7 +145,14 @@ class TestHandleCCTool:
     @patch("pathlib.Path.mkdir")
     @patch("pathlib.Path.iterdir")
     def test_handle_cc_tool_success(
-        self, mock_iterdir, mock_mkdir, mock_stat, mock_exists, mock_run, mock_get_path, mock_validate
+        self,
+        mock_iterdir,
+        mock_mkdir,
+        mock_stat,
+        mock_exists,
+        mock_run,
+        mock_get_path,
+        mock_validate,
     ):
         """Test successful CC tool handling"""
         # Setup mocks

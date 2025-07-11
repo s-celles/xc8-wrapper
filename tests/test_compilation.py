@@ -156,7 +156,9 @@ def scan_for_xc8_versions() -> List[str]:
 
     # Convert to sorted list (highest version first)
     try:
-        return sorted(found_versions, key=lambda v: [int(x) for x in v.split(".")], reverse=True)
+        return sorted(
+            found_versions, key=lambda v: [int(x) for x in v.split(".")], reverse=True
+        )
     except ValueError:
         # Fallback to string sorting if version parsing fails
         return sorted(found_versions, reverse=True)
@@ -178,7 +180,9 @@ def get_all_xc8_versions_to_try() -> List[str]:
 
     # Convert to sorted list (highest version first)
     try:
-        return sorted(versions, key=lambda v: [int(x) for x in v.split(".")], reverse=True)
+        return sorted(
+            versions, key=lambda v: [int(x) for x in v.split(".")], reverse=True
+        )
     except ValueError:
         # Fallback to string sorting if version parsing fails
         return sorted(versions, reverse=True)
@@ -221,7 +225,9 @@ def get_installed_xc8_version() -> Optional[str]:
         if Path(xc8_path).exists():
             # Try to extract version from path or run --version
             try:
-                result = subprocess.run([xc8_path, "--version"], capture_output=True, text=True, timeout=10)
+                result = subprocess.run(
+                    [xc8_path, "--version"], capture_output=True, text=True, timeout=10
+                )
                 if result.returncode == 0:
                     # Extract version from output (e.g., "MPLAB XC8 C Compiler V3.47")
                     version_match = re.search(r"V(\d+\.\d+)", result.stdout)
@@ -253,7 +259,9 @@ def download_file(url: str, dest_path: Path, timeout: int = 300) -> bool:
 
         # Create a custom opener with timeout
         opener = urllib.request.build_opener()
-        opener.addheaders = [("User-Agent", "Mozilla/5.0 (compatible; XC8-Test-Download)")]
+        opener.addheaders = [
+            ("User-Agent", "Mozilla/5.0 (compatible; XC8-Test-Download)")
+        ]
         urllib.request.install_opener(opener)
 
         # Download with timeout
@@ -304,12 +312,24 @@ expect {{
 
         # Run installer via expect if available, otherwise direct
         if shutil.which("expect"):
-            result = subprocess.run([str(expect_file)], capture_output=True, text=True, timeout=600)
+            result = subprocess.run(
+                [str(expect_file)], capture_output=True, text=True, timeout=600
+            )
         else:
             # Fallback: pipe 'y' to installer
-            process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            process = subprocess.Popen(
+                cmd,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
             stdout, stderr = process.communicate(input="y\n", timeout=600)
-            result = type("Result", (), {"returncode": process.returncode, "stdout": stdout, "stderr": stderr})()
+            result = type(
+                "Result",
+                (),
+                {"returncode": process.returncode, "stdout": stdout, "stderr": stderr},
+            )()
 
         # Cleanup
         if expect_file.exists():
@@ -346,7 +366,11 @@ def install_xc8_macos(installer_path: Path) -> bool:
     """Install XC8 on macOS"""
     try:
         # Mount DMG
-        mount_result = subprocess.run(["hdiutil", "attach", str(installer_path), "-nobrowse"], capture_output=True, text=True)
+        mount_result = subprocess.run(
+            ["hdiutil", "attach", str(installer_path), "-nobrowse"],
+            capture_output=True,
+            text=True,
+        )
 
         if mount_result.returncode != 0:
             return False
@@ -524,7 +548,9 @@ class TestXC8Compilation:
             pytest.skip("XC8 installation failed or skipped")
 
         # Verify XC8 is now available
-        assert is_xc8_installed(), "XC8 should be installed after install_xc8_if_needed()"
+        assert (
+            is_xc8_installed()
+        ), "XC8 should be installed after install_xc8_if_needed()"
 
     @pytest.mark.skipif(
         not is_xc8_installed() and os.environ.get("INSTALL_XC8") != "true",
@@ -635,10 +661,14 @@ class TestXC8Compilation:
                 xc8_path, _ = get_xc8_tool_path("cc")
 
             # Run version check
-            result = subprocess.run([xc8_path, "--version"], capture_output=True, text=True, timeout=30)
+            result = subprocess.run(
+                [xc8_path, "--version"], capture_output=True, text=True, timeout=30
+            )
 
             assert result.returncode == 0, "XC8 version check should succeed"
-            assert "XC8" in result.stdout or "XC8" in result.stderr, "Output should contain 'XC8'"
+            assert (
+                "XC8" in result.stdout or "XC8" in result.stderr
+            ), "Output should contain 'XC8'"
 
             print(f"XC8 version output: {result.stdout.strip()}")
 
@@ -671,7 +701,656 @@ class TestDownloadUrls:
             url = url_template.format(version="3.00")
             assert "xc8-v3.00" in url
             assert "microchip.com" in url
-            assert platform_name in url or platform_name in ["darwin"]  # darwin uses macos in URL
+            assert platform_name in url or platform_name in [
+                "darwin"
+            ]  # darwin uses macos in URL
+
+
+class TestCoreUtilities:
+    """Test core utility functions for better coverage"""
+
+    def test_get_xc8_tool_path_unsupported_tool(self) -> None:
+        """Test error handling for unsupported tool"""
+        from xc8_wrapper.core import get_xc8_tool_path
+
+        with pytest.raises(ValueError, match="Unsupported XC8 tool"):
+            get_xc8_tool_path("invalid_tool", "3.00")
+
+    def test_get_xc8_tool_path_no_version_or_path(self) -> None:
+        """Test error handling when neither version nor path provided"""
+        from xc8_wrapper.core import get_xc8_tool_path
+
+        with pytest.raises(
+            ValueError, match="Either version or custom_path must be provided"
+        ):
+            get_xc8_tool_path("cc")
+
+    def test_get_xc8_tool_path_invalid_version_format(self) -> None:
+        """Test error handling for invalid version format"""
+        from xc8_wrapper.core import get_xc8_tool_path
+
+        with pytest.raises(ValueError, match="Invalid version format"):
+            get_xc8_tool_path("cc", "3.00; rm -rf /")
+
+    def test_get_xc8_tool_path_invalid_custom_path(self) -> None:
+        """Test custom path security validation"""
+        from xc8_wrapper.core import get_xc8_tool_path
+
+        # Test path with directory traversal
+        with pytest.raises(ValueError, match="Invalid path provided"):
+            get_xc8_tool_path("cc", custom_path="../../../bin/xc8-cc")
+
+    def test_get_xc8_tool_path_windows_paths(self) -> None:
+        """Test Windows path detection"""
+        from xc8_wrapper.core import get_xc8_tool_path
+
+        with patch("sys.platform", "win32"):
+            tool_path, version_info = get_xc8_tool_path("cc", "3.00")
+            assert "xc8-cc.exe" in tool_path
+            assert "v3.00" == version_info
+            assert "Program Files" in tool_path
+
+    def test_get_xc8_tool_path_macos_paths(self) -> None:
+        """Test macOS path detection"""
+        from xc8_wrapper.core import get_xc8_tool_path
+
+        with patch("sys.platform", "darwin"):
+            tool_path, version_info = get_xc8_tool_path("cc", "3.00")
+            assert "xc8-cc" in tool_path
+            assert "v3.00" == version_info
+            # Use normalized paths to handle Windows vs Unix separators
+            normalized_path = tool_path.replace("\\", "/")
+            assert (
+                "/Applications/microchip" in normalized_path
+                or "/opt/microchip" in normalized_path
+            )
+
+    def test_get_xc8_tool_path_linux_paths(self) -> None:
+        """Test Linux path detection"""
+        from xc8_wrapper.core import get_xc8_tool_path
+
+        with patch("sys.platform", "linux"):
+            tool_path, version_info = get_xc8_tool_path("cc", "3.00")
+            assert "xc8-cc" in tool_path
+            assert "v3.00" == version_info
+            # Normalize path separators for cross-platform testing
+            normalized_path = tool_path.replace("\\", "/")
+            assert (
+                "/opt/microchip" in normalized_path
+                or "/usr/local/microchip" in normalized_path
+            )
+
+    def test_validate_xc8_tool_not_found(self) -> None:
+        """Test validation when tool doesn't exist"""
+        from xc8_wrapper.core import validate_xc8_tool
+
+        result = validate_xc8_tool("/nonexistent/path/xc8-cc", "cc", "v3.00")
+        assert not result
+
+    def test_validate_xc8_tool_custom_path_not_found(self) -> None:
+        """Test validation when custom path doesn't exist"""
+        from xc8_wrapper.core import validate_xc8_tool
+
+        result = validate_xc8_tool("/custom/path/xc8-cc", "cc", "custom path")
+        assert not result
+
+    def test_run_command_empty_command(self) -> None:
+        """Test run_command with empty command"""
+        from xc8_wrapper.core import run_command
+
+        result = run_command([], "test command")
+        assert not result
+
+    def test_run_command_unauthorized_executable(self) -> None:
+        """Test run_command with unauthorized executable"""
+        from xc8_wrapper.core import run_command
+
+        result = run_command(["/bin/rm", "-rf", "/"], "dangerous command")
+        assert not result
+
+    def test_run_command_timeout_exception(self) -> None:
+        """Test run_command timeout handling"""
+        import subprocess
+
+        from xc8_wrapper.core import run_command
+
+        with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("cmd", 300)):
+            result = run_command(["echo", "test"], "test command")
+            assert not result
+
+    def test_run_command_general_exception(self) -> None:
+        """Test run_command general exception handling"""
+        from xc8_wrapper.core import run_command
+
+        with patch("subprocess.run", side_effect=OSError("System error")):
+            result = run_command(["echo", "test"], "test command")
+            assert not result
+
+    def test_validate_path_security_valid_paths(self) -> None:
+        """Test path security validation with valid paths"""
+        from xc8_wrapper.core import _validate_path_security
+
+        assert _validate_path_security("/opt/microchip/bin/xc8-cc")
+        assert _validate_path_security(
+            "C:\\Program Files\\Microchip\\xc8\\v3.00\\bin\\xc8-cc.exe"
+        )
+
+    def test_validate_path_security_invalid_paths(self) -> None:
+        """Test path security validation with invalid paths"""
+        from xc8_wrapper.core import _validate_path_security
+
+        assert not _validate_path_security("../../../etc/passwd")
+        assert not _validate_path_security("..\\..\\..\\windows\\system32")
+        assert not _validate_path_security("//server/share")
+        assert not _validate_path_security("\\\\server\\share")
+
+    def test_validate_path_security_exception_handling(self) -> None:
+        """Test path security validation exception handling"""
+        from xc8_wrapper.core import _validate_path_security
+
+        # Test with an invalid path that causes OSError
+        with patch("pathlib.Path.resolve", side_effect=OSError("Invalid path")):
+            assert not _validate_path_security("/some/path")
+
+    def test_handle_cc_tool_missing_version_and_path(self) -> None:
+        """Test handle_cc_tool when neither version nor path provided"""
+        from unittest.mock import Mock
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        args = Mock()
+        args.xc8_version = None
+        args.xc8_path = None
+
+        with pytest.raises(SystemExit, match="1"):
+            handle_cc_tool(args)
+
+    def test_handle_cc_tool_missing_cpu(self) -> None:
+        """Test handle_cc_tool when CPU not provided"""
+        from unittest.mock import Mock
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        args = Mock()
+        args.xc8_version = "3.00"
+        args.xc8_path = None
+        args.cpu = None
+
+        with pytest.raises(SystemExit, match="1"):
+            handle_cc_tool(args)
+
+    def test_handle_cc_tool_get_tool_path_error(self) -> None:
+        """Test handle_cc_tool when get_xc8_tool_path raises error"""
+        from unittest.mock import Mock
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        args = Mock()
+        args.xc8_version = "invalid; version"
+        args.xc8_path = None
+        args.cpu = "PIC16F876A"
+
+        with pytest.raises(SystemExit, match="1"):
+            handle_cc_tool(args)
+
+    def test_handle_cc_tool_tool_validation_fails(self) -> None:
+        """Test handle_cc_tool when tool validation fails"""
+        from unittest.mock import Mock, patch
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        args = Mock()
+        args.xc8_version = "3.00"
+        args.xc8_path = None
+        args.cpu = "PIC16F876A"
+
+        with patch("xc8_wrapper.core.validate_xc8_tool", return_value=False):
+            with pytest.raises(SystemExit, match="1"):
+                handle_cc_tool(args)
+
+    def test_handle_cc_tool_source_file_not_found(self) -> None:
+        """Test handle_cc_tool when source file doesn't exist"""
+        from unittest.mock import Mock, patch
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        args = Mock()
+        args.xc8_version = "3.00"
+        args.xc8_path = None
+        args.cpu = "PIC16F876A"
+        args.compile_flag = None
+        args.link_flag = None
+        args.define = None
+        args.undefine = None
+        args.include = None
+        args.keep_comments = False
+        args.preprocess_only = False
+        args.list_headers = False
+        args.list_macros = False
+        args.compile_only = False
+        args.assembly_only = False
+        args.verbose = False
+        args.suppress_warnings = False
+        args.save_temps = False
+        args.optimize = None
+        args.std = None
+        args.build_dir = "/tmp/test_build"
+        args.source_dir = "/tmp/test_src"
+        args.main_c_file = "nonexistent.c"
+        args.output_hex = "main.hex"
+        args.output_elf = "main.elf"
+        args.output_p1 = "main.p1"
+        args.output_map = "main.map"
+        args.memory_file = "memoryfile.xml"
+
+        with patch("xc8_wrapper.core.validate_xc8_tool", return_value=True):
+            with patch(
+                "xc8_wrapper.core.get_xc8_tool_path",
+                return_value=("/usr/bin/xc8-cc", "v3.00"),
+            ):
+                with pytest.raises(SystemExit, match="1"):
+                    handle_cc_tool(args)
+
+    def test_handle_cc_tool_compilation_fails(self) -> None:
+        """Test handle_cc_tool when compilation fails"""
+        import tempfile
+        from unittest.mock import Mock, patch
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_file = Path(temp_dir) / "main.c"
+            source_file.write_text("#include <xc.h>\nint main() { return 0; }")
+
+            args = Mock()
+            args.xc8_version = "3.00"
+            args.xc8_path = None
+            args.cpu = "PIC16F876A"
+            args.compile_flag = None
+            args.link_flag = None
+            args.define = None
+            args.undefine = None
+            args.include = None
+            args.keep_comments = False
+            args.preprocess_only = False
+            args.list_headers = False
+            args.list_macros = False
+            args.compile_only = False
+            args.assembly_only = False
+            args.verbose = False
+            args.suppress_warnings = False
+            args.save_temps = False
+            args.optimize = None
+            args.std = None
+            args.build_dir = str(Path(temp_dir) / "build")
+            args.source_dir = temp_dir
+            args.main_c_file = "main.c"
+            args.output_hex = "main.hex"
+            args.output_elf = "main.elf"
+            args.output_p1 = "main.p1"
+            args.output_map = "main.map"
+            args.memory_file = "memoryfile.xml"
+
+            with patch("xc8_wrapper.core.validate_xc8_tool", return_value=True):
+                with patch(
+                    "xc8_wrapper.core.get_xc8_tool_path",
+                    return_value=("/usr/bin/xc8-cc", "v3.00"),
+                ):
+                    with patch("xc8_wrapper.core.run_command", return_value=False):
+                        with pytest.raises(SystemExit, match="1"):
+                            handle_cc_tool(args)
+
+    def test_handle_cc_tool_linking_fails(self) -> None:
+        """Test handle_cc_tool when linking fails"""
+        import tempfile
+        from unittest.mock import Mock, patch
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_file = Path(temp_dir) / "main.c"
+            source_file.write_text("#include <xc.h>\nint main() { return 0; }")
+
+            build_dir = Path(temp_dir) / "build"
+            build_dir.mkdir()
+
+            # Create p1 file to simulate successful compilation
+            p1_file = build_dir / "main.p1"
+            p1_file.write_text("dummy p1 content")
+
+            args = Mock()
+            args.xc8_version = "3.00"
+            args.xc8_path = None
+            args.cpu = "PIC16F876A"
+            args.compile_flag = None
+            args.link_flag = None
+            args.define = None
+            args.undefine = None
+            args.include = None
+            args.keep_comments = False
+            args.preprocess_only = False
+            args.list_headers = False
+            args.list_macros = False
+            args.compile_only = False
+            args.assembly_only = False
+            args.verbose = False
+            args.suppress_warnings = False
+            args.save_temps = False
+            args.optimize = None
+            args.std = None
+            args.build_dir = str(build_dir)
+            args.source_dir = temp_dir
+            args.main_c_file = "main.c"
+            args.output_hex = "main.hex"
+            args.output_elf = "main.elf"
+            args.output_p1 = "main.p1"
+            args.output_map = "main.map"
+            args.memory_file = "memoryfile.xml"
+
+            def mock_run_command(cmd, desc):
+                if "Compiling" in desc:
+                    return True  # Compilation succeeds
+                else:
+                    return False  # Linking fails
+
+            with patch("xc8_wrapper.core.validate_xc8_tool", return_value=True):
+                with patch(
+                    "xc8_wrapper.core.get_xc8_tool_path",
+                    return_value=("/usr/bin/xc8-cc", "v3.00"),
+                ):
+                    with patch(
+                        "xc8_wrapper.core.run_command", side_effect=mock_run_command
+                    ):
+                        with pytest.raises(SystemExit, match="1"):
+                            handle_cc_tool(args)
+
+    def test_handle_cc_tool_hex_file_not_generated(self) -> None:
+        """Test handle_cc_tool when HEX file is not generated"""
+        import tempfile
+        from unittest.mock import Mock, patch
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_file = Path(temp_dir) / "main.c"
+            source_file.write_text("#include <xc.h>\nint main() { return 0; }")
+
+            build_dir = Path(temp_dir) / "build"
+            build_dir.mkdir()
+
+            args = Mock()
+            args.xc8_version = "3.00"
+            args.xc8_path = None
+            args.cpu = "PIC16F876A"
+            args.compile_flag = None
+            args.link_flag = None
+            args.define = None
+            args.undefine = None
+            args.include = None
+            args.keep_comments = False
+            args.preprocess_only = False
+            args.list_headers = False
+            args.list_macros = False
+            args.compile_only = False
+            args.assembly_only = False
+            args.verbose = False
+            args.suppress_warnings = False
+            args.save_temps = False
+            args.optimize = None
+            args.std = None
+            args.build_dir = str(build_dir)
+            args.source_dir = temp_dir
+            args.main_c_file = "main.c"
+            args.output_hex = "main.hex"
+            args.output_elf = "main.elf"
+            args.output_p1 = "main.p1"
+            args.output_map = "main.map"
+            args.memory_file = "memoryfile.xml"
+
+            with patch("xc8_wrapper.core.validate_xc8_tool", return_value=True):
+                with patch(
+                    "xc8_wrapper.core.get_xc8_tool_path",
+                    return_value=("/usr/bin/xc8-cc", "v3.00"),
+                ):
+                    with patch("xc8_wrapper.core.run_command", return_value=True):
+                        with pytest.raises(SystemExit, match="1"):
+                            handle_cc_tool(args)
+
+    def test_handle_cc_tool_file_listing_exception(self) -> None:
+        """Test handle_cc_tool when file listing throws exception"""
+        import tempfile
+        from unittest.mock import Mock, patch
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_file = Path(temp_dir) / "main.c"
+            source_file.write_text("#include <xc.h>\nint main() { return 0; }")
+
+            build_dir = Path(temp_dir) / "build"
+            build_dir.mkdir()
+
+            # Create HEX file to simulate successful compilation and linking
+            hex_file = build_dir / "main.hex"
+            hex_file.write_text(":020000040000FA\n:00000001FF\n")  # Simple HEX content
+
+            args = Mock()
+            args.xc8_version = "3.00"
+            args.xc8_path = None
+            args.cpu = "PIC16F876A"
+            args.compile_flag = None
+            args.link_flag = None
+            args.define = None
+            args.undefine = None
+            args.include = None
+            args.keep_comments = False
+            args.preprocess_only = False
+            args.list_headers = False
+            args.list_macros = False
+            args.compile_only = False
+            args.assembly_only = False
+            args.verbose = False
+            args.suppress_warnings = False
+            args.save_temps = False
+            args.optimize = None
+            args.std = None
+            args.build_dir = str(build_dir)
+            args.source_dir = temp_dir
+            args.main_c_file = "main.c"
+            args.output_hex = "main.hex"
+            args.output_elf = "main.elf"
+            args.output_p1 = "main.p1"
+            args.output_map = "main.map"
+            args.memory_file = "memoryfile.xml"
+
+            # Mock Path.iterdir to raise exception during file listing
+            original_iterdir = Path.iterdir
+
+            def mock_iterdir(self):
+                if "build" in str(self):
+                    raise PermissionError("Access denied")
+                return original_iterdir(self)
+
+            with patch("xc8_wrapper.core.validate_xc8_tool", return_value=True):
+                with patch(
+                    "xc8_wrapper.core.get_xc8_tool_path",
+                    return_value=("/usr/bin/xc8-cc", "v3.00"),
+                ):
+                    with patch("xc8_wrapper.core.run_command", return_value=True):
+                        with patch.object(Path, "iterdir", side_effect=mock_iterdir):
+                            # This should complete successfully despite file listing error
+                            handle_cc_tool(args)
+
+    def test_handle_cc_tool_with_optimization_flags(self) -> None:
+        """Test handle_cc_tool with various optimization flags"""
+        import tempfile
+        from unittest.mock import Mock, patch
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_file = Path(temp_dir) / "main.c"
+            source_file.write_text("#include <xc.h>\nint main() { return 0; }")
+
+            build_dir = Path(temp_dir) / "build"
+            build_dir.mkdir()
+
+            # Create HEX file to simulate successful compilation and linking
+            hex_file = build_dir / "main.hex"
+            hex_file.write_text(":020000040000FA\n:00000001FF\n")
+
+            args = Mock()
+            args.xc8_version = "3.00"
+            args.xc8_path = None
+            args.cpu = "PIC16F876A"
+            args.compile_flag = ["-Wall"]
+            args.link_flag = ["-Wl,--gc-sections"]
+            args.define = ["DEBUG=1"]
+            args.undefine = ["NDEBUG"]
+            args.include = ["/usr/include"]
+            args.keep_comments = True
+            args.preprocess_only = False
+            args.list_headers = True
+            args.list_macros = True
+            args.compile_only = False
+            args.assembly_only = False
+            args.verbose = True
+            args.suppress_warnings = False
+            args.save_temps = True
+            args.optimize = "g"  # Debug optimization
+            args.std = "c11"
+            args.build_dir = str(build_dir)
+            args.source_dir = temp_dir
+            args.main_c_file = "main.c"
+            args.output_hex = "main.hex"
+            args.output_elf = "main.elf"
+            args.output_p1 = "main.p1"
+            args.output_map = "main.map"
+            args.memory_file = "memoryfile.xml"
+
+            with patch("xc8_wrapper.core.validate_xc8_tool", return_value=True):
+                with patch(
+                    "xc8_wrapper.core.get_xc8_tool_path",
+                    return_value=("/usr/bin/xc8-cc", "v3.00"),
+                ):
+                    with patch("xc8_wrapper.core.run_command", return_value=True):
+                        handle_cc_tool(args)  # Should complete successfully
+
+    def test_handle_cc_tool_with_size_optimization(self) -> None:
+        """Test handle_cc_tool with size optimization"""
+        import tempfile
+        from unittest.mock import Mock, patch
+
+        from xc8_wrapper.core import handle_cc_tool
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_file = Path(temp_dir) / "main.c"
+            source_file.write_text("#include <xc.h>\nint main() { return 0; }")
+
+            build_dir = Path(temp_dir) / "build"
+            build_dir.mkdir()
+
+            # Create HEX file to simulate successful compilation and linking
+            hex_file = build_dir / "main.hex"
+            hex_file.write_text(":020000040000FA\n:00000001FF\n")
+
+            args = Mock()
+            args.xc8_version = "3.00"
+            args.xc8_path = None
+            args.cpu = "PIC16F876A"
+            args.compile_flag = None
+            args.link_flag = None
+            args.define = None
+            args.undefine = None
+            args.include = None
+            args.keep_comments = False
+            args.preprocess_only = False
+            args.list_headers = False
+            args.list_macros = False
+            args.compile_only = False
+            args.assembly_only = False
+            args.verbose = False
+            args.suppress_warnings = False
+            args.save_temps = False
+            args.optimize = "s"  # Size optimization
+            args.std = None
+            args.build_dir = str(build_dir)
+            args.source_dir = temp_dir
+            args.main_c_file = "main.c"
+            args.output_hex = "main.hex"
+            args.output_elf = "main.elf"
+            args.output_p1 = "main.p1"
+            args.output_map = "main.map"
+            args.memory_file = "memoryfile.xml"
+
+            with patch("xc8_wrapper.core.validate_xc8_tool", return_value=True):
+                with patch(
+                    "xc8_wrapper.core.get_xc8_tool_path",
+                    return_value=("/usr/bin/xc8-cc", "v3.00"),
+                ):
+                    with patch("xc8_wrapper.core.run_command", return_value=True):
+                        handle_cc_tool(args)  # Should complete successfully
+
+    def test_get_xc8_tool_path_invalid_version_characters(self) -> None:
+        """Test version validation with invalid characters"""
+        from xc8_wrapper.core import get_xc8_tool_path
+
+        with patch("sys.platform", "win32"):
+            with pytest.raises(ValueError, match="Invalid version format"):
+                get_xc8_tool_path("cc", "3.00; rm -rf /")
+
+    def test_get_xc8_tool_path_windows_no_existing_path(self) -> None:
+        """Test Windows path when no XC8 installation exists"""
+        from xc8_wrapper.core import get_xc8_tool_path
+
+        with patch("sys.platform", "win32"):
+            with patch("pathlib.Path.exists", return_value=False):
+                # Should return first path even if it doesn't exist
+                tool_path, version_info = get_xc8_tool_path("cc", "3.00")
+                assert "xc8-cc.exe" in tool_path
+                assert "v3.00" == version_info
+
+    def test_get_xc8_tool_path_macos_no_existing_path(self) -> None:
+        """Test macOS path when no XC8 installation exists"""
+        from xc8_wrapper.core import get_xc8_tool_path
+
+        with patch("sys.platform", "darwin"):
+            with patch("pathlib.Path.exists", return_value=False):
+                # Should return first path even if it doesn't exist
+                tool_path, version_info = get_xc8_tool_path("cc", "3.00")
+                assert "xc8-cc" in tool_path
+                assert "v3.00" == version_info
+
+    def test_validate_xc8_tool_logging_paths(self) -> None:
+        """Test that validate_xc8_tool logs appropriate path suggestions"""
+        from xc8_wrapper.core import validate_xc8_tool
+
+        # Test Windows logging
+        with patch("sys.platform", "win32"):
+            with patch("pathlib.Path.exists", return_value=False):
+                with patch("xc8_wrapper.core.log") as mock_log:
+                    result = validate_xc8_tool("/nonexistent/path", "cc", "v3.00")
+                    assert result is False
+                    # Should have logged Windows-specific paths
+                    mock_log.info.assert_called()
+
+        # Test macOS logging
+        with patch("sys.platform", "darwin"):
+            with patch("pathlib.Path.exists", return_value=False):
+                with patch("xc8_wrapper.core.log") as mock_log:
+                    result = validate_xc8_tool("/nonexistent/path", "cc", "v3.00")
+                    assert result is False
+                    # Should have logged macOS-specific paths
+                    mock_log.info.assert_called()
+
+        # Test Linux logging
+        with patch("sys.platform", "linux"):
+            with patch("pathlib.Path.exists", return_value=False):
+                with patch("xc8_wrapper.core.log") as mock_log:
+                    result = validate_xc8_tool("/nonexistent/path", "cc", "v3.00")
+                    assert result is False
+                    # Should have logged Linux-specific paths
+                    mock_log.info.assert_called()
 
 
 if __name__ == "__main__":

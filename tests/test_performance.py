@@ -57,7 +57,9 @@ class TestPerformance:
         """Test that CLI parsing is fast"""
         with patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate, patch(
             "xc8_wrapper.core.get_xc8_tool_path"
-        ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run, patch("os.path.exists") as mock_exists, patch(
+        ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run, patch(
+            "os.path.exists"
+        ) as mock_exists, patch(
             "xc8_wrapper.core.os.path.getsize"
         ) as mock_getsize:
 
@@ -141,7 +143,9 @@ class TestScalability:
             if result[0] == "success":
                 success_count += 1
 
-        assert success_count == 10, f"Expected 10 successful operations, got {success_count}"
+        assert (
+            success_count == 10
+        ), f"Expected 10 successful operations, got {success_count}"
 
     def test_large_argument_lists(self):
         """Test handling of large argument lists"""

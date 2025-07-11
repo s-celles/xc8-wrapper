@@ -47,17 +47,31 @@ Environment Variables:
         """,
     )
 
-    parser.add_argument("--check", action="store_true", help="Check if XC8 is installed")
+    parser.add_argument(
+        "--check", action="store_true", help="Check if XC8 is installed"
+    )
 
-    parser.add_argument("--install", action="store_true", help="Install XC8 if not present")
+    parser.add_argument(
+        "--install", action="store_true", help="Install XC8 if not present"
+    )
 
-    parser.add_argument("--force", action="store_true", help="Force installation even if XC8 is present")
+    parser.add_argument(
+        "--force", action="store_true", help="Force installation even if XC8 is present"
+    )
 
-    parser.add_argument("--version", default="3.00", help="XC8 version to install (default: 3.00)")
+    parser.add_argument(
+        "--version", default="3.00", help="XC8 version to install (default: 3.00)"
+    )
 
-    parser.add_argument("--url", action="store_true", help="Show download URL for current platform")
+    parser.add_argument(
+        "--url", action="store_true", help="Show download URL for current platform"
+    )
 
-    parser.add_argument("--platform", choices=["linux", "windows", "darwin"], help="Override platform detection")
+    parser.add_argument(
+        "--platform",
+        choices=["linux", "windows", "darwin"],
+        help="Override platform detection",
+    )
 
     args = parser.parse_args()
 
@@ -100,10 +114,17 @@ Environment Variables:
                     import subprocess  # nosec B404 - Required for XC8 version detection
 
                     result = subprocess.run(  # nosec B603 - trusted XC8 executable path
-                        [xc8_path, "--version"], capture_output=True, text=True, timeout=10
+                        [xc8_path, "--version"],
+                        capture_output=True,
+                        text=True,
+                        timeout=10,
                     )
                     if result.returncode == 0:
-                        version_line = result.stdout.split("\n")[0] if result.stdout else result.stderr.split("\n")[0]
+                        version_line = (
+                            result.stdout.split("\n")[0]
+                            if result.stdout
+                            else result.stderr.split("\n")[0]
+                        )
                         print(f"XC8 version: {version_line.strip()}")
 
                 except Exception as e:

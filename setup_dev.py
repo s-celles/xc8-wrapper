@@ -33,7 +33,9 @@ def run_command(cmd, description, check=True):
     print(f"   Command: {' '.join(cmd)}")
 
     try:
-        result = subprocess.run(cmd, check=check, capture_output=True, text=True)  # nosec B603
+        result = subprocess.run(
+            cmd, check=check, capture_output=True, text=True
+        )  # nosec B603
         if result.returncode == 0:
             print_colored(f"✅ {description} - Success", Colors.GREEN)
             return True
@@ -57,14 +59,18 @@ def check_python_version():
     if version.major != 3 or version.minor < 9:
         print_colored("❌ Python 3.9+ is required", Colors.RED)
         return False
-    print_colored(f"✅ Python {version.major}.{version.minor} is compatible", Colors.GREEN)
+    print_colored(
+        f"✅ Python {version.major}.{version.minor} is compatible", Colors.GREEN
+    )
     return True
 
 
 def check_git():
     """Check if git is available"""
     try:
-        result = subprocess.run(["git", "--version"], capture_output=True, text=True)  # nosec B603 B607
+        result = subprocess.run(
+            ["git", "--version"], capture_output=True, text=True
+        )  # nosec B603 B607
         if result.returncode == 0:
             print_colored("✅ Git is available", Colors.GREEN)
             return True
@@ -84,7 +90,9 @@ def setup_virtual_environment():
         print_colored("ℹ️  Virtual environment already exists", Colors.YELLOW)
         return True
 
-    return run_command([sys.executable, "-m", "venv", ".venv"], "Creating virtual environment")
+    return run_command(
+        [sys.executable, "-m", "venv", ".venv"], "Creating virtual environment"
+    )
 
 
 def get_python_executable():
@@ -100,8 +108,14 @@ def install_package_dev():
     python_exe = get_python_executable()
 
     commands = [
-        ([str(python_exe), "-m", "pip", "install", "--upgrade", "pip"], "Upgrading pip"),
-        ([str(python_exe), "-m", "pip", "install", "-e", ".[dev]"], "Installing package in development mode"),
+        (
+            [str(python_exe), "-m", "pip", "install", "--upgrade", "pip"],
+            "Upgrading pip",
+        ),
+        (
+            [str(python_exe), "-m", "pip", "install", "-e", ".[dev]"],
+            "Installing package in development mode",
+        ),
     ]
 
     for cmd, desc in commands:
@@ -116,12 +130,20 @@ def setup_pre_commit():
     python_exe = get_python_executable()
 
     commands = [
-        ([str(python_exe), "-m", "pre_commit", "install"], "Installing pre-commit hooks"),
-        ([str(python_exe), "-m", "pre_commit", "autoupdate"], "Updating pre-commit hooks"),
+        (
+            [str(python_exe), "-m", "pre_commit", "install"],
+            "Installing pre-commit hooks",
+        ),
+        (
+            [str(python_exe), "-m", "pre_commit", "autoupdate"],
+            "Updating pre-commit hooks",
+        ),
     ]
 
     for cmd, desc in commands:
-        if not run_command(cmd, desc, check=False):  # Don't fail if pre-commit isn't available
+        if not run_command(
+            cmd, desc, check=False
+        ):  # Don't fail if pre-commit isn't available
             continue
 
     return True
@@ -132,9 +154,22 @@ def run_initial_tests():
     python_exe = get_python_executable()
 
     commands = [
-        ([str(python_exe), "-c", "import xc8_wrapper; print('✅ Package import successful')"], "Testing package import"),
-        ([str(python_exe), "-m", "pytest", "tests/test_core.py", "-v"], "Running core tests"),
-        ([str(python_exe), "-m", "flake8", "xc8_wrapper", "--count"], "Running linting"),
+        (
+            [
+                str(python_exe),
+                "-c",
+                "import xc8_wrapper; print('✅ Package import successful')",
+            ],
+            "Testing package import",
+        ),
+        (
+            [str(python_exe), "-m", "pytest", "tests/test_core.py", "-v"],
+            "Running core tests",
+        ),
+        (
+            [str(python_exe), "-m", "flake8", "xc8_wrapper", "--count"],
+            "Running linting",
+        ),
     ]
 
     success_count = 0
@@ -252,16 +287,25 @@ def main():
 
     if success_count == len(steps):
         print_colored("🎉 All setup steps completed successfully!", Colors.GREEN)
-        print_colored("\n🚀 You're ready to start developing!", Colors.BOLD + Colors.GREEN)
+        print_colored(
+            "\n🚀 You're ready to start developing!", Colors.BOLD + Colors.GREEN
+        )
         print("\nNext steps:")
-        print("1. Activate virtual environment: .venv/Scripts/activate (Windows) or source .venv/bin/activate (Unix)")
+        print(
+            "1. Activate virtual environment: .venv/Scripts/activate (Windows) or source .venv/bin/activate (Unix)"
+        )
         print("2. Run tests: python -m pytest tests/ -v")
         print("3. Run demo: python demo.py")
         print("4. Start coding! 🎯")
         return 0
     else:
-        print_colored(f"⚠️  {success_count}/{len(steps)} steps completed successfully", Colors.YELLOW)
-        print_colored("Some setup steps had issues. Please check the output above.", Colors.YELLOW)
+        print_colored(
+            f"⚠️  {success_count}/{len(steps)} steps completed successfully",
+            Colors.YELLOW,
+        )
+        print_colored(
+            "Some setup steps had issues. Please check the output above.", Colors.YELLOW
+        )
         return 1
 
 
