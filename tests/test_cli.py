@@ -74,17 +74,6 @@ class TestMainFunction:
         except SystemExit:
             pass
 
-    @patch("xc8_wrapper.cli.handle_ar_tool")
-    def test_main_with_ar_tool(self, mock_handle_ar):
-        """Test main function with ar tool"""
-        mock_handle_ar.return_value = None
-
-        try:
-            main(["ar", "r", "mylib.a", "file1.o", "file2.o", "--xc8-version", "3.00"])
-            mock_handle_ar.assert_called_once()
-        except SystemExit:
-            pass
-
     def test_main_invalid_arguments(self):
         """Test main function with invalid arguments"""
         with pytest.raises(SystemExit):

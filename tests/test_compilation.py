@@ -585,7 +585,7 @@ class TestXC8Compilation:
                 hex_file = build_dir / "main.hex"
 
                 if compilation_success and hex_file.exists():
-                    print(f"✓ Compilation successful: {hex_file}")
+                    print(f"Compilation successful: {hex_file}")
 
                     # Verify HEX file content
                     hex_content = hex_file.read_text()

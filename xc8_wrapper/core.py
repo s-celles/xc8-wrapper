@@ -151,7 +151,7 @@ def validate_xc8_tool(tool_path: str, tool_name: str, version_info: str) -> bool
                 log.info("         /opt/microchip/xc8/v{version}/bin/ (alternative)")
         return False
 
-    log.info(f"✓ XC8 {tool_name} {version_info} found")
+    log.info(f"XC8 {tool_name} {version_info} found")
     return True
 
 
@@ -214,7 +214,7 @@ def run_command(cmd: List[str], description: str) -> bool:
             print(result.stderr)
 
         if result.returncode == 0:
-            log.info(f"✓ {description} successful")
+            log.info(f"{description} successful")
             return True
         else:
             log.error(f"{description} error")
@@ -384,15 +384,15 @@ def handle_cc_tool(args: Any) -> None:
         log.warning("Make sure your source file exists in the source directory")
         sys.exit(1)
 
-    log.info(f"✓ Source file found: {source_file}")
+    log.info(f"Source file found: {source_file}")
 
     # Create build directory
     build_dir_path = Path(BUILD_DIR)
     if not build_dir_path.exists():
         build_dir_path.mkdir(parents=True, exist_ok=True)
-        log.info(f"✓ Created build directory: {BUILD_DIR}")
+        log.info(f"Created build directory: {BUILD_DIR}")
 
-    log.warning("\nCompilation in progress...")
+    log.warning("Compilation in progress...")
     log.info("Configuration:")
     log.info("  - Tool: XC8 CC (xc8-cc)")
     log.info(f"  - Version: {version_info}")
@@ -448,7 +448,7 @@ def handle_cc_tool(args: Any) -> None:
     hex_file = build_dir_path / OUTPUT_HEX
     if hex_file.exists():
         hex_size = hex_file.stat().st_size
-        log.info(f"\n✓ HEX file generated: {OUTPUT_HEX} ({hex_size} bytes)")
+        log.info(f"\nHEX file generated: {OUTPUT_HEX} ({hex_size} bytes)")
 
         log.info("\nGenerated files:")
         try:

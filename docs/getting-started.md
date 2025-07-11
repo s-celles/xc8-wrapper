@@ -78,39 +78,56 @@ void main(void) {
 Now let's compile the project:
 
 ```bash
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A
 ```
+
+**Note:** XC8 Wrapper uses a colored logging system where:
+- `[INFO]` messages (in white) show general information and successful operations
+- `[WARNING]` messages (in yellow) indicate compilation steps and progress
+- `[ERROR]` messages (in red) would show any compilation errors
+- Timestamps help track the compilation process
 
 If successful, you should see output like:
 
 ```
-=== XC8 TOOLCHAIN WRAPPER ===
-
+12:46:47 [INFO] === XC8 TOOLCHAIN WRAPPER ===
+12:46:55 [INFO] ✓ XC8 cc v3.00 found
+12:46:55 [INFO]
 === XC8 CC COMPILATION for PIC16F877A ===
-✓ XC8 cc v3.00 found
-✓ Source file found: src/main.c
-✓ Created build directory: build
-
+12:46:55 [INFO] ✓ Source file found: src\main.c
+12:46:55 [WARNING]
 Compilation in progress...
-Configuration:
-  - Tool: XC8 CC (xc8-cc.exe)
-  - Version: v3.00
-  - Target MCU: PIC16F877A
-  - Source: src/main.c
-  - Output: build/main.hex
-
+12:46:55 [INFO] Configuration:
+12:46:55 [INFO]   - Tool: XC8 CC (xc8-cc)
+12:46:55 [INFO]   - Version: v3.00
+12:46:55 [INFO]   - Target MCU: PIC16F877A
+12:46:55 [INFO]   - Source: src\main.c
+12:46:55 [INFO]   - Output: build\main.hex
+12:46:55 [WARNING]
 Step 1: Compiling main.c...
-Command: "C:/Program Files/Microchip/xc8/v3.00/bin/xc8-cc.exe" "-mcpu=PIC16F877A" ...
-✓ Compiling main.c successful
-
+12:46:55 [WARNING] Compiling main.c...
+12:46:55 [INFO] Command: "C:\Program Files\Microchip\xc8\v3.00\bin\xc8-cc.exe" -mcpu=PIC16F877A ...
+[XC8 compiler output...]
+12:46:55 [INFO] ✓ Compiling main.c successful
+12:46:55 [WARNING]
 Step 2: Linking...
-✓ Linking successful
-
-✓ HEX file generated: main.hex (1234 bytes)
-
+12:46:55 [WARNING] Linking...
+12:46:55 [INFO] Command: "C:\Program Files\Microchip\xc8\v3.00\bin\xc8-cc.exe" -mcpu=PIC16F877A ...
+[XC8 linker output...]
+12:46:55 [INFO] ✓ Linking successful
+12:46:55 [INFO]
+✓ HEX file generated: main.hex (309 bytes)
+12:46:55 [INFO]
+Generated files:
+12:46:55 [INFO]   main.cmf - 9414 bytes
+12:46:55 [INFO]   main.hex - 309 bytes
+12:46:55 [INFO]   main.map - 10189 bytes
+12:46:55 [INFO]   main.elf - 4350 bytes
+12:46:55 [INFO]   [... and other build files]
+12:46:55 [INFO]
 🎉 SUCCESS! PIC PIC16F877A project compiled with XC8 CC v3.00!
-File ready for programming: build/main.hex
-Next step: Upload with upload script
+12:46:55 [INFO] File ready for programming: build\main.hex
+12:46:55 [INFO] Next step: Upload with upload script
 ```
 
 ### Step 4: Check Generated Files
@@ -122,12 +139,19 @@ my-pic-project/
 ├── src/
 │   └── main.c
 ├── build/
-│   ├── main.hex     ← Programming file
-│   ├── main.elf     ← Executable file
-│   ├── main.p1      ← Object file
-│   ├── main.map     ← Memory map
-│   └── memoryfile.xml ← Memory usage
+│   ├── main.hex          ← Programming file (Intel HEX format)
+│   ├── main.elf          ← Executable and Linkable Format file
+│   ├── main.p1           ← Compiled object file
+│   ├── main.map          ← Memory map and symbol information
+│   ├── main.cmf          ← Chip metadata file
+│   ├── main.sym          ← Symbol table
+│   ├── memoryfile.xml    ← Memory usage summary
+│   ├── main.hxl          ← HEX file log
+│   ├── main.s            ← Generated assembly code
+│   └── startup.s         ← Startup code
 ```
+
+The most important file is `main.hex` - this is what you'll upload to your PIC microcontroller.
 
 ## Common Usage Patterns
 
@@ -135,10 +159,10 @@ my-pic-project/
 
 ```bash
 # Minimal command
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A
 
 # With custom directories
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A \
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A \
     --source-dir my_src \
     --build-dir my_build \
     --main-c-file my_main.c
@@ -148,20 +172,20 @@ xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A \
 
 ```bash
 # No optimization (fastest compile)
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A -O0
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -O0
 
 # Size optimization (smallest code)
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A -Os
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -Os
 
 # Speed optimization
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A -O2
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -O2
 ```
 
 ### Adding Preprocessor Definitions
 
 ```bash
 # Define constants
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A \
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A \
     -D DEBUG=1 \
     -D LED_PIN=0 \
     -D _XTAL_FREQ=20000000
@@ -171,7 +195,7 @@ xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A \
 
 ```bash
 # Add include directories
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A \
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A \
     -I ./include \
     -I ./lib/headers
 ```
@@ -180,7 +204,7 @@ xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A \
 
 ```bash
 # See detailed compilation process
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A --verbose
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A --verbose
 ```
 
 ## Popular PIC Microcontrollers
@@ -190,28 +214,28 @@ Here are some commonly used PIC microcontrollers and their XC8 Wrapper commands:
 ### PIC16F Series
 ```bash
 # PIC16F877A (40-pin, popular for learning)
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A
 
 # PIC16F84A (18-pin, simple projects)
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F84A
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F84A
 
 # PIC16F628A (18-pin with more features)
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F628A
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F628A
 ```
 
 ### PIC18F Series
 ```bash
 # PIC18F4550 (USB-capable)
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC18F4550
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC18F4550
 
 # PIC18F4520 (Enhanced mid-range)
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC18F4520
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC18F4520
 ```
 
 ### PIC12F Series
 ```bash
 # PIC12F675 (8-pin, tiny projects)
-xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC12F675
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC12F675
 ```
 
 ## Project Templates
