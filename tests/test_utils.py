@@ -4,15 +4,11 @@ Tests for utility functions and edge cases
 Test edge cases, error conditions, and utility functions.
 """
 
-import os
-import sys
-import tempfile
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from xc8_wrapper.core import SUPPORTED_XC8_TOOLS, Colors, get_xc8_tool_path, print_colored, validate_xc8_tool
+from xc8_wrapper.core import SUPPORTED_XC8_TOOLS, get_xc8_tool_path, validate_xc8_tool
 
 
 @pytest.mark.unit
@@ -93,50 +89,6 @@ class TestPlatformSpecific:
             )
             assert path.endswith("xc8-cc")  # No .exe on Linux
             assert version_info == "v3.00"
-
-
-class TestColors:
-    """Test color constants and functionality"""
-
-    def test_colors_exist(self):
-        """Test that color constants exist"""
-        assert hasattr(Colors, "RED")
-        assert hasattr(Colors, "GREEN")
-        assert hasattr(Colors, "YELLOW")
-        assert hasattr(Colors, "BLUE")
-        assert hasattr(Colors, "CYAN")
-        assert hasattr(Colors, "WHITE")
-        assert hasattr(Colors, "GRAY")
-
-    def test_colors_are_strings(self):
-        """Test that color constants are strings"""
-        assert isinstance(Colors.RED, str)
-        assert isinstance(Colors.GREEN, str)
-        assert isinstance(Colors.YELLOW, str)
-        assert isinstance(Colors.BLUE, str)
-        assert isinstance(Colors.CYAN, str)
-        assert isinstance(Colors.WHITE, str)
-        assert isinstance(Colors.GRAY, str)
-
-    @patch("builtins.print")
-    def test_print_colored_with_empty_string(self, mock_print):
-        """Test print_colored with empty string"""
-        print_colored("", Colors.RED)
-        mock_print.assert_called_once()
-
-    @patch("builtins.print")
-    def test_print_colored_with_multiline_string(self, mock_print):
-        """Test print_colored with multiline string"""
-        multiline = "Line 1\nLine 2\nLine 3"
-        print_colored(multiline, Colors.GREEN)
-        mock_print.assert_called_once()
-
-    @patch("builtins.print")
-    def test_print_colored_with_special_characters(self, mock_print):
-        """Test print_colored with special characters"""
-        special_chars = "Special: äöü ñ 中文 🎉"
-        print_colored(special_chars, Colors.BLUE)
-        mock_print.assert_called_once()
 
 
 class TestConstants:

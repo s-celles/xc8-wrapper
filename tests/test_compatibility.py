@@ -233,7 +233,7 @@ class TestEncodingCompatibility:
 
     def test_unicode_output_handling(self):
         """Test handling of unicode in output"""
-        from xc8_wrapper.core import Colors, print_colored
+        from xc8_wrapper.logger import log
 
         unicode_messages = [
             "Compilation réussie",  # French
@@ -245,7 +245,7 @@ class TestEncodingCompatibility:
         # Test that unicode messages don't crash
         for message in unicode_messages:
             try:
-                print_colored(message, Colors.GREEN)
+                log.info(message)
             except UnicodeError:
                 pytest.fail(f"Unicode error with message: {message}")
 

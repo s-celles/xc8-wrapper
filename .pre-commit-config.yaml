@@ -45,6 +45,17 @@ repos:
         args: [-r, xc8_wrapper/]
         exclude: tests/
 
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: python -m pytest
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+        args: [-v, --tb=short]
+
   # Temporarily disabled safety check due to configuration issues
   # - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
   #   rev: v1.4.2
