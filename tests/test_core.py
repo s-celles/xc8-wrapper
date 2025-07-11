@@ -14,19 +14,10 @@ import pytest
 
 from xc8_wrapper.core import (
     SUPPORTED_XC8_TOOLS,
-    Colors,
-    _find_existing_xc8_path,
-    _get_platform_executable_name,
-    _get_platform_xc8_paths,
-    _print_installation_paths,
     _validate_path_security,
-    get_all_xc8_versions_to_try,
     get_xc8_tool_path,
-    handle_ar_tool,
     handle_cc_tool,
-    print_colored,
     run_command,
-    scan_for_xc8_versions,
     validate_xc8_tool,
 )
 

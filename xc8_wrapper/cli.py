@@ -11,7 +11,8 @@ from typing import Any, List, Optional
 
 from colorama import init
 
-from .core import SUPPORTED_XC8_TOOLS, Colors, handle_ar_tool, handle_cc_tool, print_colored
+from .core import SUPPORTED_XC8_TOOLS, handle_cc_tool
+from .logger import log
 
 # Initialize colorama for cross-platform support
 init(autoreset=True)
@@ -196,7 +197,7 @@ def main(argv: Optional[List[str]] = None) -> None:
     Args:
         argv: Command line arguments (defaults to sys.argv)
     """
-    print_colored("=== XC8 TOOLCHAIN WRAPPER ===", Colors.CYAN)
+    log.info("=== XC8 TOOLCHAIN WRAPPER ===")
 
     parser = create_argument_parser()
     args = parser.parse_args(argv)
@@ -205,10 +206,11 @@ def main(argv: Optional[List[str]] = None) -> None:
     if args.tool == "cc":
         handle_cc_tool(args)
     elif args.tool == "ar":
-        handle_ar_tool(args)
+        log.error("AR tool is not yet implemented")
+        sys.exit(1)
     else:
-        print_colored(f"✗ Tool '{args.tool}' is not yet implemented", Colors.RED)
-        print_colored(f"Currently supported tools: {', '.join(SUPPORTED_XC8_TOOLS.keys())}", Colors.YELLOW)
+        log.error(f"Tool '{args.tool}' is not yet implemented")
+        log.warning(f"Currently supported tools: {', '.join(SUPPORTED_XC8_TOOLS.keys())}")
         sys.exit(1)
 
 

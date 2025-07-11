@@ -558,10 +558,14 @@ class TestXC8Compilation:
                     "PIC16F876A",
                     "--xc8-version",
                     "3.00",
+                    "--source-dir",
+                    str(temp_path),
+                    "--build-dir",
+                    str(temp_path / "build"),
                     "--main-c-file",
-                    str(main_c),
+                    "main.c",
                     "--output-hex",
-                    str(temp_path / "main.hex"),
+                    "main.hex",
                 ]
 
                 with patch.object(sys, "argv", test_args):
@@ -577,7 +581,8 @@ class TestXC8Compilation:
                         compilation_success = False
 
                 # Check if output files were created
-                hex_file = temp_path / "main.hex"
+                build_dir = temp_path / "build"
+                hex_file = build_dir / "main.hex"
 
                 if compilation_success and hex_file.exists():
                     print(f"✓ Compilation successful: {hex_file}")
@@ -592,6 +597,13 @@ class TestXC8Compilation:
                     print("Files in temp directory:")
                     for file in temp_path.iterdir():
                         print(f"  {file.name}: {file.stat().st_size} bytes")
+
+                    # List files in build directory if it exists
+                    build_dir = temp_path / "build"
+                    if build_dir.exists():
+                        print("Files in build directory:")
+                        for file in build_dir.iterdir():
+                            print(f"  {file.name}: {file.stat().st_size} bytes")
 
                     if not compilation_success:
                         pytest.fail("Compilation failed")

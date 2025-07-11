@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from xc8_wrapper.cli import Colors, create_argument_parser, main, print_colored
+from xc8_wrapper.cli import create_argument_parser, main
 
 
 @pytest.mark.unit
@@ -105,24 +105,6 @@ class TestMainFunction:
         """Test main function with unsupported tool"""
         with pytest.raises(SystemExit):
             main(["unsupported_tool", "--some-arg"])
-
-
-class TestPrintColored:
-    """Test colored output functionality in CLI"""
-
-    @patch("builtins.print")
-    def test_print_colored_cli(self, mock_print):
-        """Test colored printing in CLI context"""
-        print_colored("Test message", Colors.CYAN)
-        mock_print.assert_called_once()
-
-    @patch("builtins.print")
-    def test_print_colored_multiple_calls(self, mock_print):
-        """Test multiple colored print calls"""
-        messages = ["Message 1", "Message 2", "Message 3"]
-        for msg in messages:
-            print_colored(msg, Colors.CYAN)
-        assert mock_print.call_count == len(messages)
 
 
 class TestArgumentValidation:

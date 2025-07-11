@@ -10,13 +10,12 @@ __email__ = "s.celles@gmail.com"
 
 from .core import (
     SUPPORTED_XC8_TOOLS,
-    Colors,
     get_xc8_tool_path,
     handle_cc_tool,
-    print_colored,
     run_command,
     validate_xc8_tool,
 )
+from .logger import log
 
 __all__ = [
     "get_xc8_tool_path",
@@ -24,6 +23,5 @@ __all__ = [
     "run_command",
     "handle_cc_tool",
     "SUPPORTED_XC8_TOOLS",
-    "Colors",
-    "print_colored",
+    "log",
 ]
