@@ -3,16 +3,17 @@ Logging configuration with colorama and logbook
 """
 
 import sys
+from typing import Dict
 
 from colorama import Fore, Style, init
-from logbook import Logger, StreamHandler
+from logbook import Logger, LogRecord, StreamHandler
 
 init()  # Initialize colorama
 
 
 class ColoredFormatter:
-    def __init__(self):
-        self.colors = {
+    def __init__(self) -> None:
+        self.colors: Dict[str, str] = {
             "DEBUG": Fore.CYAN,
             "INFO": Fore.GREEN,
             "WARNING": Fore.YELLOW,
@@ -20,7 +21,7 @@ class ColoredFormatter:
             "CRITICAL": Fore.MAGENTA,
         }
 
-    def format(self, record):
+    def format(self, record: LogRecord) -> str:
         color = self.colors.get(record.level_name, "")
         return f"{record.time:%H:%M:%S} {color}[{record.level_name}]{Style.RESET_ALL} {record.message}"
 
