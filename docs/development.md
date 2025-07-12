@@ -2,6 +2,32 @@
 
 Guide for contributing to and developing XC8 Wrapper.
 
+## Quick Reference
+
+```bash
+# Install in development mode
+pip install -e .
+
+# Install with development dependencies
+pip install -e .[dev]
+
+# Run tests
+pytest
+
+# Run tests with coverage
+pytest --cov=xc8_wrapper
+
+# Format and lint code
+ruff check --fix .
+ruff format .
+
+# Type checking
+mypy .
+
+# Build package
+python -m build
+```
+
 ## Getting Started with Development
 
 ### Prerequisites
@@ -416,6 +442,21 @@ All changes require code review:
 - Use GitHub Issues for bug reports and feature requests
 - Use GitHub Discussions for questions and ideas
 - Be respectful and constructive in all interactions
+
+## Usage Examples
+
+After installation, you can use the wrapper in multiple ways:
+
+```bash
+# Command-line tool
+xc8-wrapper --cpu PIC16F876A --xc8-version 3.00
+
+# Python module
+python -m xc8_wrapper.cli --cpu PIC16F876A --xc8-version 3.00
+
+# Python API
+from xc8_wrapper import get_xc8_tool_path, handle_cc_tool
+```
 
 ## Getting Help
 
