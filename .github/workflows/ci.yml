@@ -65,8 +65,6 @@ jobs:
         python -m pip install --upgrade pip
         # Force reinstall of setuptools to avoid macOS issues
         python -m pip install --upgrade setuptools wheel
-        # Install specific ruff version for consistency
-        pip install ruff==0.12.3
         # Install package with verbose output to debug any issues
         pip install -e .[dev] -v
       env:
