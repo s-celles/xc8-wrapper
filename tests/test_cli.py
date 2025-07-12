@@ -115,7 +115,7 @@ class TestArgumentValidation:
 
         # Test missing required arguments - should raise since tool is required
         with pytest.raises(SystemExit):
-            args = parser.parse_args([])
+            parser.parse_args([])
 
     def test_parser_cpu_argument(self):
         """Test CPU argument parsing"""

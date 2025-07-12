@@ -256,9 +256,6 @@ def _validate_path_security(path: str) -> bool:
         bool: True if path is safe, False otherwise
     """
     try:
-        # Convert to absolute path to resolve any relative references
-        abs_path = Path(path).resolve()
-
         # Check for path traversal attempts
         if ".." in path:
             return False

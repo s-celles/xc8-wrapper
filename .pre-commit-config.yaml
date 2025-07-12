@@ -44,12 +44,18 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: python -m pytest
-        language: system
+        entry: pytest
+        language: python
         types: [python]
         pass_filenames: false
         always_run: true
         args: [-v, --tb=short]
+        additional_dependencies: [
+          pytest>=7.0,
+          pytest-cov>=4.0,
+          colorama>=0.4.4,
+          logbook>=1.5.3
+        ]
 
   # Temporarily disabled safety check due to configuration issues
   # - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
