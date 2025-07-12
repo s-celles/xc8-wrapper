@@ -45,6 +45,12 @@ repos:
         args: [-r, xc8_wrapper/]
         exclude: tests/
 
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.8.3
+    hooks:
+      - id: commitizen-branch
+        stages: [pre-push]
+
   - repo: local
     hooks:
       - id: pytest
