@@ -13,10 +13,10 @@ from pathlib import Path
 
 def run_command(cmd, description):
     """Run a command and report results"""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     # Set environment variables to fix encoding issues on Windows
     env = os.environ.copy()
@@ -79,10 +79,13 @@ def main():
         ),
         (["python", "demo.py"], "Demo Script"),
         (
-            ["python", "-m", "flake8", "xc8_wrapper", "--count", "--statistics"],
+            ["python", "-m", "ruff", "check", "xc8_wrapper"],
             "Linting",
         ),
-        (["python", "-m", "black", "--check", "xc8_wrapper"], "Code Formatting Check"),
+        (
+            ["python", "-m", "ruff", "format", "--check", "xc8_wrapper"],
+            "Code Formatting Check",
+        ),
         (
             ["python", "-m", "mypy", "xc8_wrapper", "--ignore-missing-imports"],
             "Type Checking",
@@ -100,9 +103,9 @@ def main():
             results.append((description, False))
 
     # Summary
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("SUMMARY")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     passed = sum(1 for _, success in results if success)
     total = len(results)

@@ -33,9 +33,7 @@ def run_command(cmd, description, check=True):
     print(f"   Command: {' '.join(cmd)}")
 
     try:
-        result = subprocess.run(
-            cmd, check=check, capture_output=True, text=True
-        )  # nosec B603
+        result = subprocess.run(cmd, check=check, capture_output=True, text=True)  # nosec B603
         if result.returncode == 0:
             print_colored(f"✅ {description} - Success", Colors.GREEN)
             return True
@@ -68,9 +66,7 @@ def check_python_version():
 def check_git():
     """Check if git is available"""
     try:
-        result = subprocess.run(
-            ["git", "--version"], capture_output=True, text=True
-        )  # nosec B603 B607
+        result = subprocess.run(["git", "--version"], capture_output=True, text=True)  # nosec B603 B607
         if result.returncode == 0:
             print_colored("✅ Git is available", Colors.GREEN)
             return True
@@ -167,7 +163,7 @@ def run_initial_tests():
             "Running core tests",
         ),
         (
-            [str(python_exe), "-m", "flake8", "xc8_wrapper", "--count"],
+            [str(python_exe), "-m", "ruff", "check", "xc8_wrapper"],
             "Running linting",
         ),
     ]
@@ -190,9 +186,15 @@ def create_development_config():
     "python.testing.pytestEnabled": true,
     "python.testing.pytestArgs": ["tests"],
     "python.linting.enabled": true,
-    "python.linting.flake8Enabled": true,
-    "python.formatting.provider": "black",
-    "python.sortImports.provider": "isort",
+    "ruff.enable": true,
+    "ruff.lint.enable": true,
+    "ruff.format.enable": true,
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    },
     "files.exclude": {
         "**/__pycache__": true,
         "**/*.pyc": true,

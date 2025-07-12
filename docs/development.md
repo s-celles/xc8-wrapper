@@ -45,8 +45,9 @@ Guide for contributing to and developing XC8 Wrapper.
 # Run the test suite
 pytest
 
-# Check code formatting
-black --check .
+# Check code formatting and linting
+ruff check .
+ruff format --check .
 
 # Check type annotations
 mypy .
@@ -105,20 +106,15 @@ pytest -v
 # Run tests with coverage
 pytest --cov=xc8_wrapper --cov-report=html
 
-# Format code
-black .
-
-# Sort imports
-isort .
+# Format and lint code
+ruff check --fix .
+ruff format .
 
 # Check types
 mypy .
 
 # Check security
 bandit -r xc8_wrapper/
-
-# Check linting
-flake8 xc8_wrapper tests
 ```
 
 ### 4. Commit Your Changes
@@ -219,9 +215,7 @@ def test_get_xc8_tool_path_not_found():
 
 We use several tools to maintain code quality:
 
-- **Black**: Code formatting
-- **isort**: Import sorting
-- **flake8**: Linting
+- **Ruff**: Code formatting, import sorting, and linting
 - **mypy**: Type checking
 - **bandit**: Security scanning
 
@@ -340,10 +334,8 @@ jobs:
 All pull requests must pass:
 - ✅ All tests on all platforms and Python versions
 - ✅ Code coverage ≥ 78%
-- ✅ Code formatting (black)
-- ✅ Import sorting (isort)
+- ✅ Code formatting and linting (ruff)
 - ✅ Type checking (mypy)
-- ✅ Linting (flake8)
 - ✅ Security scanning (bandit)
 
 ## Documentation

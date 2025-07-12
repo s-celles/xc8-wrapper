@@ -4,7 +4,6 @@ Integration tests for XC8 Wrapper
 Test the integration between different components of the XC8 wrapper.
 """
 
-import os
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -12,7 +11,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from xc8_wrapper.cli import main
-from xc8_wrapper.core import get_xc8_tool_path, handle_cc_tool, validate_xc8_tool
 
 
 @pytest.mark.integration
@@ -21,16 +19,14 @@ class TestIntegration:
 
     def test_cli_to_core_integration(self):
         """Test integration between CLI and core modules"""
-        with patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate, patch(
-            "xc8_wrapper.core.get_xc8_tool_path"
-        ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run, patch(
-            "os.path.exists"
-        ) as mock_exists, patch(
-            "os.path.getsize"
-        ) as mock_getsize, patch(
-            "os.makedirs"
-        ) as mock_makedirs:
-
+        with (
+            patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate,
+            patch("xc8_wrapper.core.get_xc8_tool_path") as mock_get_path,
+            patch("xc8_wrapper.core.run_command") as mock_run,
+            patch("os.path.exists") as mock_exists,
+            patch("os.path.getsize") as mock_getsize,
+            patch("os.makedirs"),
+        ):
             # Setup mocks
             mock_get_path.return_value = (r"C:\xc8\bin\xc8-cc.exe", "v3.00")
             mock_validate.return_value = True
@@ -69,10 +65,11 @@ int main() {
 
             build_dir = Path(temp_dir) / "build"
 
-            with patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate, patch(
-                "xc8_wrapper.core.get_xc8_tool_path"
-            ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run:
-
+            with (
+                patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate,
+                patch("xc8_wrapper.core.get_xc8_tool_path") as mock_get_path,
+                patch("xc8_wrapper.core.run_command") as mock_run,
+            ):
                 # Setup mocks
                 mock_get_path.return_value = (r"C:\xc8\bin\xc8-cc.exe", "v3.00")
                 mock_validate.return_value = True
@@ -112,16 +109,14 @@ int main() {
 
     def test_configuration_integration(self):
         """Test configuration handling across components"""
-        with patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate, patch(
-            "xc8_wrapper.core.get_xc8_tool_path"
-        ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run, patch(
-            "pathlib.Path.exists"
-        ) as mock_exists, patch(
-            "pathlib.Path.mkdir"
-        ) as mock_mkdir, patch(
-            "pathlib.Path.stat"
-        ) as mock_stat:
-
+        with (
+            patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate,
+            patch("xc8_wrapper.core.get_xc8_tool_path") as mock_get_path,
+            patch("xc8_wrapper.core.run_command") as mock_run,
+            patch("pathlib.Path.exists") as mock_exists,
+            patch("pathlib.Path.mkdir") as mock_mkdir,
+            patch("pathlib.Path.stat") as mock_stat,
+        ):
             # Setup mocks
             mock_get_path.return_value = (r"C:\xc8\bin\xc8-cc.exe", "v3.00")
             mock_validate.return_value = True

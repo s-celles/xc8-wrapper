@@ -7,7 +7,6 @@ It can be used standalone or as part of the test suite.
 """
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
@@ -79,7 +78,6 @@ Environment Variables:
     if args.platform:
         import test_compilation
 
-        original_get_platform = test_compilation.get_platform_name
         test_compilation.get_platform_name = lambda: args.platform
 
     try:

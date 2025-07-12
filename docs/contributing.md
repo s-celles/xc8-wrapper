@@ -79,12 +79,9 @@ python run_tests.py
 We maintain high code quality standards:
 
 ```bash
-# Format code
-black xc8_wrapper tests
-isort xc8_wrapper tests
-
-# Lint code
-flake8 xc8_wrapper tests
+# Format and lint code
+ruff check --fix .
+ruff format .
 
 # Type checking
 mypy xc8_wrapper --ignore-missing-imports
@@ -116,9 +113,9 @@ pre-commit autoupdate
 
 ### Code Style
 
-- **Python**: Follow PEP 8, enforced by `black` and `flake8`
-- **Line length**: 127 characters (configured in setup.cfg)
-- **Imports**: Sorted with `isort`, using the `black` profile
+- **Python**: Follow PEP 8, enforced by `ruff`
+- **Line length**: 88 characters (configured in pyproject.toml)
+- **Imports**: Sorted with `ruff` using import sorting rules
 - **Type hints**: Use type hints where appropriate
 - **Docstrings**: Use Google-style docstrings
 

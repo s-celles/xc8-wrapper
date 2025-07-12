@@ -84,7 +84,7 @@ def main():
 
     # Dependencies
     safe_print("\n--- Dependencies Test ---")
-    deps = ["colorama", "pytest", "black", "flake8", "mypy"]
+    deps = ["colorama", "pytest", "ruff", "mypy"]
     for dep in deps:
         try:
             __import__(dep)

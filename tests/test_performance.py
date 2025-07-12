@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from xc8_wrapper.cli import main
-from xc8_wrapper.core import get_xc8_tool_path, handle_cc_tool, validate_xc8_tool
+from xc8_wrapper.core import get_xc8_tool_path, validate_xc8_tool
 
 
 @pytest.mark.performance
@@ -55,14 +55,13 @@ class TestPerformance:
     @pytest.mark.slow
     def test_cli_parsing_performance(self):
         """Test that CLI parsing is fast"""
-        with patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate, patch(
-            "xc8_wrapper.core.get_xc8_tool_path"
-        ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run, patch(
-            "os.path.exists"
-        ) as mock_exists, patch(
-            "xc8_wrapper.core.os.path.getsize"
-        ) as mock_getsize:
-
+        with (
+            patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate,
+            patch("xc8_wrapper.core.get_xc8_tool_path") as mock_get_path,
+            patch("xc8_wrapper.core.run_command") as mock_run,
+            patch("os.path.exists") as mock_exists,
+            patch("xc8_wrapper.core.os.path.getsize") as mock_getsize,
+        ):
             # Setup mocks
             mock_get_path.return_value = (r"C:\xc8\bin\xc8-cc.exe", "v3.00")
             mock_validate.return_value = True
@@ -149,16 +148,14 @@ class TestScalability:
 
     def test_large_argument_lists(self):
         """Test handling of large argument lists"""
-        with patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate, patch(
-            "xc8_wrapper.core.get_xc8_tool_path"
-        ) as mock_get_path, patch("xc8_wrapper.core.run_command") as mock_run, patch(
-            "pathlib.Path.exists"
-        ) as mock_exists, patch(
-            "pathlib.Path.mkdir"
-        ) as mock_mkdir, patch(
-            "pathlib.Path.stat"
-        ) as mock_stat:
-
+        with (
+            patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate,
+            patch("xc8_wrapper.core.get_xc8_tool_path") as mock_get_path,
+            patch("xc8_wrapper.core.run_command") as mock_run,
+            patch("pathlib.Path.exists") as mock_exists,
+            patch("pathlib.Path.mkdir") as mock_mkdir,
+            patch("pathlib.Path.stat") as mock_stat,
+        ):
             # Setup mocks
             mock_get_path.return_value = (r"C:\xc8\bin\xc8-cc.exe", "v3.00")
             mock_validate.return_value = True

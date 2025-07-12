@@ -85,32 +85,10 @@ jobs:
         LC_ALL: en_US.UTF-8
         LANG: en_US.UTF-8
 
-    - name: Lint with flake8
+    - name: Check formatting and linting with ruff
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      env:
-        # Fix encoding issues on all platforms
-        PYTHONIOENCODING: utf-8
-        PYTHONLEGACYWINDOWSSTDIO: 1
-        LC_ALL: en_US.UTF-8
-        LANG: en_US.UTF-8
-
-    - name: Check formatting with black
-      run: |
-        black --check --diff .
-      env:
-        # Fix encoding issues on all platforms
-        PYTHONIOENCODING: utf-8
-        PYTHONLEGACYWINDOWSSTDIO: 1
-        LC_ALL: en_US.UTF-8
-        LANG: en_US.UTF-8
-
-    - name: Sort imports with isort
-      run: |
-        isort --check-only --diff .
+        ruff check .
+        ruff format --check .
       env:
         # Fix encoding issues on all platforms
         PYTHONIOENCODING: utf-8

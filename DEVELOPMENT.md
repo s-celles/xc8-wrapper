@@ -17,8 +17,9 @@ pytest
 # Run tests with coverage
 pytest --cov=xc8_wrapper
 
-# Format code
-black .
+# Format and lint code
+ruff check --fix .
+ruff format .
 
 # Type checking
 mypy .

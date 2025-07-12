@@ -4,7 +4,7 @@ Tests for utility functions and edge cases
 Test edge cases, error conditions, and utility functions.
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 

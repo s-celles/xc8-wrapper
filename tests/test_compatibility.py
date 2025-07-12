@@ -6,12 +6,12 @@ Test compatibility across different Python versions, platforms, and XC8 versions
 
 import platform
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from xc8_wrapper.cli import main
-from xc8_wrapper.core import SUPPORTED_XC8_TOOLS, get_xc8_tool_path, validate_xc8_tool
+from xc8_wrapper.core import get_xc8_tool_path, validate_xc8_tool
 
 
 @pytest.mark.compatibility
@@ -52,7 +52,6 @@ class TestPythonVersionCompatibility:
     def test_type_hints_compatibility(self):
         """Test that type hints don't break on older Python versions"""
         # Import the modules to ensure type hints don't cause issues
-        from xc8_wrapper.cli import main
         from xc8_wrapper.core import get_xc8_tool_path
 
         # Test that functions are callable
@@ -92,7 +91,6 @@ class TestPlatformCompatibility:
 
     def test_path_separator_handling(self):
         """Test that path separators are handled correctly"""
-        import os
 
         # Test with different path separators
         test_paths = [
@@ -192,7 +190,6 @@ class TestDependencyCompatibility:
         import os
         import pathlib
         import subprocess
-        import sys
         import tempfile
 
         # Test basic functionality
@@ -204,7 +201,7 @@ class TestDependencyCompatibility:
 
     def test_unittest_mock_compatibility(self):
         """Test unittest.mock compatibility"""
-        from unittest.mock import MagicMock, call, patch
+        from unittest.mock import patch
 
         # Test that mock functionality works
         with patch("pathlib.Path.exists") as mock_exists:
