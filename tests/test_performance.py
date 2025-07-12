@@ -142,9 +142,9 @@ class TestScalability:
             if result[0] == "success":
                 success_count += 1
 
-        assert (
-            success_count == 10
-        ), f"Expected 10 successful operations, got {success_count}"
+        assert success_count == 10, (
+            f"Expected 10 successful operations, got {success_count}"
+        )
 
     def test_large_argument_lists(self):
         """Test handling of large argument lists"""

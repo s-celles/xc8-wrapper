@@ -548,9 +548,9 @@ class TestXC8Compilation:
             pytest.skip("XC8 installation failed or skipped")
 
         # Verify XC8 is now available
-        assert (
-            is_xc8_installed()
-        ), "XC8 should be installed after install_xc8_if_needed()"
+        assert is_xc8_installed(), (
+            "XC8 should be installed after install_xc8_if_needed()"
+        )
 
     @pytest.mark.skipif(
         not is_xc8_installed() and os.environ.get("INSTALL_XC8") != "true",
@@ -666,9 +666,9 @@ class TestXC8Compilation:
             )
 
             assert result.returncode == 0, "XC8 version check should succeed"
-            assert (
-                "XC8" in result.stdout or "XC8" in result.stderr
-            ), "Output should contain 'XC8'"
+            assert "XC8" in result.stdout or "XC8" in result.stderr, (
+                "Output should contain 'XC8'"
+            )
 
             print(f"XC8 version output: {result.stdout.strip()}")
 
