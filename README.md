@@ -128,7 +128,7 @@ The package includes a simple LED blink example (`examples/simple_blink/main.c`)
 
 ## 🤝 Contributing
 
-Contributions welcome! See the [Development Guide](https://s-celles.github.io/xc8-wrapper/) for setup instructions and contribution guidelines.
+Contributions welcome! See the [Contributing Guide](docs/contributing.md) for setup instructions and contribution guidelines.
 
 ---
 

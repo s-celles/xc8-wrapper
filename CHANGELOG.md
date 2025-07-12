@@ -116,7 +116,7 @@ This is the initial release, no migration needed.
 - Windows-specific paths in default configuration
 
 ### Contributing
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please see our [Contributing Guide](https://s-celles.github.io/xc8-wrapper/contributing/) for guidelines.
 
 ### Support
 - GitHub Issues: Report bugs and request features

@@ -56,7 +56,8 @@ xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A -O2 --verbose
 | [📖 CLI Reference](cli-reference.md) | Complete command-line documentation |
 | [💡 Examples](examples.md) | Real-world usage examples and patterns |
 | [❓ FAQ](faq.md) | Frequently asked questions and solutions |
-| [🛠️ Development](development.md) | Contributing and development guide |
+| [🛠️ Development](development.md) | Development setup and tools guide |
+| [🤝 Contributing](contributing.md) | Contributing guidelines and workflow |
 
 ## Features Overview
 
@@ -111,7 +112,7 @@ This project is licensed under the MIT License. See the [LICENSE](https://github
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Development Guide](development.md) for information on how to contribute to this project.
+We welcome contributions! Please see our [Contributing Guide](contributing.md) for detailed information on how to contribute to this project.
 
 ## 💬 Support
 
