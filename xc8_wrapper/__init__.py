@@ -11,6 +11,8 @@ __email__ = "s.celles@gmail.com"
 from .core import (
     SUPPORTED_XC8_TOOLS,
     get_xc8_tool_path,
+    find_available_xc8_versions,
+    get_latest_xc8_version,
     handle_cc_tool,
     run_command,
     validate_xc8_tool,
@@ -19,6 +21,8 @@ from .logger import log
 
 __all__ = [
     "get_xc8_tool_path",
+    "find_available_xc8_versions",
+    "get_latest_xc8_version",
     "validate_xc8_tool",
     "run_command",
     "handle_cc_tool",

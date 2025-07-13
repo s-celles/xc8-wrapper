@@ -66,67 +66,55 @@ def get_xc8_tool_path(
             raise ValueError(f"Invalid path provided: {custom_path}")
         return custom_path, "custom path"
     elif version:
-        # Validate version string to prevent injection
-        # (allow alphanumeric, dots, hyphens, underscores)
-        if not all(c.isalnum() or c in ".-_" for c in version):
-            raise ValueError(f"Invalid version format: {version}")
-
-        # Determine platform-specific installation path
-        if sys.platform.startswith("win"):
-            # Windows: Check both 64-bit and 32-bit Program Files locations
-            possible_paths = [
-                Path("C:/Program Files/Microchip/xc8") / f"v{version}" / "bin",
-                Path("C:/Program Files (x86)/Microchip/xc8") / f"v{version}" / "bin",
-            ]
-            xc8_path = None
-            for path in possible_paths:
-                if path.exists():
-                    xc8_path = path
-                    break
-            if not xc8_path:
-                # Default to the first path even if it doesn't exist
-                # (for error reporting)
-                xc8_path = possible_paths[0]
-        elif sys.platform.startswith("darwin"):
-            # macOS: Check /Applications first, then /opt as fallback
-            possible_paths = [
-                Path("/Applications/microchip/xc8") / f"v{version}" / "bin",
-                Path("/opt/microchip/xc8") / f"v{version}" / "bin",
-            ]
-            xc8_path = None
-            for path in possible_paths:
-                if path.exists():
-                    xc8_path = path
-                    break
-            if not xc8_path:
-                # Default to the first path even if it doesn't exist
-                # (for error reporting)
-                xc8_path = possible_paths[0]
-        else:
-            # Linux and other Unix-like systems: Check standard installation paths
-            possible_paths = [
-                Path("/opt/microchip/bin"),
-                Path("/usr/local/microchip/bin"),
-                Path("/opt/microchip/xc8")
-                / f"v{version}"
-                / "bin",  # Alternative versioned path
-                Path("/usr/local/microchip/xc8")
-                / f"v{version}"
-                / "bin",  # Alternative versioned path
-            ]
-            xc8_path = None
-            for path in possible_paths:
-                if path.exists():
-                    xc8_path = path
-                    break
-            if not xc8_path:
-                # Default to the first path even if it doesn't exist (for error reporting)
-                xc8_path = possible_paths[0]
-
-        tool_path = xc8_path / executable
-        return str(tool_path), f"v{version}"
+        # Use the provided version
+        pass  # Continue with existing logic below
     else:
-        raise ValueError("Either version or custom_path must be provided")
+        # Auto-detect the latest version if none provided
+        version = get_latest_xc8_version()
+        if not version:
+            raise ValueError("No XC8 installation found. Please install XC8 compiler or provide a custom path.")
+        log.info(f"Auto-detected XC8 version: {version}")
+    
+    # Validate version string to prevent injection
+    # (allow alphanumeric, dots, hyphens, underscores)
+    if not all(c.isalnum() or c in ".-_" for c in version):
+        raise ValueError(f"Invalid version format: {version}")
+
+    # Determine platform-specific installation path
+    if sys.platform.startswith("win"):
+        # Windows: Check both 64-bit and 32-bit Program Files locations
+        possible_paths = [
+            Path("C:/Program Files/Microchip/xc8") / f"v{version}" / "bin",
+            Path("C:/Program Files (x86)/Microchip/xc8") / f"v{version}" / "bin",
+        ]
+    elif sys.platform.startswith("darwin"):
+        # macOS: Check /Applications first, then /opt as fallback
+        possible_paths = [
+            Path("/Applications/microchip/xc8") / f"v{version}" / "bin",
+            Path("/opt/microchip/xc8") / f"v{version}" / "bin",
+        ]
+    else:
+        # Linux and other Unix-like systems: Check standard installation paths
+        possible_paths = [
+            Path("/opt/microchip/bin"),
+            Path("/usr/local/microchip/bin"),
+            Path("/opt/microchip/xc8") / f"v{version}" / "bin",
+            Path("/usr/local/microchip/xc8") / f"v{version}" / "bin",
+        ]
+    
+    # Find the first existing path
+    xc8_path = None
+    for path in possible_paths:
+        if path.exists():
+            xc8_path = path
+            break
+    
+    if not xc8_path:
+        # Default to the first path even if it doesn't exist (for error reporting)
+        xc8_path = possible_paths[0]
+
+    tool_path = xc8_path / executable
+    return str(tool_path), f"v{version}"
 
 
 def validate_xc8_tool(tool_path: str, tool_name: str, version_info: str) -> bool:
@@ -270,6 +258,59 @@ def _validate_path_security(path: str) -> bool:
     except (OSError, ValueError):
         # Invalid path
         return False
+
+
+def find_available_xc8_versions() -> List[str]:
+    """
+    Find all available XC8 versions installed on the system
+
+    Returns:
+        List[str]: List of available XC8 versions (e.g., ['3.00', '2.46', '2.36'])
+                  Sorted from newest to oldest
+    """
+    versions = []
+
+    if sys.platform.startswith("win"):
+        # Windows: Check both 64-bit and 32-bit Program Files locations
+        base_paths = [
+            Path("C:/Program Files/Microchip/xc8"),
+            Path("C:/Program Files (x86)/Microchip/xc8"),
+        ]
+    elif sys.platform.startswith("darwin"):
+        # macOS
+        base_paths = [
+            Path("/Applications/microchip/xc8"),
+            Path("/opt/microchip/xc8"),
+        ]
+    else:
+        # Linux and other Unix-like systems
+        base_paths = [
+            Path("/opt/microchip/xc8"),
+            Path("/usr/local/microchip/xc8"),
+        ]
+
+    for base_path in base_paths:
+        if base_path.exists():
+            for version_dir in base_path.glob("v*"):
+                if version_dir.is_dir():
+                    version = version_dir.name[1:]  # Remove 'v' prefix
+                    if version not in versions:
+                        versions.append(version)
+
+    # Sort versions (newest first)
+    versions.sort(reverse=True)
+    return versions
+
+
+def get_latest_xc8_version() -> Optional[str]:
+    """
+    Get the latest installed XC8 version
+
+    Returns:
+        Optional[str]: Latest XC8 version found, or None if no versions found
+    """
+    versions = find_available_xc8_versions()
+    return versions[0] if versions else None
 
 
 def handle_cc_tool(args: Any) -> None:
