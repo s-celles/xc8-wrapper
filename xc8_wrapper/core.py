@@ -72,9 +72,11 @@ def get_xc8_tool_path(
         # Auto-detect the latest version if none provided
         version = get_latest_xc8_version()
         if not version:
-            raise ValueError("No XC8 installation found. Please install XC8 compiler or provide a custom path.")
+            raise ValueError(
+                "No XC8 installation found. Please install XC8 compiler or provide a custom path."
+            )
         log.info(f"Auto-detected XC8 version: {version}")
-    
+
     # Validate version string to prevent injection
     # (allow alphanumeric, dots, hyphens, underscores)
     if not all(c.isalnum() or c in ".-_" for c in version):
@@ -101,14 +103,14 @@ def get_xc8_tool_path(
             Path("/opt/microchip/xc8") / f"v{version}" / "bin",
             Path("/usr/local/microchip/xc8") / f"v{version}" / "bin",
         ]
-    
+
     # Find the first existing path
     xc8_path = None
     for path in possible_paths:
         if path.exists():
             xc8_path = path
             break
-    
+
     if not xc8_path:
         # Default to the first path even if it doesn't exist (for error reporting)
         xc8_path = possible_paths[0]

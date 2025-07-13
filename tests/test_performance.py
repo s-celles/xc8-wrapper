@@ -213,18 +213,18 @@ class TestResourceUsage:
         error_scenarios = [
             ("nonexistent_tool", "3.00", None),  # Only this should raise
         ]
-        
+
         # Test auto-detection scenarios (should work)
         auto_detection_scenarios = [
             ("cc", "", None),
             ("cc", None, None),
         ]
-        
+
         # Test error scenario
         for tool, version, custom_path in error_scenarios:
             with pytest.raises(ValueError):
                 get_xc8_tool_path(tool, version=version, custom_path=custom_path)
-        
+
         # Test auto-detection scenarios
         for tool, version, custom_path in auto_detection_scenarios:
             result = get_xc8_tool_path(tool, version=version, custom_path=custom_path)
