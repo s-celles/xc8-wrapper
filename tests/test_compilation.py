@@ -717,13 +717,16 @@ class TestCoreUtilities:
             get_xc8_tool_path("invalid_tool", "3.00")
 
     def test_get_xc8_tool_path_no_version_or_path(self) -> None:
-        """Test error handling when neither version nor path provided"""
+        """Test auto-detection when neither version nor path provided"""
         from xc8_wrapper.core import get_xc8_tool_path
 
-        with pytest.raises(
-            ValueError, match="Either version or custom_path must be provided"
-        ):
-            get_xc8_tool_path("cc")
+        # Should trigger auto-detection
+        result = get_xc8_tool_path("cc")
+        assert result is not None
+        assert len(result) == 2
+        path, version = result
+        assert isinstance(path, str)
+        assert isinstance(version, str)
 
     def test_get_xc8_tool_path_invalid_version_format(self) -> None:
         """Test error handling for invalid version format"""

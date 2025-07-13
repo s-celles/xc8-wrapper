@@ -17,18 +17,24 @@ class TestEdgeCases:
     """Test edge cases and error conditions"""
 
     def test_get_xc8_tool_path_empty_version(self):
-        """Test error with empty version string"""
-        with pytest.raises(
-            ValueError, match="Either version or custom_path must be provided"
-        ):
-            get_xc8_tool_path("cc", version="")
+        """Test auto-detection with empty version string"""
+        # Empty version should trigger auto-detection
+        result = get_xc8_tool_path("cc", version="")
+        assert result is not None
+        assert len(result) == 2
+        path, version = result
+        assert isinstance(path, str)
+        assert isinstance(version, str)
 
     def test_get_xc8_tool_path_none_values(self):
-        """Test error with None values"""
-        with pytest.raises(
-            ValueError, match="Either version or custom_path must be provided"
-        ):
-            get_xc8_tool_path("cc", version=None, custom_path=None)
+        """Test auto-detection with None values"""
+        # None values should trigger auto-detection
+        result = get_xc8_tool_path("cc", version=None, custom_path=None)
+        assert result is not None
+        assert len(result) == 2
+        path, version = result
+        assert isinstance(path, str)
+        assert isinstance(version, str)
 
     def test_get_xc8_tool_path_both_provided(self):
         """Test behavior when both version and custom_path are provided"""

@@ -65,11 +65,14 @@ class TestXC8ToolPath:
             get_xc8_tool_path("unsupported", version="3.00")
 
     def test_get_xc8_tool_path_no_version_or_path(self):
-        """Test error when neither version nor path is provided"""
-        with pytest.raises(
-            ValueError, match="Either version or custom_path must be provided"
-        ):
-            get_xc8_tool_path("cc")
+        """Test auto-detection when neither version nor path is provided"""
+        # Should trigger auto-detection
+        result = get_xc8_tool_path("cc")
+        assert result is not None
+        assert len(result) == 2
+        path, version = result
+        assert isinstance(path, str)
+        assert isinstance(version, str)
 
 
 class TestValidateXC8Tool:

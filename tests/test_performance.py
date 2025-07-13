@@ -209,16 +209,26 @@ class TestResourceUsage:
 
     def test_error_recovery(self):
         """Test that errors don't leave resources in bad state"""
-        # Test multiple error conditions
+        # Test multiple error conditions (only unsupported tool should raise error)
         error_scenarios = [
-            ("nonexistent_tool", "3.00", None),
+            ("nonexistent_tool", "3.00", None),  # Only this should raise
+        ]
+        
+        # Test auto-detection scenarios (should work)
+        auto_detection_scenarios = [
             ("cc", "", None),
             ("cc", None, None),
         ]
-
+        
+        # Test error scenario
         for tool, version, custom_path in error_scenarios:
             with pytest.raises(ValueError):
                 get_xc8_tool_path(tool, version=version, custom_path=custom_path)
+        
+        # Test auto-detection scenarios
+        for tool, version, custom_path in auto_detection_scenarios:
+            result = get_xc8_tool_path(tool, version=version, custom_path=custom_path)
+            assert result is not None
 
         # After errors, normal operations should still work
         path, version = get_xc8_tool_path("cc", version="3.00")
