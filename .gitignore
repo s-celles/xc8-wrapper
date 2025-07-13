@@ -123,3 +123,6 @@ dmypy.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Vendor files
+vendor/
