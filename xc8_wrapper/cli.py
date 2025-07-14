@@ -108,7 +108,9 @@ def install_command(
 # CC (Compiler) command - matches vendor xc8-cc options
 @app.command("cc")
 def cc_command(
-    files: Annotated[Optional[List[str]], typer.Argument(help="Source files to compile")] = None,
+    files: Annotated[
+        Optional[List[str]], typer.Argument(help="Source files to compile")
+    ] = None,
     # Basic options matching vendor help
     c: Annotated[
         bool, typer.Option("-c", help="Compile/assemble to intermediate/object file")
@@ -135,7 +137,9 @@ def cc_command(
     include: Annotated[
         Optional[List[str]], typer.Option("-I", help="Specify include path")
     ] = None,
-    library: Annotated[Optional[List[str]], typer.Option("-l", help="Specify library")] = None,
+    library: Annotated[
+        Optional[List[str]], typer.Option("-l", help="Specify library")
+    ] = None,
     library_path: Annotated[
         Optional[List[str]], typer.Option("-L", help="Specify library search path")
     ] = None,
@@ -150,20 +154,24 @@ def cc_command(
         typer.Option("-Wl", help="Pass comma-separated options directly to the linker"),
     ] = None,
     xlinker: Annotated[
-        Optional[List[str]], typer.Option("-Xlinker", help="Pass option directly to the linker")
+        Optional[List[str]],
+        typer.Option("-Xlinker", help="Pass option directly to the linker"),
     ] = None,
     assembler_options: Annotated[
         Optional[List[str]],
         typer.Option("-Wa", help="Pass comma-separated options on to the assembler"),
     ] = None,
     xparser: Annotated[
-        Optional[List[str]], typer.Option("-Xparser", help="Pass option directly to the parser")
+        Optional[List[str]],
+        typer.Option("-Xparser", help="Pass option directly to the parser"),
     ] = None,
     xp1: Annotated[
-        Optional[List[str]], typer.Option("-Xp1", help="Pass option directly to the parser")
+        Optional[List[str]],
+        typer.Option("-Xp1", help="Pass option directly to the parser"),
     ] = None,
     xclang: Annotated[
-        Optional[List[str]], typer.Option("-Xclang", help="Pass option directly to the parser")
+        Optional[List[str]],
+        typer.Option("-Xclang", help="Pass option directly to the parser"),
     ] = None,
     xassembler: Annotated[
         Optional[List[str]],

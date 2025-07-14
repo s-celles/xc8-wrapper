@@ -212,7 +212,7 @@ class TestResourceUsage:
     def test_error_recovery(self):
         """Test that errors don't leave resources in bad state"""
         from typing import Optional, Tuple
-        
+
         # Test multiple error conditions (only unsupported tool should raise error)
         error_scenarios: list[Tuple[str, str, Optional[str]]] = [
             ("nonexistent_tool", "3.00", None),  # Only this should raise
@@ -227,19 +227,19 @@ class TestResourceUsage:
         # Test error scenario
         for tool_name, tool_version, custom_path in error_scenarios:
             with pytest.raises(ValueError):
-                get_xc8_tool_path(tool_name, version=tool_version, custom_path=custom_path)
+                get_xc8_tool_path(
+                    tool_name, version=tool_version, custom_path=custom_path
+                )
 
         # Test auto-detection scenarios
         for scenario in auto_detection_scenarios:
             tool = scenario[0]
             version = scenario[1]  # Can be None
-            path = scenario[2]     # Can be None
-            
+            path = scenario[2]  # Can be None
+
             with patch("xc8_wrapper.core.get_latest_xc8_version") as mock_get_latest:
                 mock_get_latest.return_value = "3.00"  # Mock a detected version
-                result = get_xc8_tool_path(
-                    tool, version=version, custom_path=path
-                )
+                result = get_xc8_tool_path(tool, version=version, custom_path=path)
                 assert result is not None
 
         # After errors, normal operations should still work
