@@ -13,11 +13,13 @@ jobs:
       matrix:
         # Windows first (primary development platform), then Linux, then macOS
         os: [windows-latest, ubuntu-latest, macos-latest]
-        python-version: ['3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
         exclude:
           # Reduce the matrix size by excluding some combinations
           - os: macos-latest
             python-version: '3.9'
+          - os: macos-latest
+            python-version: '3.13'
         include:
           # Mark macOS as experimental - allowed to fail
           - os: macos-latest
@@ -69,7 +71,7 @@ jobs:
     - name: Check and install XC8 if needed (Linux)
       if: runner.os == 'Linux'
       run: |
-        python install_xc8.py --check || python install_xc8.py --install --version 3.00
+        xc8-wrapper install --check || xc8-wrapper install --version 3.00
       env:
         INSTALL_XC8: "true"
       continue-on-error: true
@@ -93,7 +95,7 @@ jobs:
 
     - name: Run platform diagnostics
       run: |
-        python diagnose_platform.py
+        python -c "import platform; import sys; print(f'Platform: {platform.platform()}'); print(f'Python: {sys.version}'); print(f'Encoding: {sys.getdefaultencoding()}')"
       env:
         # Fix encoding issues on all platforms
         PYTHONIOENCODING: utf-8
@@ -183,7 +185,7 @@ jobs:
     - name: Install XC8 (Linux/Windows)
       if: runner.os != 'macOS'
       run: |
-        python install_xc8.py --install --version 3.00
+        xc8-wrapper install --version 3.00
       env:
         INSTALL_XC8: "true"
 
@@ -191,13 +193,13 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         echo "::warning::macOS XC8 installation may fail due to CI limitations"
-        python install_xc8.py --install --version 3.00 || echo "XC8 installation failed, will test error handling"
+        xc8-wrapper install --version 3.00 || echo "XC8 installation failed, will test error handling"
       env:
         INSTALL_XC8: "true"
 
     - name: Verify XC8 installation status
       run: |
-        python install_xc8.py --check
+        xc8-wrapper install --check
       continue-on-error: true
 
     - name: Run compilation tests
