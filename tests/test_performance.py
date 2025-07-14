@@ -227,8 +227,10 @@ class TestResourceUsage:
 
         # Test auto-detection scenarios
         for tool, version, custom_path in auto_detection_scenarios:
-            result = get_xc8_tool_path(tool, version=version, custom_path=custom_path)
-            assert result is not None
+            with patch("xc8_wrapper.core.get_latest_xc8_version") as mock_get_latest:
+                mock_get_latest.return_value = "3.00"  # Mock a detected version
+                result = get_xc8_tool_path(tool, version=version, custom_path=custom_path)
+                assert result is not None
 
         # After errors, normal operations should still work
         path, version = get_xc8_tool_path("cc", version="3.00")

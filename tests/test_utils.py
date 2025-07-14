@@ -19,22 +19,28 @@ class TestEdgeCases:
     def test_get_xc8_tool_path_empty_version(self):
         """Test auto-detection with empty version string"""
         # Empty version should trigger auto-detection
-        result = get_xc8_tool_path("cc", version="")
-        assert result is not None
-        assert len(result) == 2
-        path, version = result
-        assert isinstance(path, str)
-        assert isinstance(version, str)
+        with patch("xc8_wrapper.core.get_latest_xc8_version") as mock_get_latest:
+            mock_get_latest.return_value = "3.00"  # Mock a detected version
+            result = get_xc8_tool_path("cc", version="")
+            assert result is not None
+            assert len(result) == 2
+            path, version = result
+            assert isinstance(path, str)
+            assert isinstance(version, str)
+            mock_get_latest.assert_called_once()
 
     def test_get_xc8_tool_path_none_values(self):
         """Test auto-detection with None values"""
         # None values should trigger auto-detection
-        result = get_xc8_tool_path("cc", version=None, custom_path=None)
-        assert result is not None
-        assert len(result) == 2
-        path, version = result
-        assert isinstance(path, str)
-        assert isinstance(version, str)
+        with patch("xc8_wrapper.core.get_latest_xc8_version") as mock_get_latest:
+            mock_get_latest.return_value = "3.00"  # Mock a detected version
+            result = get_xc8_tool_path("cc", version=None, custom_path=None)
+            assert result is not None
+            assert len(result) == 2
+            path, version = result
+            assert isinstance(path, str)
+            assert isinstance(version, str)
+            mock_get_latest.assert_called_once()
 
     def test_get_xc8_tool_path_both_provided(self):
         """Test behavior when both version and custom_path are provided"""
