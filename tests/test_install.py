@@ -49,24 +49,21 @@ class TestDownloadUrls:
 
     def test_get_xc8_download_url_windows(self):
         """Test Windows download URL generation"""
-        with patch("xc8_wrapper.install.get_platform_name", return_value="windows"):
-            url = get_xc8_download_url("3.00")
-            assert "windows-x64-installer.exe" in url
-            assert "xc8-v3.00" in url
+        url = get_xc8_download_url("3.00", "windows")
+        assert "windows-x64-installer.exe" in url
+        assert "xc8-v3.00" in url
 
     def test_get_xc8_download_url_linux(self):
         """Test Linux download URL generation"""
-        with patch("xc8_wrapper.install.get_platform_name", return_value="linux"):
-            url = get_xc8_download_url("3.00")
-            assert "linux-x64-installer.run" in url
-            assert "xc8-v3.00" in url
+        url = get_xc8_download_url("3.00", "linux")
+        assert "linux-x64-installer.run" in url
+        assert "xc8-v3.00" in url
 
     def test_get_xc8_download_url_macos(self):
         """Test macOS download URL generation"""
-        with patch("xc8_wrapper.install.get_platform_name", return_value="darwin"):
-            url = get_xc8_download_url("3.00")
-            assert "macos-x64-installer.dmg" in url
-            assert "xc8-v3.00" in url
+        url = get_xc8_download_url("3.00", "darwin")
+        assert "macos-x64-installer.dmg" in url
+        assert "xc8-v3.00" in url
 
 
 class TestVersionList:

@@ -46,9 +46,8 @@ def get_platform_name() -> str:
         raise ValueError(f"Unsupported platform: {system}")
 
 
-def get_xc8_download_url(version: str) -> str:
-    """Get download URL for XC8 version and current platform"""
-    platform_name = get_platform_name()
+def get_xc8_download_url(version: str, platform_name: str) -> str:
+    """Get download URL for XC8 version and platform_name"""
     return XC8_DOWNLOAD_URLS[platform_name].format(version=version)
 
 
@@ -126,11 +125,33 @@ def download_file(url: str, destination: Path) -> bool:
 def install_xc8_linux(installer_path: Path) -> bool:
     """Install XC8 on Linux"""
     try:
+        # Debug: Check installer file
+        log.info(f"Installer path: {installer_path}")
+        log.info(f"Installer exists: {installer_path.exists()}")
+        if installer_path.exists():
+            size = installer_path.stat().st_size
+            log.info(f"Installer size: {size} bytes")
+        else:
+            log.info("Installer size: N/A bytes")
+
         # Make installer executable
         installer_path.chmod(0o755)
+        log.info("Made installer executable")
+
+        # Debug: Check if we have write permissions to /opt/microchip
+        import os
+
+        opt_microchip = Path("/opt/microchip")
+        log.info(f"/opt/microchip exists: {opt_microchip.exists()}")
+        if opt_microchip.exists():
+            writable = os.access(opt_microchip, os.W_OK)
+            log.info(f"/opt/microchip writable: {writable}")
+        else:
+            log.info("/opt/microchip writable: N/A")
 
         # Prepare command for unattended installation
         cmd = [
+            "sudo",
             str(installer_path),
             "--mode",
             "unattended",
@@ -142,6 +163,8 @@ def install_xc8_linux(installer_path: Path) -> bool:
             "FreeMode",
         ]
 
+        log.info(f"Running installation command: {' '.join(cmd)}")
+
         # Run installer
         result = subprocess.run(  # nosec B603
             cmd,
@@ -150,13 +173,28 @@ def install_xc8_linux(installer_path: Path) -> bool:
             timeout=600,  # 10 minutes timeout
         )
 
+        log.info(f"Installation return code: {result.returncode}")
+
+        # Always log stdout and stderr for debugging
+        if result.stdout:
+            log.info(f"Installation stdout:\n{result.stdout}")
+        if result.stderr:
+            log.info(f"Installation stderr:\n{result.stderr}")
+
+        # Debug: Check what was actually installed
+        if opt_microchip.exists():
+            log.info("Contents of /opt/microchip after installation:")
+            for item in opt_microchip.rglob("*"):
+                if item.is_file():
+                    log.info(f"  File: {item}")
+                elif item.is_dir():
+                    log.info(f"  Dir:  {item}")
+
         if result.returncode == 0:
             log.info("XC8 installation completed successfully")
             return True
         else:
             log.error(f"XC8 installation failed with return code {result.returncode}")
-            if result.stderr:
-                log.error(f"Installation error: {result.stderr}")
             return False
 
     except subprocess.TimeoutExpired:
@@ -164,6 +202,9 @@ def install_xc8_linux(installer_path: Path) -> bool:
         return False
     except Exception as e:
         log.error(f"Error during XC8 installation: {e}")
+        import traceback
+
+        log.error(f"Exception traceback: {traceback.format_exc()}")
         return False
 
 
@@ -319,7 +360,7 @@ def install_xc8_if_needed(version: Optional[str] = None, force: bool = False) ->
     for v in versions_to_try:
         log.info(f"Attempting to install XC8 version {v}...")
 
-        url = get_xc8_download_url(v)
+        url = get_xc8_download_url(v, platform_name)
 
         # Determine installer filename
         if platform_name == "linux":

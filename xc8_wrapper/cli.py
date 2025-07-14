@@ -65,7 +65,7 @@ def install_command(
         from .install import get_platform_name
 
         platform_name = get_platform_name()
-        download_url = get_xc8_download_url(version)
+        download_url = get_xc8_download_url(version, platform_name)
         log.info(f"Platform: {platform_name}")
         log.info(f"XC8 v{version} download URL:")
         log.info(download_url)
