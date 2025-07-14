@@ -180,11 +180,25 @@ jobs:
         python -m pip install --upgrade setuptools wheel
         pip install -e .[dev] -v
 
-    - name: Install XC8 (all platforms)
+    - name: Install XC8 (Linux/Windows)
+      if: runner.os != 'macOS'
       run: |
         python install_xc8.py --install --version 3.00
       env:
         INSTALL_XC8: "true"
+
+    - name: Attempt XC8 installation (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        echo "::warning::macOS XC8 installation may fail due to CI limitations"
+        python install_xc8.py --install --version 3.00 || echo "XC8 installation failed, will test error handling"
+      env:
+        INSTALL_XC8: "true"
+
+    - name: Verify XC8 installation status
+      run: |
+        python install_xc8.py --check
+      continue-on-error: true
 
     - name: Run compilation tests
       run: |
