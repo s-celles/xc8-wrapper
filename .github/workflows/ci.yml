@@ -167,7 +167,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs: [test, compilation-tests, security]
+    needs: [test, security]
     steps:
     - uses: actions/checkout@v4
 
