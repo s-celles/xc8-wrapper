@@ -14,63 +14,6 @@
 
 ---
 
-## 🚀 Quick Start
-
-```bash
-# Install
-pip install xc8-wrapper
-
-# Compile a PIC project (CC tool)
-xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00
-
-# Create library archive (AR tool)
-xc8-wrapper ar r mylib.a file1.p1 file2.p1 --xc8-version 3.00
-```
-
-## ✨ Features
-
-- **🎯 Hierarchical CLI** with tool-specific arguments (cc, ar)
-- **🔒 Security-first** design with input validation and safe execution
-- **🌍 Cross-platform** support for Windows, Linux, and macOS
-- **⚡ Smart XC8 detection** - automatically finds your compiler installation
-- **🧪 Well tested** with comprehensive test suite (88%+ coverage)
-
-## 🛠️ Supported Tools
-
-- **`cc`**: C compiler, assembler, and linker (xc8-cc)
-- **`ar`**: Archiver/librarian for creating static libraries (xc8-ar)
-
-## 📝 Basic Usage
-
-### Compiler (CC Tool)
-```bash
-# Basic compilation
-xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00
-
-# With optimization and defines
-xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 -O2 -DDEBUG=1
-
-# Custom paths and flags
-xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 \
-  --source-dir src --build-dir build \
-  --compile-flag "-Wall" --link-flag "-Wl,--gc-sections"
-```
-
-### Archiver (AR Tool)
-```bash
-# Create library
-xc8-wrapper ar r mylib.a file1.p1 file2.p1 --xc8-version 3.00
-
-# Add files with verbose output
-xc8-wrapper ar rv mylib.a *.p1 --xc8-version 3.00
-
-# List archive contents
-xc8-wrapper ar t mylib.a --xc8-version 3.00
-
-# Extract files from archive
-xc8-wrapper ar x mylib.a --xc8-version 3.00
-```
-
 ## 📚 Documentation
 
 **Complete documentation is available at:**
@@ -81,49 +24,10 @@ xc8-wrapper ar x mylib.a --xc8-version 3.00
 - [🚀 Getting Started Tutorial](https://s-celles.github.io/xc8-wrapper/getting-started/)
 - [📖 CLI Reference](https://s-celles.github.io/xc8-wrapper/cli-reference/)
 
-## 🧪 Testing XC8 Compilation
-
-This package includes comprehensive compilation tests to ensure XC8 works correctly:
-
-### Check XC8 Installation
-```bash
-# Check if XC8 is installed
-python install_xc8.py --check
-
-# Show download URL for your platform
-python install_xc8.py --url
-
-# Install XC8 if needed (Linux/macOS)
-python install_xc8.py --install --version 3.00
-```
-
-### Run Compilation Tests
-```bash
-# Run all tests (skips compilation tests if XC8 not installed)
-pytest
-
-# Run only compilation tests
-pytest tests/test_compilation.py -v
-
-# Enable XC8 auto-install in CI (Linux only)
-INSTALL_XC8=true pytest tests/test_compilation.py
-```
-
-### Example PIC Program
-The package includes a simple LED blink example (`examples/simple_blink/main.c`) that demonstrates:
-- Proper configuration bits for PIC16F876A
-- Port configuration and LED control
-- Delay functions and infinite loops
-
-## 📋 Requirements
-
-- **Python**: 3.9+
-- **XC8 Compiler**: 2.xx, 3.xx, ... (must be installed separately)
-- **OS**: Windows, macOS, or Linux
-
 ## ⚖️ License
 
 **Wrapper Code**: MIT License (see [LICENSE](LICENSE) file)
+
 **XC8 Compiler**: Proprietary Microchip license - [download from Microchip](https://www.microchip.com/en-us/tools-resources/develop/mplab-xc-compilers)
 
 ## 🤝 Contributing

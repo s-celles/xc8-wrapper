@@ -9,7 +9,7 @@ A modern, secure, and cross-platform wrapper for the Microchip XC8 compiler tool
     This project is currently in active development. APIs may change between versions.
 
 !!! info "AI-Generated Content Notice"
-A significant portion of this project's content (including code, documentation, and examples) has been generated using AI assistance. Please review all code and documentation carefully before use in production environments. We recommend thorough testing and validation of any AI-generated components.
+    A significant portion of this project's content (including code, documentation, and examples) has been generated using AI assistance. Please review all code and documentation carefully before use in production environments. We recommend thorough testing and validation of any AI-generated components.
 
 ## 🌟 What is XC8 Wrapper?
 
@@ -27,12 +27,20 @@ XC8 Wrapper is a Python-based command-line tool that provides a modern, user-fri
 ### 📦 Installation
 
 ```bash
-pip install xc8-wrapper
+pip install git+https://github.com/s-celles/xc8-wrapper.git  # until it's not registered on PyPI
+
+pip install xc8-wrapper  # when registered on PyPI
 ```
 
 ### 💻 Basic Usage
 
 ```bash
+# See available commands
+xc8-wrapper --help
+
+# Install XC8
+xc8-wrapper install
+
 # Compile a simple PIC project
 xc8-wrapper --tool cc --xc8-version 3.00 --cpu PIC16F877A
 
