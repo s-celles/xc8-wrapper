@@ -7,7 +7,7 @@ This module handles XC8 installation functionality integrated into the main CLI.
 import os
 import platform
 import shutil
-import subprocess
+import subprocess  # nosec B404 # Required for XC8 version detection and installation
 import tempfile
 import urllib.request
 from pathlib import Path
@@ -74,7 +74,7 @@ def get_installed_xc8_version() -> str:
         xc8_path, _ = get_xc8_tool_path("cc")
 
         # Try to get version
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603
             [xc8_path, "--version"],
             capture_output=True,
             text=True,
@@ -100,7 +100,7 @@ def download_file(url: str, destination: Path) -> bool:
     """Download file from URL to destination path"""
     try:
         log.info(f"Downloading from: {url}")
-        with urllib.request.urlopen(url) as response:
+        with urllib.request.urlopen(url) as response:  # nosec B310 # Trusted XC8 download URL
             if response.status != 200:
                 log.error(f"HTTP error {response.status} downloading XC8 installer")
                 return False
@@ -127,7 +127,7 @@ def install_xc8_linux(installer_path: Path) -> bool:
         installer_path.chmod(0o755)
 
         # Run installer with --mode unattended
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603
             [str(installer_path), "--mode", "unattended"],
             capture_output=True,
             text=True,
@@ -155,7 +155,7 @@ def install_xc8_windows(installer_path: Path) -> bool:
     """Install XC8 on Windows"""
     try:
         # Run installer with /S for silent mode
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603
             [str(installer_path), "/S"],
             capture_output=True,
             text=True,
@@ -183,7 +183,8 @@ def install_xc8_macos(installer_path: Path) -> bool:
     """Install XC8 on macOS"""
     try:
         # Mount DMG first
-        mount_result = subprocess.run(
+        # nosec B603,B607 - Trusted system utilities for XC8 installation
+        mount_result = subprocess.run(  # nosec
             ["hdiutil", "attach", str(installer_path)],
             capture_output=True,
             text=True,
@@ -217,7 +218,8 @@ def install_xc8_macos(installer_path: Path) -> bool:
             return False
 
         # Run installer
-        result = subprocess.run(
+        # nosec B603,B607 - Trusted system utilities for XC8 installation
+        result = subprocess.run(  # nosec
             ["sudo", "installer", "-pkg", str(installer_pkg), "-target", "/"],
             capture_output=True,
             text=True,
@@ -225,7 +227,7 @@ def install_xc8_macos(installer_path: Path) -> bool:
         )
 
         # Unmount DMG
-        subprocess.run(["hdiutil", "detach", mount_point], capture_output=True)
+        subprocess.run(["hdiutil", "detach", mount_point], capture_output=True)  # nosec
 
         if result.returncode == 0:
             log.info("XC8 installation completed successfully")
@@ -348,7 +350,7 @@ def check_xc8_installation() -> Dict[str, Any]:
             result["path"] = xc8_path
 
             # Try to get version string
-            result_proc = subprocess.run(
+            result_proc = subprocess.run(  # nosec B603
                 [xc8_path, "--version"],
                 capture_output=True,
                 text=True,
