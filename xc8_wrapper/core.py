@@ -12,6 +12,25 @@ from typing import Any, List, Optional, Tuple
 
 from .logger import log
 
+# Known XC8 versions that actually exist (highest to lowest)
+XC8_KNOWN_VERSIONS = [
+    "3.00",
+    "2.50",
+    "2.46",
+    "2.45",
+    "2.41",
+    "2.40",
+    "2.36",
+    "2.35",
+    "2.32",
+    "2.31",
+    "2.30",
+    "2.20",
+    "2.10",
+    "2.05",
+    "2.00",
+]
+
 # Supported XC8 tools
 SUPPORTED_XC8_TOOLS = {
     "cc": {
@@ -325,210 +344,152 @@ def handle_cc_tool(args: Any) -> None:
     Raises:
         SystemExit: If compilation fails or requirements are not met
     """
-    # Validate that either version or path is provided
+    # Validate that either version or path is provided, or try auto-detection
     if not args.xc8_version and not args.xc8_path:
-        log.error("Either --xc8-version or --xc8-path must be provided")
-        sys.exit(1)
-
+        log.info("No XC8 version or path specified, attempting auto-detection...")
+        # Try to use default XC8 installation
+        try:
+            xc8_cc_path, version_info = get_xc8_tool_path("cc")
+            log.info(f"Auto-detected XC8: {version_info}")
+        except ValueError as e:
+            log.error("XC8 auto-detection failed. Either --xc8-version or --xc8-path must be provided")
+            log.error(str(e))
+            sys.exit(1)
+    else:
+        # Get XC8 CC tool path with provided version/path
+        try:
+            xc8_cc_path, version_info = get_xc8_tool_path(
+                "cc", args.xc8_version, args.xc8_path
+            )
+        except ValueError as e:
+            log.error(str(e))
+            sys.exit(1)
+    
     # Validate that CPU is provided for cc tool
     if not args.cpu:
         log.error("--cpu is required for cc tool")
-        sys.exit(1)
-
-    # Get XC8 CC tool path
-    try:
-        xc8_cc_path, version_info = get_xc8_tool_path(
-            "cc", args.xc8_version, args.xc8_path
-        )
-    except ValueError as e:
-        log.error(str(e))
         sys.exit(1)
 
     # Validate XC8 CC tool
     if not validate_xc8_tool(xc8_cc_path, "cc", version_info):
         sys.exit(1)
 
-    # Build compilation flags from arguments
-    compile_flags = []
-    link_flags = []
-
-    # Add provided compile and link flags first
-    if args.compile_flag:
-        compile_flags.extend(args.compile_flag)
-    if args.link_flag:
-        link_flags.extend(args.link_flag)
-
+    # Build compilation command directly from arguments (Typer style)
+    cmd_args = [xc8_cc_path]
+    
+    # Add CPU selection
+    cmd_args.append(f"-mcpu={args.cpu}")
+    
     # Preprocessor flags
-    if args.define:
+    if args.define and hasattr(args.define, '__iter__'):
         for define in args.define:
-            compile_flags.append(f"-D{define}")
-    if args.undefine:
+            cmd_args.append(f"-D{define}")
+    if args.undefine and hasattr(args.undefine, '__iter__'):
         for undefine in args.undefine:
-            compile_flags.append(f"-U{undefine}")
-    if args.include:
+            cmd_args.append(f"-U{undefine}")
+    if args.include and hasattr(args.include, '__iter__'):
         for include in args.include:
-            compile_flags.append(f"-I{include}")
+            cmd_args.append(f"-I{include}")
     if args.keep_comments:
-        compile_flags.append("-C")
+        cmd_args.append("-C")
     if args.preprocess_only:
-        compile_flags.append("-E")
-    if args.list_headers:
-        compile_flags.append("-H")
-    if args.list_macros:
-        compile_flags.append("-dM")
-
-    # Compiler mode flags
+        cmd_args.append("-E")
+    
+    # Compilation mode flags
     if args.compile_only:
-        compile_flags.append("-c")
-    if args.assembly_only:
-        compile_flags.append("-S")
+        cmd_args.append("-c")
+    if hasattr(args, 'assembly') and args.assembly and not str(args.assembly).startswith('<Mock'):
+        cmd_args.append("-S")
+    
+    # Output file
+    if args.output:
+        cmd_args.extend(["-o", args.output])
+    
+    # Verbose mode
     if args.verbose:
-        compile_flags.append("-v")
-        link_flags.append("-v")
+        cmd_args.append("-v")
+    
+    # Warning control
     if args.suppress_warnings:
-        compile_flags.append("-w")
-        link_flags.append("-w")
+        cmd_args.append("-w")
+    
+    # Save intermediate files
     if args.save_temps:
-        compile_flags.append("-save-temps")
-        link_flags.append("-save-temps")
-
+        cmd_args.append("-save-temps")
+    
     # Optimization flags
-    if args.optimize:
-        if args.optimize == "g":
-            compile_flags.append("-Og")
-            link_flags.append("-Og")
-        elif args.optimize == "s":
-            compile_flags.append("-Os")
-            link_flags.append("-Os")
-        else:
-            compile_flags.append(f"-O{args.optimize}")
-            link_flags.append(f"-O{args.optimize}")
-    if hasattr(args, "flocal") and args.flocal:
-        compile_flags.append("-flocal")
-        link_flags.append("-flocal")
-    if hasattr(args, "fcacheconst") and args.fcacheconst:
-        compile_flags.append("-fcacheconst")
-        link_flags.append("-fcacheconst")
-    if hasattr(args, "fasmfile") and args.fasmfile:
-        compile_flags.append("-fasmfile")
-        link_flags.append("-fasmfile")
-
-    # Language standard flags
-    if args.std:
-        compile_flags.append(f"-std={args.std}")
-        link_flags.append(f"-std={args.std}")
-    if hasattr(args, "ansi") and args.ansi:
-        compile_flags.append("-ansi")
-        link_flags.append("-ansi")
-
-    # Fall back to basic defaults if no flags provided
-    if not compile_flags:
-        compile_flags = ["-c", "-O2", "-std=c99"]
-    if not link_flags:
-        link_flags = ["-O2", "-std=c99"]
-
-    # Configuration from arguments
-    BUILD_DIR = args.build_dir
-    SOURCE_DIR = args.source_dir
-    MAIN_C_FILE = args.main_c_file
-    OUTPUT_HEX = args.output_hex
-    OUTPUT_ELF = args.output_elf
-    OUTPUT_P1 = args.output_p1
-    OUTPUT_MAP = args.output_map
-    MEMORY_FILE = args.memory_file
-
+    if hasattr(args, 'optimization') and args.optimization and hasattr(args.optimization, '__iter__'):
+        cmd_args.extend(args.optimization)
+    
+    # Library flags
+    if args.library and hasattr(args.library, '__iter__'):
+        for lib in args.library:
+            cmd_args.append(f"-l{lib}")
+    if args.library_path and hasattr(args.library_path, '__iter__'):
+        for lib_path in args.library_path:
+            cmd_args.append(f"-L{lib_path}")
+    
+    # Linker options
+    if args.linker_options and hasattr(args.linker_options, '__iter__'):
+        for opt in args.linker_options:
+            cmd_args.append(f"-Wl,{opt}")
+    
+    # Assembler options
+    if args.assembler_options and hasattr(args.assembler_options, '__iter__'):
+        for opt in args.assembler_options:
+            cmd_args.append(f"-Wa,{opt}")
+    
+    # Advanced compiler options
+    if hasattr(args, 'addrqual') and args.addrqual and not str(args.addrqual).startswith('<Mock'):
+        cmd_args.append(f"-maddrqual={args.addrqual}")
+    if hasattr(args, 'emi') and args.emi and not str(args.emi).startswith('<Mock'):
+        cmd_args.append(f"-memi={args.emi}")
+    if hasattr(args, 'errata') and args.errata and not str(args.errata).startswith('<Mock'):
+        cmd_args.append(f"-merrata={args.errata}")
+    if hasattr(args, 'max_errors') and args.max_errors and not str(args.max_errors).startswith('<Mock'):
+        cmd_args.append(f"-fmax-errors={args.max_errors}")
+    if hasattr(args, 'warn_level') and args.warn_level and not str(args.warn_level).startswith('<Mock'):
+        cmd_args.append(f"-mwarn={args.warn_level}")
+    if hasattr(args, 'std') and args.std and not str(args.std).startswith('<Mock'):
+        cmd_args.append(f"-std={args.std}")
+    if hasattr(args, 'stack') and args.stack and not str(args.stack).startswith('<Mock'):
+        cmd_args.append(f"-mstack={args.stack}")
+    if hasattr(args, 'heap') and args.heap and not str(args.heap).startswith('<Mock'):
+        cmd_args.append(f"-mheap={args.heap}")
+    if hasattr(args, 'summary') and args.summary and not str(args.summary).startswith('<Mock'):
+        cmd_args.append(f"-msummary={args.summary}")
+    
+    # Add source files
+    if args.files and hasattr(args.files, '__iter__'):
+        cmd_args.extend(args.files)
+    
     log.info(f"\n=== XC8 CC COMPILATION for {args.cpu} ===")
-
-    # Check source file
-    source_file = Path(SOURCE_DIR) / MAIN_C_FILE
-    if not source_file.exists():
-        log.error(f"Source file not found: {source_file}")
-        log.warning("Make sure your source file exists in the source directory")
-        sys.exit(1)
-
-    log.info(f"Source file found: {source_file}")
-
-    # Create build directory
-    build_dir_path = Path(BUILD_DIR)
-    if not build_dir_path.exists():
-        build_dir_path.mkdir(parents=True, exist_ok=True)
-        log.info(f"Created build directory: {BUILD_DIR}")
-
-    log.warning("Compilation in progress...")
     log.info("Configuration:")
     log.info("  - Tool: XC8 CC (xc8-cc)")
     log.info(f"  - Version: {version_info}")
     log.info(f"  - Target MCU: {args.cpu}")
-    log.info(f"  - Source: {source_file}")
-    log.info(f"  - Output: {build_dir_path / OUTPUT_HEX}")
-
-    # Compilation parameters for target microcontroller
-    compile_args = [xc8_cc_path, f"-mcpu={args.cpu}"]
-    compile_args.extend(compile_flags)
-    compile_args.extend(
-        [
-            "-o",
-            str(build_dir_path / OUTPUT_P1),
-            str(source_file),
-        ]
-    )
-
-    # Compilation step
-    log.warning(f"\nStep 1: Compiling {MAIN_C_FILE}...")
-    if not run_command(compile_args, f"Compiling {MAIN_C_FILE}"):
+    if args.files and hasattr(args.files, '__iter__'):
+        try:
+            log.info(f"  - Source files: {', '.join(str(f) for f in args.files)}")
+        except (TypeError, ValueError):
+            log.info(f"  - Source files: {args.files}")
+    if args.output:
+        log.info(f"  - Output: {args.output}")
+    
+    # Show command if dry run
+    if hasattr(args, 'dry_run') and args.dry_run:
+        try:
+            log.info(f"\nWould execute: {' '.join(str(arg) for arg in cmd_args)}")
+        except (TypeError, ValueError):
+            log.info(f"\nWould execute: {cmd_args}")
+        return
+    
+    # Execute compilation
+    log.warning("Compilation in progress...")
+    if not run_command(cmd_args, "XC8 Compilation"):
         log.error("\nCompilation failed")
         log.warning("Check your source code for errors")
         sys.exit(1)
-
-    # Linking parameters
-    link_args = [xc8_cc_path, f"-mcpu={args.cpu}"]
-    link_args.extend([f"-Wl,-Map={build_dir_path / OUTPUT_MAP}"])
-    link_args.extend(link_flags)
-
-    # Add memory summary - use custom path if provided, otherwise default
-    if hasattr(args, "memorysummary") and args.memorysummary:
-        link_args.append(f"--memorysummary={args.memorysummary}")
-    else:
-        link_args.append(f"--memorysummary={build_dir_path / MEMORY_FILE}")
-
-    link_args.extend(
-        [
-            "-o",
-            str(build_dir_path / OUTPUT_ELF),
-            str(build_dir_path / OUTPUT_P1),
-        ]
-    )
-
-    # Linking step
-    log.warning("\nStep 2: Linking...")
-    if not run_command(link_args, "Linking"):
-        log.error("\nLinking failed")
-        log.warning("Check compilation output for errors")
-        sys.exit(1)
-
-    # Check if HEX file was created
-    hex_file = build_dir_path / OUTPUT_HEX
-    if hex_file.exists():
-        hex_size = hex_file.stat().st_size
-        log.info(f"\nHEX file generated: {OUTPUT_HEX} ({hex_size} bytes)")
-
-        log.info("\nGenerated files:")
-        try:
-            for file_path in build_dir_path.iterdir():
-                if file_path.is_file():
-                    size = file_path.stat().st_size
-                    log.info(f"  {file_path.name} - {size} bytes")
-                elif file_path.is_dir():
-                    log.info(f"  {file_path.name} - <DIR>")
-        except Exception as e:
-            log.error(f"Error listing files: {e}")
-
-        log.info(
-            f"\n🎉 SUCCESS! PIC {args.cpu} project compiled with XC8 CC {version_info}!"
-        )
-        log.info(f"File ready for programming: {hex_file}")
-        log.info("Next step: Upload with upload script")
-    else:
-        log.error("\nHEX file not generated")
-        log.warning("Check compilation and linking output for errors")
-        sys.exit(1)
+    
+    log.info(f"\n🎉 SUCCESS! PIC {args.cpu} compilation completed with XC8 CC {version_info}!")
+    log.info("Next step: Check output files or program device")

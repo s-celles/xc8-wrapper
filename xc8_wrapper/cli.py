@@ -2,16 +2,19 @@
 """
 Command-line interface for XC8 Wrapper
 
-This module provides the main entry point for the XC8 toolchain wrapper.
+This module provides the main entry point for the XC8 toolchain wrapper using Typer.
 """
 
-import argparse
 import sys
-from typing import Any, List, Optional
+from pathlib import Path
+from typing import Annotated, List, Optional
 
+import typer
 from colorama import init
+from typing_extensions import Literal
 
 from .core import SUPPORTED_XC8_TOOLS, handle_cc_tool
+from .install import check_xc8_installation, get_xc8_download_url, install_xc8_if_needed
 from .logger import log
 
 # Initialize colorama for cross-platform support
@@ -20,228 +23,416 @@ init(autoreset=True)
 # Version information
 __version__ = "0.1.0"
 
-
-def create_base_parser() -> argparse.ArgumentParser:
-    """Create the base argument parser with common arguments"""
-    parser = argparse.ArgumentParser(
-        description="XC8 toolchain wrapper for PIC microcontrollers", prog="xc8-wrapper"
-    )
-
-    # Version argument
-    parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {__version__}"
-    )
-
-    # Tool selection
-    parser.add_argument(
-        "tool",
-        choices=list(SUPPORTED_XC8_TOOLS.keys()),
-        help="XC8 tool to use",
-    )
-
-    # Common tool path/version arguments
-    parser.add_argument(
-        "--xc8-version",
-        help="XC8 toolchain version to use (ignored if --xc8-path is provided)",
-    )
-    parser.add_argument(
-        "--xc8-path", help="Full path to XC8 tool executable (overrides --xc8-version)"
-    )
-
-    return parser
+# Create main Typer app
+app = typer.Typer(
+    name="xc8-wrapper",
+    help="XC8 toolchain wrapper for PIC microcontrollers",
+    add_completion=False,
+    rich_markup_mode="rich",
+)
 
 
-def create_cc_subparser(subparsers: Any) -> argparse.ArgumentParser:
-    """Create argument parser for xc8-cc tool"""
-    cc_parser: argparse.ArgumentParser = subparsers.add_parser(
-        "cc", help="C compiler, assembler, and linker"
-    )
-
-    # Required arguments for cc tool
-    cc_parser.add_argument("--cpu", required=True, help="Target microcontroller")
-
-    # Tool path/version arguments (inherited from base)
-    cc_parser.add_argument(
-        "--xc8-version",
-        help="XC8 toolchain version to use (ignored if --xc8-path is provided)",
-    )
-    cc_parser.add_argument(
-        "--xc8-path", help="Full path to XC8 tool executable (overrides --xc8-version)"
-    )
-
-    # Preprocessor arguments
-    cc_parser.add_argument(
-        "-D",
-        "--define",
-        action="append",
-        help="Define preprocessor symbol (can be used multiple times)",
-    )
-    cc_parser.add_argument(
-        "-U",
-        "--undefine",
-        action="append",
-        help="Undefine preprocessor symbol (can be used multiple times)",
-    )
-    cc_parser.add_argument(
-        "-I",
-        "--include",
-        action="append",
-        help="Specify include path (can be used multiple times)",
-    )
-    cc_parser.add_argument(
-        "-C",
-        "--keep-comments",
-        action="store_true",
-        help="Tell the preprocessor not to discard comments",
-    )
-    cc_parser.add_argument(
-        "-E", "--preprocess-only", action="store_true", help="Preprocess only"
-    )
-    cc_parser.add_argument(
-        "-H", "--list-headers", action="store_true", help="List included header files"
-    )
-    cc_parser.add_argument(
-        "-dM", "--list-macros", action="store_true", help="List all defined macros"
-    )
-
-    # Compiler mode arguments
-    cc_parser.add_argument(
-        "-c",
-        "--compile-only",
-        action="store_true",
-        help="Compile/assemble to intermediate/object file",
-    )
-    cc_parser.add_argument(
-        "-S", "--assembly-only", action="store_true", help="Compile to assembly file"
-    )
-    cc_parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Verbose output"
-    )
-    cc_parser.add_argument(
-        "-w", "--suppress-warnings", action="store_true", help="Suppress all warnings"
-    )
-    cc_parser.add_argument(
-        "--save-temps", action="store_true", help="Do not delete intermediate files"
-    )
-
-    # Optimization arguments
-    cc_parser.add_argument(
-        "-O",
-        "--optimize",
-        choices=["0", "1", "2", "3", "g", "s"],
-        help="Optimization level (0=none, 1-3=levels, g=debug, s=size)",
-    )
-
-    # Language standard arguments
-    cc_parser.add_argument(
-        "--std", help="Specify language standard (c89, c90, c99, c11, etc.)"
-    )
-
-    # Advanced compilation flags (for anything not covered above)
-    cc_parser.add_argument(
-        "--compile-flag",
-        action="append",
-        help="Add additional compilation flag (can be used multiple times)",
-    )
-    cc_parser.add_argument(
-        "--link-flag",
-        action="append",
-        help="Add additional linking flag (can be used multiple times)",
-    )
-    cc_parser.add_argument(
-        "--build-dir", default="build", help="Build directory (default: build)"
-    )
-    cc_parser.add_argument(
-        "--source-dir", default="src", help="Source directory (default: src)"
-    )
-    cc_parser.add_argument(
-        "--main-c-file", default="main.c", help="Main C file (default: main.c)"
-    )
-    cc_parser.add_argument(
-        "--output-hex", default="main.hex", help="Output HEX file (default: main.hex)"
-    )
-    cc_parser.add_argument(
-        "--output-elf", default="main.elf", help="Output ELF file (default: main.elf)"
-    )
-    cc_parser.add_argument(
-        "--output-p1", default="main.p1", help="Output P1 file (default: main.p1)"
-    )
-    cc_parser.add_argument(
-        "--output-map", default="main.map", help="Output MAP file (default: main.map)"
-    )
-    cc_parser.add_argument(
-        "--memory-file",
-        default="memoryfile.xml",
-        help="Memory file (default: memoryfile.xml)",
-    )
-
-    return cc_parser
+@app.callback()
+def main_callback(
+    version: Annotated[
+        bool, typer.Option("--version", help="Show version information")
+    ] = False,
+):
+    """XC8 toolchain wrapper for PIC microcontrollers"""
+    if version:
+        log.info(f"xc8-wrapper version {__version__}")
+        raise typer.Exit()
 
 
-def create_ar_subparser(subparsers: Any) -> argparse.ArgumentParser:
-    """Create argument parser for xc8-ar tool"""
-    ar_parser: argparse.ArgumentParser = subparsers.add_parser(
-        "ar", help="Archiver/librarian for creating and managing library archives"
-    )
+# Installation command
+@app.command("install")
+def install_command(
+    check: Annotated[
+        bool, typer.Option("--check", help="Check if XC8 is installed")
+    ] = False,
+    force: Annotated[
+        bool, typer.Option("--force", help="Force installation even if XC8 is present")
+    ] = False,
+    version: Annotated[
+        str, typer.Option("--version", help="XC8 version to install")
+    ] = "3.00",
+    url: Annotated[
+        bool, typer.Option("--url", help="Show download URL for current platform")
+    ] = False,
+):
+    """Install XC8 compiler"""
+    log.info("=== XC8 INSTALLATION ===")
+    
+    if url:
+        from .install import get_platform_name
+        platform_name = get_platform_name()
+        download_url = get_xc8_download_url(version)
+        log.info(f"Platform: {platform_name}")
+        log.info(f"XC8 v{version} download URL:")
+        log.info(download_url)
+        return
+    
+    if check or not force:
+        # Check installation status
+        status = check_xc8_installation()
+        log.info(f"XC8 installed: {'Yes' if status['installed'] else 'No'}")
+        
+        if status["installed"]:
+            if "version" in status:
+                log.info(f"Detected version: {status['version']}")
+            if "path" in status:
+                log.info(f"XC8 path: {status['path']}")
+            if "version_string" in status:
+                log.info(f"XC8 version: {status['version_string']}")
+            if "error" in status:
+                log.warning(f"Warning: Could not get XC8 details: {status['error']}")
+        
+        if check:
+            raise typer.Exit(0 if status["installed"] else 1)
+    
+    if force or not check_xc8_installation()["installed"]:
+        if force:
+            log.info(f"Force installing XC8 v{version}...")
+        else:
+            log.info(f"Installing XC8 v{version} if needed...")
+        
+        success = install_xc8_if_needed(version, force=force)
+        
+        if success:
+            log.info("XC8 installation completed successfully")
+            raise typer.Exit(0)
+        else:
+            log.error("XC8 installation failed")
+            raise typer.Exit(1)
 
-    # Tool path/version arguments (inherited from base)
-    ar_parser.add_argument(
-        "--xc8-version",
-        help="XC8 toolchain version to use (ignored if --xc8-path is provided)",
-    )
-    ar_parser.add_argument(
-        "--xc8-path", help="Full path to XC8 tool executable (overrides --xc8-version)"
-    )
 
-    # Archiver operation arguments
-    ar_parser.add_argument(
-        "operation",
-        choices=["r", "c", "d", "t", "x"],
-        help="Archive operation: r=replace/add, c=create, d=delete, t=list, x=extract",
-    )
+# CC (Compiler) command - matches vendor xc8-cc options
+@app.command("cc")
+def cc_command(
+    files: Annotated[List[str], typer.Argument(help="Source files to compile")] = None,
+    # Basic options matching vendor help
+    c: Annotated[
+        bool, typer.Option("-c", help="Compile/assemble to intermediate/object file")
+    ] = False,
+    preprocess_comments: Annotated[
+        bool, typer.Option("-C", help="Tell the preprocessor not to discard comments")
+    ] = False,
+    assembly: Annotated[
+        bool, typer.Option("-S", help="Compile to assembly file")
+    ] = False,
+    verbose: Annotated[bool, typer.Option("-v", help="Verbose")] = False,
+    preprocess_only: Annotated[
+        bool, typer.Option("-E", help="Preprocess only")
+    ] = False,
+    output: Annotated[
+        Optional[str], typer.Option("-o", help="Specify output file")
+    ] = None,
+    define: Annotated[
+        List[str], typer.Option("-D", help="Define preprocessor symbol")
+    ] = None,
+    undefine: Annotated[
+        List[str], typer.Option("-U", help="Undefine preprocessor symbol")
+    ] = None,
+    include: Annotated[
+        List[str], typer.Option("-I", help="Specify include path")
+    ] = None,
+    library: Annotated[
+        List[str], typer.Option("-l", help="Specify library")
+    ] = None,
+    library_path: Annotated[
+        List[str], typer.Option("-L", help="Specify library search path")
+    ] = None,
+    list_headers: Annotated[
+        bool, typer.Option("-H", help="List included header files")
+    ] = False,
+    list_macros: Annotated[
+        bool, typer.Option("-dM", help="List all defined macros")
+    ] = False,
+    linker_options: Annotated[
+        List[str], typer.Option("-Wl", help="Pass comma-separated options directly to the linker")
+    ] = None,
+    xlinker: Annotated[
+        List[str], typer.Option("-Xlinker", help="Pass option directly to the linker")
+    ] = None,
+    assembler_options: Annotated[
+        List[str], typer.Option("-Wa", help="Pass comma-separated options on to the assembler")
+    ] = None,
+    xparser: Annotated[
+        List[str], typer.Option("-Xparser", help="Pass option directly to the parser")
+    ] = None,
+    xp1: Annotated[
+        List[str], typer.Option("-Xp1", help="Pass option directly to the parser")
+    ] = None,
+    xclang: Annotated[
+        List[str], typer.Option("-Xclang", help="Pass option directly to the parser")
+    ] = None,
+    xassembler: Annotated[
+        List[str], typer.Option("-Xassembler", help="Pass option directly to the assembler")
+    ] = None,
+    language: Annotated[
+        Optional[str], typer.Option("-x", help="Specify the language of the input files")
+    ] = None,
+    xassembler_with_cpp: Annotated[
+        bool, typer.Option("-xassembler-with-cpp", help="Request that assembly source files be preprocessed")
+    ] = False,
+    preprocessor_options: Annotated[
+        List[str], typer.Option("-Wp", help="Pass comma-separated options directly to the preprocessor")
+    ] = None,
+    xpreprocessor: Annotated[
+        List[str], typer.Option("-Xpreprocessor", help="Pass option directly to the preprocessor")
+    ] = None,
+    dry_run: Annotated[
+        bool, typer.Option("-###", help="Show command lines but do not execute")
+    ] = False,
+    target_help: Annotated[
+        bool, typer.Option("--target-help", help="Target help")
+    ] = False,
+    print_devices: Annotated[
+        bool, typer.Option("-mprint-devices", help="List supported devices")
+    ] = False,
+    print_builtins: Annotated[
+        bool, typer.Option("-mprint-builtins", help="List built in functions")
+    ] = False,
+    # CPU selection (required for compilation)
+    cpu: Annotated[
+        Optional[str], typer.Option("-mcpu", "--cpu", help="Select device")
+    ] = None,
+    # XC8 wrapper specific options
+    xc8_version: Annotated[
+        Optional[str], typer.Option("--xc8-version", help="XC8 toolchain version to use")
+    ] = None,
+    xc8_path: Annotated[
+        Optional[str], typer.Option("--xc8-path", help="Full path to XC8 tool executable")
+    ] = None,
+    # Additional vendor options
+    addrqual: Annotated[
+        Optional[str], typer.Option("-maddrqual", help="Specify address space qualifier handling")
+    ] = None,
+    make_deps: Annotated[
+        bool, typer.Option("-M", help="Generate make dependencies")
+    ] = False,
+    make_deps_md: Annotated[
+        bool, typer.Option("-MD", help="Generate make dependencies")
+    ] = False,
+    make_deps_file: Annotated[
+        Optional[str], typer.Option("-MF", help="Generate make dependencies")
+    ] = None,
+    make_deps_mm: Annotated[
+        bool, typer.Option("-MM", help="Generate make dependencies")
+    ] = False,
+    make_deps_mmd: Annotated[
+        bool, typer.Option("-MMD", help="Generate make dependencies")
+    ] = False,
+    emi: Annotated[
+        Optional[str], typer.Option("-memi", help="Specify external memory interface mode")
+    ] = None,
+    errata: Annotated[
+        Optional[str], typer.Option("-merrata", help="Apply errata work-arounds")
+    ] = None,
+    max_errors: Annotated[
+        Optional[int], typer.Option("-fmax-errors", help="Specify the maximum number of errors to report")
+    ] = None,
+    cci: Annotated[
+        bool, typer.Option("-mcci", help="Use CCI Language extension")
+    ] = False,
+    ext: Annotated[
+        Optional[str], typer.Option("-mext", help="Use specified language extensions")
+    ] = None,
+    warn_level: Annotated[
+        Optional[str], typer.Option("-mwarn", help="Set warning level")
+    ] = None,
+    maxichip: Annotated[
+        bool, typer.Option("-mmaxichip", help="Build for hyperthetical maximized-resource device")
+    ] = False,
+    maxipic: Annotated[
+        bool, typer.Option("-mmaxipic", help="Build for hyperthetical maximized-resource device")
+    ] = False,
+    c90lib: Annotated[
+        bool, typer.Option("-mc90lib", help="Link in standard C90 libraries")
+    ] = False,
+    nostdlib: Annotated[
+        bool, typer.Option("-nostdlib", help="Do not link the standard system startup or C library")
+    ] = False,
+    nostdinc: Annotated[
+        bool, typer.Option("-nostdinc", help="Do not search the standard C library include directories for headers")
+    ] = False,
+    nodefaultlibs: Annotated[
+        bool, typer.Option("-nodefaultlibs", help="Do not link the standard C library")
+    ] = False,
+    nostartfiles: Annotated[
+        bool, typer.Option("-nostartfiles", help="Do not link the standard system startup module")
+    ] = False,
+    suppress_warnings: Annotated[
+        bool, typer.Option("-w", help="Suppress all warnings")
+    ] = False,
+    save_temps: Annotated[
+        bool, typer.Option("-save-temps", help="Do not delete intermediate files")
+    ] = False,
+    # Optimization levels
+    og: Annotated[
+        bool, typer.Option("-Og", help="Favor accurate debug over optimization")
+    ] = False,
+    os: Annotated[
+        bool, typer.Option("-Os", help="Optimize for space rather than speed")
+    ] = False,
+    o0: Annotated[
+        bool, typer.Option("-O0", help="Optimize level 0 (default)")
+    ] = False,
+    o1: Annotated[
+        bool, typer.Option("-O1", help="Optimize level 1")
+    ] = False,
+    o2: Annotated[
+        bool, typer.Option("-O2", help="Optimize level 2")
+    ] = False,
+    o3: Annotated[
+        bool, typer.Option("-O3", help="Optimize level 3")
+    ] = False,
+    # Additional optimization options
+    flocal: Annotated[
+        bool, typer.Option("-flocal", help="Localized optimizations")
+    ] = False,
+    fcacheconst: Annotated[
+        bool, typer.Option("-fcacheconst", help="Cached constants optimizations")
+    ] = False,
+    fasmfile: Annotated[
+        bool, typer.Option("-fasmfile", help="Optimize assembler source files")
+    ] = False,
+    # More vendor options
+    undefints: Annotated[
+        bool, typer.Option("-mundefints", help="Program unassigned interrupt vectors")
+    ] = False,
+    ansi: Annotated[
+        bool, typer.Option("-ansi", help="Use the C90 language standard")
+    ] = False,
+    std: Annotated[
+        Optional[str], typer.Option("-std", help="Specify language standard")
+    ] = None,
+    pedantic: Annotated[
+        bool, typer.Option("-Wpedantic", help="Flag use of non-standard keywords")
+    ] = False,
+    stack: Annotated[
+        Optional[str], typer.Option("-mstack", help="Specify default stack model and size")
+    ] = None,
+    heap: Annotated[
+        Optional[str], typer.Option("-mheap", help="Specify maximum heap size")
+    ] = None,
+    summary: Annotated[
+        Optional[str], typer.Option("-msummary", help="Specify compilation summary information")
+    ] = None,
+    shroud: Annotated[
+        bool, typer.Option("-mshroud", help="Shroud (obfuscate) generated intermediate files")
+    ] = False,
+    # Additional options truncated for brevity - can be expanded as needed
+):
+    """C compiler, assembler, and linker (matches xc8-cc)"""
+    log.info("=== XC8 COMPILER ===")
+    
+    # Handle help options
+    if target_help:
+        log.info("Target help requested")
+        # Would show target-specific help
+        return
+    
+    if print_devices:
+        log.info("Supported devices would be listed here")
+        # Would list supported devices
+        return
+    
+    if print_builtins:
+        log.info("Built-in functions would be listed here")
+        # Would list built-in functions
+        return
+    
+    # Validate required arguments for compilation
+    if not files and not (print_devices or print_builtins or target_help):
+        log.error("No input files specified")
+        raise typer.Exit(1)
+    
+    if not cpu and not (print_devices or print_builtins or target_help):
+        log.error("CPU/device must be specified with -mcpu or --cpu")
+        raise typer.Exit(1)
+    
+    # Create args object compatible with existing handler
+    class Args:
+        def __init__(self):
+            # Basic compilation options
+            self.cpu = cpu
+            self.xc8_version = xc8_version
+            self.xc8_path = xc8_path
+            self.files = files or []
+            
+            # Preprocessor options
+            self.define = define or []
+            self.undefine = undefine or []
+            self.include = include or []
+            self.keep_comments = preprocess_comments
+            self.preprocess_only = preprocess_only
+            
+            # Compilation options
+            self.compile_only = c
+            self.assembly = assembly
+            self.output = output
+            self.verbose = verbose
+            
+            # Library options
+            self.library = library or []
+            self.library_path = library_path or []
+            
+            # Tool options
+            self.linker_options = linker_options or []
+            self.assembler_options = assembler_options or []
+            
+            # Advanced options
+            self.dry_run = dry_run
+            self.save_temps = save_temps
+            self.suppress_warnings = suppress_warnings
+            
+            # Optimization
+            optimization_flags = []
+            if og: optimization_flags.append("-Og")
+            if os: optimization_flags.append("-Os")
+            if o0: optimization_flags.append("-O0")
+            if o1: optimization_flags.append("-O1")
+            if o2: optimization_flags.append("-O2")
+            if o3: optimization_flags.append("-O3")
+            self.optimization = optimization_flags
+            
+            # Additional vendor-specific options
+            self.addrqual = addrqual
+            self.emi = emi
+            self.errata = errata
+            self.max_errors = max_errors
+            self.warn_level = warn_level
+            self.std = std
+            self.stack = stack
+            self.heap = heap
+            self.summary = summary
+    
+    args = Args()
+    
+    try:
+        handle_cc_tool(args)
+    except Exception as e:
+        log.error(f"Compilation failed: {e}")
+        raise typer.Exit(1)
 
-    # Archive file
-    ar_parser.add_argument("archive", help="Archive file (.a)")
 
-    # Object files
-    ar_parser.add_argument("files", nargs="*", help="Object files (.o, .p1) to process")
-
-    # Modifiers
-    ar_parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Verbose output"
-    )
-    ar_parser.add_argument(
-        "-u", "--update", action="store_true", help="Update only newer files"
-    )
-    ar_parser.add_argument(
-        "-s", "--index", action="store_true", help="Write an object-file index"
-    )
-
-    return ar_parser
-
-
-def create_argument_parser() -> argparse.ArgumentParser:
-    """Create and configure the hierarchical argument parser"""
-    # Create main parser with tool selection
-    parser = argparse.ArgumentParser(
-        description="XC8 toolchain wrapper for PIC microcontrollers", prog="xc8-wrapper"
-    )
-
-    # Version argument at top level
-    parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {__version__}"
-    )
-
-    # Create subparsers for each tool
-    subparsers = parser.add_subparsers(
-        dest="tool", help="XC8 tool to use", required=True
-    )
-
-    # Add tool-specific subparsers
-    create_cc_subparser(subparsers)
-    create_ar_subparser(subparsers)
-
-    return parser
+# Archive command (placeholder for future AR tool support)
+@app.command("ar")
+def ar_command(
+    operation: Annotated[
+        str, typer.Argument(help="Archive operation: r=replace/add, c=create, d=delete, t=list, x=extract")
+    ],
+    archive: Annotated[str, typer.Argument(help="Archive file (.a)")],
+    files: Annotated[List[str], typer.Argument(help="Object files (.o, .p1) to process")] = None,
+    verbose: Annotated[bool, typer.Option("-v", help="Verbose output")] = False,
+    update: Annotated[bool, typer.Option("-u", help="Update only newer files")] = False,
+    index: Annotated[bool, typer.Option("-s", help="Write an object-file index")] = False,
+):
+    """Archive/librarian tool (xc8-ar)"""
+    log.info("=== XC8 ARCHIVER ===")
+    log.error("AR tool is not yet implemented")
+    raise typer.Exit(1)
 
 
 def main(argv: Optional[List[str]] = None) -> None:
@@ -251,22 +442,15 @@ def main(argv: Optional[List[str]] = None) -> None:
     Args:
         argv: Command line arguments (defaults to sys.argv)
     """
-    log.info("=== XC8 TOOLCHAIN WRAPPER ===")
-
-    parser = create_argument_parser()
-    args = parser.parse_args(argv)
-
-    # Route to appropriate tool handler
-    if args.tool == "cc":
-        handle_cc_tool(args)
-    elif args.tool == "ar":
-        log.error("AR tool is not yet implemented")
+    try:
+        app(argv)
+    except typer.Exit as e:
+        sys.exit(e.exit_code)
+    except KeyboardInterrupt:
+        log.warning("Operation cancelled by user")
         sys.exit(1)
-    else:
-        log.error(f"Tool '{args.tool}' is not yet implemented")
-        log.warning(
-            f"Currently supported tools: {', '.join(SUPPORTED_XC8_TOOLS.keys())}"
-        )
+    except Exception as e:
+        log.error(f"Unexpected error: {e}")
         sys.exit(1)
 
 

@@ -177,6 +177,7 @@ class TestScalability:
 
             # Test that it handles large argument lists
             try:
+                large_args.append("main.c")  # Add required file argument
                 main(large_args)
             except SystemExit:
                 pass

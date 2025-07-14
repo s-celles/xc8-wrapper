@@ -36,7 +36,7 @@ class TestIntegration:
 
             # Test CLI calling core functionality
             try:
-                main(["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00"])
+                main(["cc", "--cpu", "PIC16F876A", "--xc8-version", "3.00", "main.c"])
             except SystemExit:
                 # Expected when tool execution completes
                 pass
@@ -84,10 +84,7 @@ int main() {
                             "PIC16F876A",
                             "--xc8-version",
                             "3.00",
-                            "--source-dir",
-                            str(src_dir),
-                            "--build-dir",
-                            str(build_dir),
+                            str(main_c),
                         ]
                     )
                 except SystemExit:
@@ -141,7 +138,8 @@ int main() {
                         "VERSION=100",
                         "-I",
                         "./include",
-                        "--verbose",
+                        "-v",
+                        "main.c",
                     ]
                 )
             except SystemExit:

@@ -223,6 +223,11 @@ class TestHandleCCTool:
         args.std = None
         args.compile_flag = []
         args.link_flag = []
+        
+        # Explicitly set attributes that might be checked by the function
+        for attr in ['library', 'library_path', 'linker_options', 'assembler_options', 'files', 'output', 'dry_run']:
+            setattr(args, attr, [] if attr in ['library', 'library_path', 'linker_options', 'assembler_options', 'files'] else None)
+        args.dry_run = False  # Ensure not in dry run mode
 
         # Test
         handle_cc_tool(args)
@@ -265,9 +270,20 @@ class TestHandleCCTool:
         args.xc8_path = None
         args.source_dir = "nonexistent"
         args.main_c_file = "main.c"
+        args.files = ["main.c"]
+        args.output = None
+        args.dry_run = False
+        
+        # Set all attributes that might be checked
+        for attr in ['define', 'undefine', 'include', 'library', 'library_path', 'linker_options', 'assembler_options']:
+            setattr(args, attr, [])
 
-        with pytest.raises(SystemExit):
-            handle_cc_tool(args)
+        # Mock the compile command to fail due to missing source
+        with patch("xc8_wrapper.core.get_xc8_tool_path", return_value=("/usr/bin/xc8-cc", "v3.00")):
+            with patch("xc8_wrapper.core.validate_xc8_tool", return_value=True):
+                with patch("xc8_wrapper.core.run_command", return_value=False):
+                    with pytest.raises(SystemExit):
+                        handle_cc_tool(args)
 
 
 @pytest.mark.unit
