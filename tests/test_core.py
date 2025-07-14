@@ -64,8 +64,12 @@ class TestXC8ToolPath:
         with pytest.raises(ValueError, match="Unsupported XC8 tool"):
             get_xc8_tool_path("unsupported", version="3.00")
 
-    def test_get_xc8_tool_path_no_version_or_path(self):
+    @patch("xc8_wrapper.core.find_available_xc8_versions")
+    def test_get_xc8_tool_path_no_version_or_path(self, mock_find_versions):
         """Test auto-detection when neither version nor path is provided"""
+        # Mock available versions for auto-detection
+        mock_find_versions.return_value = ["3.00", "2.46"]
+        
         # Should trigger auto-detection
         result = get_xc8_tool_path("cc")
         assert result is not None
@@ -73,6 +77,17 @@ class TestXC8ToolPath:
         path, version = result
         assert isinstance(path, str)
         assert isinstance(version, str)
+        assert version == "v3.00"  # Should use the latest version
+
+    @patch("xc8_wrapper.core.find_available_xc8_versions")
+    def test_get_xc8_tool_path_no_version_or_path_no_installations(self, mock_find_versions):
+        """Test auto-detection when no XC8 installations are found (CI scenario)"""
+        # Mock no available versions (CI environment without XC8)
+        mock_find_versions.return_value = []
+        
+        # Should raise ValueError when no installations found
+        with pytest.raises(ValueError, match="No XC8 installation found"):
+            get_xc8_tool_path("cc")
 
 
 class TestValidateXC8Tool:
