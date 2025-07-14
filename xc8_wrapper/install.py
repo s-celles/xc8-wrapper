@@ -129,9 +129,22 @@ def install_xc8_linux(installer_path: Path) -> bool:
         # Make installer executable
         installer_path.chmod(0o755)
 
-        # Run installer with --mode unattended
+        # Prepare command for unattended installation
+        cmd = [
+            str(installer_path),
+            "--mode",
+            "unattended",
+            "--unattendedmodeui",
+            "none",
+            "--netservername",
+            "localhost",
+            "--LicenseType",
+            "FreeMode",
+        ]
+
+        # Run installer
         result = subprocess.run(  # nosec B603
-            [str(installer_path), "--mode", "unattended"],
+            cmd,
             capture_output=True,
             text=True,
             timeout=600,  # 10 minutes timeout
@@ -155,18 +168,44 @@ def install_xc8_linux(installer_path: Path) -> bool:
 
 
 def install_xc8_windows(installer_path: Path) -> bool:
-    """Install XC8 on Windows"""
+    """Install XC8 on Windows using unattended mode (console-compatible)"""
+
+    # Based on vendor/xc8-installer-help.txt, use simple unattended mode
+    # --mode unattended is perfect for CI/console environments
+    cmd = [
+        str(installer_path),
+        "--mode",
+        "unattended",
+        "--unattendedmodeui",
+        "none",
+        "--netservername",
+        "localhost",
+        "--LicenseType",
+        "FreeMode",
+    ]
+
+    log.info(f"Installing XC8 in unattended mode: {' '.join(cmd)}")
+
     try:
-        # Run installer with /S for silent mode
         result = subprocess.run(  # nosec B603
-            [str(installer_path), "/S"],
+            cmd,
             capture_output=True,
             text=True,
             timeout=600,  # 10 minutes timeout
         )
 
+        log.info(f"Installation return code: {result.returncode}")
+        if result.stdout:
+            log.debug(f"Installation stdout: {result.stdout}")
+        if result.stderr:
+            log.debug(f"Installation stderr: {result.stderr}")
+
         if result.returncode == 0:
             log.info("XC8 installation completed successfully")
+            return True
+        elif result.returncode == 3010:
+            # Return code 3010 means "restart required" but installation was successful
+            log.info("XC8 installation completed successfully (restart required)")
             return True
         else:
             log.error(f"XC8 installation failed with return code {result.returncode}")
@@ -303,6 +342,8 @@ def install_xc8_if_needed(version: Optional[str] = None, force: bool = False) ->
 
             # Install based on platform
             try:
+                log.info(f"Starting installation of XC8 {v} on {platform_name}")
+
                 if platform_name == "linux":
                     success = install_xc8_linux(installer_path)
                 elif platform_name == "windows":
@@ -310,22 +351,39 @@ def install_xc8_if_needed(version: Optional[str] = None, force: bool = False) ->
                 elif platform_name == "darwin":
                     success = install_xc8_macos(installer_path)
                 else:
+                    log.error(f"Unsupported platform: {platform_name}")
                     success = False
 
                 if success:
-                    log.info(f"XC8 version {v} installation completed")
-                    if is_xc8_installed():  # Verify installation
-                        log.info(f"XC8 version {v} installation verified")
+                    log.info(f"XC8 version {v} installation completed successfully")
+
+                    # Verify installation
+                    log.info("Verifying XC8 installation...")
+                    if is_xc8_installed():
+                        installed_version = get_installed_xc8_version()
+                        log.info(
+                            f"XC8 installation verified - version {installed_version} detected"
+                        )
                         return True
                     else:
-                        log.warning(f"XC8 version {v} installation failed verification")
+                        log.warning(
+                            f"XC8 version {v} installation completed but verification failed"
+                        )
+                        log.warning(
+                            "The installer reported success but XC8 tools are not accessible"
+                        )
                         continue  # Try next version
                 else:
-                    log.error(f"XC8 version {v} installation failed")
+                    log.error(
+                        f"XC8 version {v} installation failed - installer returned failure"
+                    )
                     continue  # Try next version
 
             except Exception as e:
-                log.error(f"Failed to install XC8 version {v}: {e}")
+                log.error(f"Exception during XC8 version {v} installation: {e}")
+                import traceback
+
+                log.debug(f"Installation exception traceback: {traceback.format_exc()}")
                 continue  # Try next version
 
     # If we get here, all versions failed
