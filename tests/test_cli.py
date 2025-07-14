@@ -85,7 +85,9 @@ class TestTyperCLI:
         """Test basic cc command"""
         mock_handle.return_value = None
 
-        result = self.runner.invoke(app, ["cc", "main.c", "--cpu", "PIC16F877A", "--xc8-version", "3.00"])
+        result = self.runner.invoke(
+            app, ["cc", "main.c", "--cpu", "PIC16F877A", "--xc8-version", "3.00"]
+        )
         assert result.exit_code == 0
         mock_handle.assert_called_once()
 
@@ -94,15 +96,22 @@ class TestTyperCLI:
         """Test cc command with various options"""
         mock_handle.return_value = None
 
-        result = self.runner.invoke(app, [
-            "cc", "main.c",
-            "--cpu", "PIC16F877A",
-            "--xc8-version", "3.00",
-            "-O2",
-            "-DDEBUG=1",
-            "-I", "include",
-            "-v"
-        ])
+        result = self.runner.invoke(
+            app,
+            [
+                "cc",
+                "main.c",
+                "--cpu",
+                "PIC16F877A",
+                "--xc8-version",
+                "3.00",
+                "-O2",
+                "-DDEBUG=1",
+                "-I",
+                "include",
+                "-v",
+            ],
+        )
         assert result.exit_code == 0
         mock_handle.assert_called_once()
 
@@ -183,19 +192,29 @@ class TestArgumentPassing:
         """Test that CC arguments are passed correctly to the handler"""
         mock_handle.return_value = None
 
-        result = self.runner.invoke(app, [
-            "cc", "main.c", "lib.c",
-            "--cpu", "PIC18F4550",
-            "--xc8-version", "3.00",
-            "-c",
-            "-O3",
-            "-DDEBUG=1",
-            "-DVERSION=100",
-            "-I", "include1",
-            "-I", "include2",
-            "-o", "output.hex",
-            "-v"
-        ])
+        result = self.runner.invoke(
+            app,
+            [
+                "cc",
+                "main.c",
+                "lib.c",
+                "--cpu",
+                "PIC18F4550",
+                "--xc8-version",
+                "3.00",
+                "-c",
+                "-O3",
+                "-DDEBUG=1",
+                "-DVERSION=100",
+                "-I",
+                "include1",
+                "-I",
+                "include2",
+                "-o",
+                "output.hex",
+                "-v",
+            ],
+        )
 
         assert result.exit_code == 0
         mock_handle.assert_called_once()
@@ -220,14 +239,20 @@ class TestArgumentPassing:
         """Test optimization flags are handled correctly"""
         mock_handle.return_value = None
 
-        result = self.runner.invoke(app, [
-            "cc", "main.c",
-            "--cpu", "PIC16F877A",
-            "--xc8-version", "3.00",
-            "-O2",
-            "-Os",
-            "-flocal"
-        ])
+        result = self.runner.invoke(
+            app,
+            [
+                "cc",
+                "main.c",
+                "--cpu",
+                "PIC16F877A",
+                "--xc8-version",
+                "3.00",
+                "-O2",
+                "-Os",
+                "-flocal",
+            ],
+        )
 
         assert result.exit_code == 0
         args = mock_handle.call_args[0][0]
@@ -239,15 +264,25 @@ class TestArgumentPassing:
         """Test advanced vendor-specific options"""
         mock_handle.return_value = None
 
-        result = self.runner.invoke(app, [
-            "cc", "main.c",
-            "--cpu", "PIC16F877A",
-            "--xc8-version", "3.00",
-            "-mwarn", "9",
-            "-std", "c99",
-            "-fmax-errors", "5",
-            "-mstack", "compiled:auto:auto:auto:1000h"
-        ])
+        result = self.runner.invoke(
+            app,
+            [
+                "cc",
+                "main.c",
+                "--cpu",
+                "PIC16F877A",
+                "--xc8-version",
+                "3.00",
+                "-mwarn",
+                "9",
+                "-std",
+                "c99",
+                "-fmax-errors",
+                "5",
+                "-mstack",
+                "compiled:auto:auto:auto:1000h",
+            ],
+        )
 
         assert result.exit_code == 0
         args = mock_handle.call_args[0][0]
@@ -272,7 +307,7 @@ class TestCLIIntegration:
             ["--help"],
             ["install", "--help"],
             ["cc", "--help"],
-            ["ar", "--help"]
+            ["ar", "--help"],
         ]
 
         for cmd in commands_to_test:
@@ -293,7 +328,7 @@ class TestCLIIntegration:
             "installed": True,
             "version": "3.00",
             "path": "/path/to/xc8",
-            "version_string": "XC8 v3.00"
+            "version_string": "XC8 v3.00",
         }
 
         result = self.runner.invoke(app, ["install", "--check"])

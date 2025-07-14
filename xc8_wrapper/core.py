@@ -352,7 +352,9 @@ def handle_cc_tool(args: Any) -> None:
             xc8_cc_path, version_info = get_xc8_tool_path("cc")
             log.info(f"Auto-detected XC8: {version_info}")
         except ValueError as e:
-            log.error("XC8 auto-detection failed. Either --xc8-version or --xc8-path must be provided")
+            log.error(
+                "XC8 auto-detection failed. Either --xc8-version or --xc8-path must be provided"
+            )
             log.error(str(e))
             sys.exit(1)
     else:
@@ -381,13 +383,13 @@ def handle_cc_tool(args: Any) -> None:
     cmd_args.append(f"-mcpu={args.cpu}")
 
     # Preprocessor flags
-    if args.define and hasattr(args.define, '__iter__'):
+    if args.define and hasattr(args.define, "__iter__"):
         for define in args.define:
             cmd_args.append(f"-D{define}")
-    if args.undefine and hasattr(args.undefine, '__iter__'):
+    if args.undefine and hasattr(args.undefine, "__iter__"):
         for undefine in args.undefine:
             cmd_args.append(f"-U{undefine}")
-    if args.include and hasattr(args.include, '__iter__'):
+    if args.include and hasattr(args.include, "__iter__"):
         for include in args.include:
             cmd_args.append(f"-I{include}")
     if args.keep_comments:
@@ -398,7 +400,11 @@ def handle_cc_tool(args: Any) -> None:
     # Compilation mode flags
     if args.compile_only:
         cmd_args.append("-c")
-    if hasattr(args, 'assembly') and args.assembly and not str(args.assembly).startswith('<Mock'):
+    if (
+        hasattr(args, "assembly")
+        and args.assembly
+        and not str(args.assembly).startswith("<Mock")
+    ):
         cmd_args.append("-S")
 
     # Output file
@@ -418,49 +424,77 @@ def handle_cc_tool(args: Any) -> None:
         cmd_args.append("-save-temps")
 
     # Optimization flags
-    if hasattr(args, 'optimization') and args.optimization and hasattr(args.optimization, '__iter__'):
+    if (
+        hasattr(args, "optimization")
+        and args.optimization
+        and hasattr(args.optimization, "__iter__")
+    ):
         cmd_args.extend(args.optimization)
 
     # Library flags
-    if args.library and hasattr(args.library, '__iter__'):
+    if args.library and hasattr(args.library, "__iter__"):
         for lib in args.library:
             cmd_args.append(f"-l{lib}")
-    if args.library_path and hasattr(args.library_path, '__iter__'):
+    if args.library_path and hasattr(args.library_path, "__iter__"):
         for lib_path in args.library_path:
             cmd_args.append(f"-L{lib_path}")
 
     # Linker options
-    if args.linker_options and hasattr(args.linker_options, '__iter__'):
+    if args.linker_options and hasattr(args.linker_options, "__iter__"):
         for opt in args.linker_options:
             cmd_args.append(f"-Wl,{opt}")
 
     # Assembler options
-    if args.assembler_options and hasattr(args.assembler_options, '__iter__'):
+    if args.assembler_options and hasattr(args.assembler_options, "__iter__"):
         for opt in args.assembler_options:
             cmd_args.append(f"-Wa,{opt}")
 
     # Advanced compiler options
-    if hasattr(args, 'addrqual') and args.addrqual and not str(args.addrqual).startswith('<Mock'):
+    if (
+        hasattr(args, "addrqual")
+        and args.addrqual
+        and not str(args.addrqual).startswith("<Mock")
+    ):
         cmd_args.append(f"-maddrqual={args.addrqual}")
-    if hasattr(args, 'emi') and args.emi and not str(args.emi).startswith('<Mock'):
+    if hasattr(args, "emi") and args.emi and not str(args.emi).startswith("<Mock"):
         cmd_args.append(f"-memi={args.emi}")
-    if hasattr(args, 'errata') and args.errata and not str(args.errata).startswith('<Mock'):
+    if (
+        hasattr(args, "errata")
+        and args.errata
+        and not str(args.errata).startswith("<Mock")
+    ):
         cmd_args.append(f"-merrata={args.errata}")
-    if hasattr(args, 'max_errors') and args.max_errors and not str(args.max_errors).startswith('<Mock'):
+    if (
+        hasattr(args, "max_errors")
+        and args.max_errors
+        and not str(args.max_errors).startswith("<Mock")
+    ):
         cmd_args.append(f"-fmax-errors={args.max_errors}")
-    if hasattr(args, 'warn_level') and args.warn_level and not str(args.warn_level).startswith('<Mock'):
+    if (
+        hasattr(args, "warn_level")
+        and args.warn_level
+        and not str(args.warn_level).startswith("<Mock")
+    ):
         cmd_args.append(f"-mwarn={args.warn_level}")
-    if hasattr(args, 'std') and args.std and not str(args.std).startswith('<Mock'):
+    if hasattr(args, "std") and args.std and not str(args.std).startswith("<Mock"):
         cmd_args.append(f"-std={args.std}")
-    if hasattr(args, 'stack') and args.stack and not str(args.stack).startswith('<Mock'):
+    if (
+        hasattr(args, "stack")
+        and args.stack
+        and not str(args.stack).startswith("<Mock")
+    ):
         cmd_args.append(f"-mstack={args.stack}")
-    if hasattr(args, 'heap') and args.heap and not str(args.heap).startswith('<Mock'):
+    if hasattr(args, "heap") and args.heap and not str(args.heap).startswith("<Mock"):
         cmd_args.append(f"-mheap={args.heap}")
-    if hasattr(args, 'summary') and args.summary and not str(args.summary).startswith('<Mock'):
+    if (
+        hasattr(args, "summary")
+        and args.summary
+        and not str(args.summary).startswith("<Mock")
+    ):
         cmd_args.append(f"-msummary={args.summary}")
 
     # Add source files
-    if args.files and hasattr(args.files, '__iter__'):
+    if args.files and hasattr(args.files, "__iter__"):
         cmd_args.extend(args.files)
 
     log.info(f"\n=== XC8 CC COMPILATION for {args.cpu} ===")
@@ -468,7 +502,7 @@ def handle_cc_tool(args: Any) -> None:
     log.info("  - Tool: XC8 CC (xc8-cc)")
     log.info(f"  - Version: {version_info}")
     log.info(f"  - Target MCU: {args.cpu}")
-    if args.files and hasattr(args.files, '__iter__'):
+    if args.files and hasattr(args.files, "__iter__"):
         try:
             log.info(f"  - Source files: {', '.join(str(f) for f in args.files)}")
         except (TypeError, ValueError):
@@ -477,7 +511,7 @@ def handle_cc_tool(args: Any) -> None:
         log.info(f"  - Output: {args.output}")
 
     # Show command if dry run
-    if hasattr(args, 'dry_run') and args.dry_run:
+    if hasattr(args, "dry_run") and args.dry_run:
         try:
             log.info(f"\nWould execute: {' '.join(str(arg) for arg in cmd_args)}")
         except (TypeError, ValueError):
@@ -491,5 +525,7 @@ def handle_cc_tool(args: Any) -> None:
         log.warning("Check your source code for errors")
         sys.exit(1)
 
-    log.info(f"\n🎉 SUCCESS! PIC {args.cpu} compilation completed with XC8 CC {version_info}!")
+    log.info(
+        f"\n🎉 SUCCESS! PIC {args.cpu} compilation completed with XC8 CC {version_info}!"
+    )
     log.info("Next step: Check output files or program device")

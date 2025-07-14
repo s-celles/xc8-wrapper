@@ -885,7 +885,9 @@ class TestCoreUtilities:
         args.save_temps = False
 
         # Mock get_xc8_tool_path to fail auto-detection
-        with patch("xc8_wrapper.core.get_xc8_tool_path", side_effect=ValueError("No XC8 found")):
+        with patch(
+            "xc8_wrapper.core.get_xc8_tool_path", side_effect=ValueError("No XC8 found")
+        ):
             with pytest.raises(SystemExit, match="1"):
                 handle_cc_tool(args)
 

@@ -63,6 +63,7 @@ def install_command(
 
     if url:
         from .install import get_platform_name
+
         platform_name = get_platform_name()
         download_url = get_xc8_download_url(version)
         log.info(f"Platform: {platform_name}")
@@ -134,9 +135,7 @@ def cc_command(
     include: Annotated[
         List[str], typer.Option("-I", help="Specify include path")
     ] = None,
-    library: Annotated[
-        List[str], typer.Option("-l", help="Specify library")
-    ] = None,
+    library: Annotated[List[str], typer.Option("-l", help="Specify library")] = None,
     library_path: Annotated[
         List[str], typer.Option("-L", help="Specify library search path")
     ] = None,
@@ -147,13 +146,15 @@ def cc_command(
         bool, typer.Option("-dM", help="List all defined macros")
     ] = False,
     linker_options: Annotated[
-        List[str], typer.Option("-Wl", help="Pass comma-separated options directly to the linker")
+        List[str],
+        typer.Option("-Wl", help="Pass comma-separated options directly to the linker"),
     ] = None,
     xlinker: Annotated[
         List[str], typer.Option("-Xlinker", help="Pass option directly to the linker")
     ] = None,
     assembler_options: Annotated[
-        List[str], typer.Option("-Wa", help="Pass comma-separated options on to the assembler")
+        List[str],
+        typer.Option("-Wa", help="Pass comma-separated options on to the assembler"),
     ] = None,
     xparser: Annotated[
         List[str], typer.Option("-Xparser", help="Pass option directly to the parser")
@@ -165,19 +166,29 @@ def cc_command(
         List[str], typer.Option("-Xclang", help="Pass option directly to the parser")
     ] = None,
     xassembler: Annotated[
-        List[str], typer.Option("-Xassembler", help="Pass option directly to the assembler")
+        List[str],
+        typer.Option("-Xassembler", help="Pass option directly to the assembler"),
     ] = None,
     language: Annotated[
-        Optional[str], typer.Option("-x", help="Specify the language of the input files")
+        Optional[str],
+        typer.Option("-x", help="Specify the language of the input files"),
     ] = None,
     xassembler_with_cpp: Annotated[
-        bool, typer.Option("-xassembler-with-cpp", help="Request that assembly source files be preprocessed")
+        bool,
+        typer.Option(
+            "-xassembler-with-cpp",
+            help="Request that assembly source files be preprocessed",
+        ),
     ] = False,
     preprocessor_options: Annotated[
-        List[str], typer.Option("-Wp", help="Pass comma-separated options directly to the preprocessor")
+        List[str],
+        typer.Option(
+            "-Wp", help="Pass comma-separated options directly to the preprocessor"
+        ),
     ] = None,
     xpreprocessor: Annotated[
-        List[str], typer.Option("-Xpreprocessor", help="Pass option directly to the preprocessor")
+        List[str],
+        typer.Option("-Xpreprocessor", help="Pass option directly to the preprocessor"),
     ] = None,
     dry_run: Annotated[
         bool, typer.Option("-###", help="Show command lines but do not execute")
@@ -197,14 +208,17 @@ def cc_command(
     ] = None,
     # XC8 wrapper specific options
     xc8_version: Annotated[
-        Optional[str], typer.Option("--xc8-version", help="XC8 toolchain version to use")
+        Optional[str],
+        typer.Option("--xc8-version", help="XC8 toolchain version to use"),
     ] = None,
     xc8_path: Annotated[
-        Optional[str], typer.Option("--xc8-path", help="Full path to XC8 tool executable")
+        Optional[str],
+        typer.Option("--xc8-path", help="Full path to XC8 tool executable"),
     ] = None,
     # Additional vendor options
     addrqual: Annotated[
-        Optional[str], typer.Option("-maddrqual", help="Specify address space qualifier handling")
+        Optional[str],
+        typer.Option("-maddrqual", help="Specify address space qualifier handling"),
     ] = None,
     make_deps: Annotated[
         bool, typer.Option("-M", help="Generate make dependencies")
@@ -222,13 +236,17 @@ def cc_command(
         bool, typer.Option("-MMD", help="Generate make dependencies")
     ] = False,
     emi: Annotated[
-        Optional[str], typer.Option("-memi", help="Specify external memory interface mode")
+        Optional[str],
+        typer.Option("-memi", help="Specify external memory interface mode"),
     ] = None,
     errata: Annotated[
         Optional[str], typer.Option("-merrata", help="Apply errata work-arounds")
     ] = None,
     max_errors: Annotated[
-        Optional[int], typer.Option("-fmax-errors", help="Specify the maximum number of errors to report")
+        Optional[int],
+        typer.Option(
+            "-fmax-errors", help="Specify the maximum number of errors to report"
+        ),
     ] = None,
     cci: Annotated[
         bool, typer.Option("-mcci", help="Use CCI Language extension")
@@ -240,25 +258,41 @@ def cc_command(
         Optional[str], typer.Option("-mwarn", help="Set warning level")
     ] = None,
     maxichip: Annotated[
-        bool, typer.Option("-mmaxichip", help="Build for hyperthetical maximized-resource device")
+        bool,
+        typer.Option(
+            "-mmaxichip", help="Build for hyperthetical maximized-resource device"
+        ),
     ] = False,
     maxipic: Annotated[
-        bool, typer.Option("-mmaxipic", help="Build for hyperthetical maximized-resource device")
+        bool,
+        typer.Option(
+            "-mmaxipic", help="Build for hyperthetical maximized-resource device"
+        ),
     ] = False,
     c90lib: Annotated[
         bool, typer.Option("-mc90lib", help="Link in standard C90 libraries")
     ] = False,
     nostdlib: Annotated[
-        bool, typer.Option("-nostdlib", help="Do not link the standard system startup or C library")
+        bool,
+        typer.Option(
+            "-nostdlib", help="Do not link the standard system startup or C library"
+        ),
     ] = False,
     nostdinc: Annotated[
-        bool, typer.Option("-nostdinc", help="Do not search the standard C library include directories for headers")
+        bool,
+        typer.Option(
+            "-nostdinc",
+            help="Do not search the standard C library include directories for headers",
+        ),
     ] = False,
     nodefaultlibs: Annotated[
         bool, typer.Option("-nodefaultlibs", help="Do not link the standard C library")
     ] = False,
     nostartfiles: Annotated[
-        bool, typer.Option("-nostartfiles", help="Do not link the standard system startup module")
+        bool,
+        typer.Option(
+            "-nostartfiles", help="Do not link the standard system startup module"
+        ),
     ] = False,
     suppress_warnings: Annotated[
         bool, typer.Option("-w", help="Suppress all warnings")
@@ -273,18 +307,10 @@ def cc_command(
     os: Annotated[
         bool, typer.Option("-Os", help="Optimize for space rather than speed")
     ] = False,
-    o0: Annotated[
-        bool, typer.Option("-O0", help="Optimize level 0 (default)")
-    ] = False,
-    o1: Annotated[
-        bool, typer.Option("-O1", help="Optimize level 1")
-    ] = False,
-    o2: Annotated[
-        bool, typer.Option("-O2", help="Optimize level 2")
-    ] = False,
-    o3: Annotated[
-        bool, typer.Option("-O3", help="Optimize level 3")
-    ] = False,
+    o0: Annotated[bool, typer.Option("-O0", help="Optimize level 0 (default)")] = False,
+    o1: Annotated[bool, typer.Option("-O1", help="Optimize level 1")] = False,
+    o2: Annotated[bool, typer.Option("-O2", help="Optimize level 2")] = False,
+    o3: Annotated[bool, typer.Option("-O3", help="Optimize level 3")] = False,
     # Additional optimization options
     flocal: Annotated[
         bool, typer.Option("-flocal", help="Localized optimizations")
@@ -309,16 +335,21 @@ def cc_command(
         bool, typer.Option("-Wpedantic", help="Flag use of non-standard keywords")
     ] = False,
     stack: Annotated[
-        Optional[str], typer.Option("-mstack", help="Specify default stack model and size")
+        Optional[str],
+        typer.Option("-mstack", help="Specify default stack model and size"),
     ] = None,
     heap: Annotated[
         Optional[str], typer.Option("-mheap", help="Specify maximum heap size")
     ] = None,
     summary: Annotated[
-        Optional[str], typer.Option("-msummary", help="Specify compilation summary information")
+        Optional[str],
+        typer.Option("-msummary", help="Specify compilation summary information"),
     ] = None,
     shroud: Annotated[
-        bool, typer.Option("-mshroud", help="Shroud (obfuscate) generated intermediate files")
+        bool,
+        typer.Option(
+            "-mshroud", help="Shroud (obfuscate) generated intermediate files"
+        ),
     ] = False,
     # Additional options truncated for brevity - can be expanded as needed
 ) -> None:
@@ -425,13 +456,20 @@ def cc_command(
 @app.command("ar")
 def ar_command(
     operation: Annotated[
-        str, typer.Argument(help="Archive operation: r=replace/add, c=create, d=delete, t=list, x=extract")
+        str,
+        typer.Argument(
+            help="Archive operation: r=replace/add, c=create, d=delete, t=list, x=extract"
+        ),
     ],
     archive: Annotated[str, typer.Argument(help="Archive file (.a)")],
-    files: Annotated[List[str], typer.Argument(help="Object files (.o, .p1) to process")] = None,
+    files: Annotated[
+        List[str], typer.Argument(help="Object files (.o, .p1) to process")
+    ] = None,
     verbose: Annotated[bool, typer.Option("-v", help="Verbose output")] = False,
     update: Annotated[bool, typer.Option("-u", help="Update only newer files")] = False,
-    index: Annotated[bool, typer.Option("-s", help="Write an object-file index")] = False,
+    index: Annotated[
+        bool, typer.Option("-s", help="Write an object-file index")
+    ] = False,
 ) -> None:
     """Archive/librarian tool (xc8-ar)"""
     log.info("=== XC8 ARCHIVER ===")

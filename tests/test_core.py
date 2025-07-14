@@ -225,8 +225,29 @@ class TestHandleCCTool:
         args.link_flag = []
 
         # Explicitly set attributes that might be checked by the function
-        for attr in ['library', 'library_path', 'linker_options', 'assembler_options', 'files', 'output', 'dry_run']:
-            setattr(args, attr, [] if attr in ['library', 'library_path', 'linker_options', 'assembler_options', 'files'] else None)
+        for attr in [
+            "library",
+            "library_path",
+            "linker_options",
+            "assembler_options",
+            "files",
+            "output",
+            "dry_run",
+        ]:
+            setattr(
+                args,
+                attr,
+                []
+                if attr
+                in [
+                    "library",
+                    "library_path",
+                    "linker_options",
+                    "assembler_options",
+                    "files",
+                ]
+                else None,
+            )
         args.dry_run = False  # Ensure not in dry run mode
 
         # Test
@@ -275,11 +296,22 @@ class TestHandleCCTool:
         args.dry_run = False
 
         # Set all attributes that might be checked
-        for attr in ['define', 'undefine', 'include', 'library', 'library_path', 'linker_options', 'assembler_options']:
+        for attr in [
+            "define",
+            "undefine",
+            "include",
+            "library",
+            "library_path",
+            "linker_options",
+            "assembler_options",
+        ]:
             setattr(args, attr, [])
 
         # Mock the compile command to fail due to missing source
-        with patch("xc8_wrapper.core.get_xc8_tool_path", return_value=("/usr/bin/xc8-cc", "v3.00")):
+        with patch(
+            "xc8_wrapper.core.get_xc8_tool_path",
+            return_value=("/usr/bin/xc8-cc", "v3.00"),
+        ):
             with patch("xc8_wrapper.core.validate_xc8_tool", return_value=True):
                 with patch("xc8_wrapper.core.run_command", return_value=False):
                     with pytest.raises(SystemExit):

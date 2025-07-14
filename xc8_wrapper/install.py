@@ -61,6 +61,7 @@ def is_xc8_installed() -> bool:
     """Check if XC8 is installed and accessible"""
     try:
         from .core import get_xc8_tool_path
+
         get_xc8_tool_path("cc")
         return True
     except Exception:
@@ -71,6 +72,7 @@ def get_installed_xc8_version() -> str:
     """Get the version of the installed XC8 compiler"""
     try:
         from .core import get_xc8_tool_path
+
         xc8_path, _ = get_xc8_tool_path("cc")
 
         # Try to get version
@@ -88,7 +90,8 @@ def get_installed_xc8_version() -> str:
             )
             # Extract version number from output like "XC8 C Compiler V3.00"
             import re
-            match = re.search(r'[Vv]?(\d+\.\d+)', version_line)
+
+            match = re.search(r"[Vv]?(\d+\.\d+)", version_line)
             if match:
                 return match.group(1)
         return "unknown"
@@ -105,12 +108,12 @@ def download_file(url: str, destination: Path) -> bool:
                 log.error(f"HTTP error {response.status} downloading XC8 installer")
                 return False
 
-            total_size = response.headers.get('Content-Length')
+            total_size = response.headers.get("Content-Length")
             if total_size:
                 total_size = int(total_size)
                 log.info(f"File size: {total_size / 1024 / 1024:.1f} MB")
 
-            with open(destination, 'wb') as f:
+            with open(destination, "wb") as f:
                 shutil.copyfileobj(response, f)
 
         log.info(f"Downloaded to: {destination}")
@@ -197,9 +200,9 @@ def install_xc8_macos(installer_path: Path) -> bool:
 
         # Find the mounted volume
         mount_point = None
-        for line in mount_result.stdout.split('\n'):
-            if '.dmg' in line and '/Volumes/' in line:
-                mount_point = line.split('\t')[-1].strip()
+        for line in mount_result.stdout.split("\n"):
+            if ".dmg" in line and "/Volumes/" in line:
+                mount_point = line.split("\t")[-1].strip()
                 break
 
         if not mount_point:
@@ -209,7 +212,7 @@ def install_xc8_macos(installer_path: Path) -> bool:
         # Find installer package
         installer_pkg = None
         for item in Path(mount_point).iterdir():
-            if item.suffix == '.pkg':
+            if item.suffix == ".pkg":
                 installer_pkg = item
                 break
 
@@ -342,6 +345,7 @@ def check_xc8_installation() -> Dict[str, Any]:
 
         try:
             from .core import get_xc8_tool_path
+
             # Use detected version if available, otherwise try without version
             if detected_version and detected_version != "unknown":
                 xc8_path, _ = get_xc8_tool_path("cc", version=detected_version)
