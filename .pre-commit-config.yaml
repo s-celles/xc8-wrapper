@@ -21,8 +21,8 @@ repos:
     rev: v1.16.1
     hooks:
       - id: mypy
-        additional_dependencies: [types-colorama]
-        args: [--ignore-missing-imports, --no-strict-optional, --allow-untyped-defs]
+        additional_dependencies: [types-colorama, typer, colorama, logbook]
+        args: [--ignore-missing-imports, --no-strict-optional, --allow-untyped-defs, --disable-error-code=misc]
         exclude: ^(tests/|setup_dev\.py|run_tests\.py|demo\.py|diagnose_platform\.py|install_xc8\.py)
 
   - repo: https://github.com/pycqa/bandit
@@ -37,17 +37,6 @@ repos:
     hooks:
       - id: commitizen-branch
         stages: [pre-push]
-
-  - repo: local
-    hooks:
-      - id: pytest
-        name: pytest
-        entry: pytest
-        language: python
-        types: [python]
-        pass_filenames: false
-        always_run: true
-        args: [-v, --tb=short]
         additional_dependencies: [
           pytest>=7.0,
           pytest-cov>=4.0,

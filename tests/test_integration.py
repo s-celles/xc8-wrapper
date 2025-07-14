@@ -63,8 +63,6 @@ int main() {
 """
             )
 
-            build_dir = Path(temp_dir) / "build"
-
             with (
                 patch("xc8_wrapper.core.validate_xc8_tool") as mock_validate,
                 patch("xc8_wrapper.core.get_xc8_tool_path") as mock_get_path,

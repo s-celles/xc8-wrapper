@@ -8,12 +8,12 @@ import os
 import platform
 import shutil
 import subprocess
-import sys
 import tempfile
 import urllib.request
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
+from .core import XC8_KNOWN_VERSIONS
 from .logger import log
 
 # XC8 download URLs by platform and version
@@ -31,9 +31,6 @@ XC8_DOWNLOAD_URLS = {
         "ProductDocuments/SoftwareTools/xc8-v{version}-full-install-macos-x64-installer.dmg"
     ),
 }
-
-# Import known versions from core module
-from .core import XC8_KNOWN_VERSIONS
 
 
 def get_platform_name() -> str:
@@ -75,7 +72,7 @@ def get_installed_xc8_version() -> str:
     try:
         from .core import get_xc8_tool_path
         xc8_path, _ = get_xc8_tool_path("cc")
-        
+
         # Try to get version
         result = subprocess.run(
             [xc8_path, "--version"],
@@ -107,15 +104,15 @@ def download_file(url: str, destination: Path) -> bool:
             if response.status != 200:
                 log.error(f"HTTP error {response.status} downloading XC8 installer")
                 return False
-            
+
             total_size = response.headers.get('Content-Length')
             if total_size:
                 total_size = int(total_size)
                 log.info(f"File size: {total_size / 1024 / 1024:.1f} MB")
-            
+
             with open(destination, 'wb') as f:
                 shutil.copyfileobj(response, f)
-            
+
         log.info(f"Downloaded to: {destination}")
         return True
     except Exception as e:
@@ -128,7 +125,7 @@ def install_xc8_linux(installer_path: Path) -> bool:
     try:
         # Make installer executable
         installer_path.chmod(0o755)
-        
+
         # Run installer with --mode unattended
         result = subprocess.run(
             [str(installer_path), "--mode", "unattended"],
@@ -136,7 +133,7 @@ def install_xc8_linux(installer_path: Path) -> bool:
             text=True,
             timeout=600,  # 10 minutes timeout
         )
-        
+
         if result.returncode == 0:
             log.info("XC8 installation completed successfully")
             return True
@@ -145,7 +142,7 @@ def install_xc8_linux(installer_path: Path) -> bool:
             if result.stderr:
                 log.error(f"Installation error: {result.stderr}")
             return False
-            
+
     except subprocess.TimeoutExpired:
         log.error("XC8 installation timed out")
         return False
@@ -164,7 +161,7 @@ def install_xc8_windows(installer_path: Path) -> bool:
             text=True,
             timeout=600,  # 10 minutes timeout
         )
-        
+
         if result.returncode == 0:
             log.info("XC8 installation completed successfully")
             return True
@@ -173,7 +170,7 @@ def install_xc8_windows(installer_path: Path) -> bool:
             if result.stderr:
                 log.error(f"Installation error: {result.stderr}")
             return False
-            
+
     except subprocess.TimeoutExpired:
         log.error("XC8 installation timed out")
         return False
@@ -192,33 +189,33 @@ def install_xc8_macos(installer_path: Path) -> bool:
             text=True,
             timeout=60,
         )
-        
+
         if mount_result.returncode != 0:
             log.error("Failed to mount XC8 DMG")
             return False
-        
+
         # Find the mounted volume
         mount_point = None
         for line in mount_result.stdout.split('\n'):
             if '.dmg' in line and '/Volumes/' in line:
                 mount_point = line.split('\t')[-1].strip()
                 break
-        
+
         if not mount_point:
             log.error("Could not find mounted XC8 volume")
             return False
-        
+
         # Find installer package
         installer_pkg = None
         for item in Path(mount_point).iterdir():
             if item.suffix == '.pkg':
                 installer_pkg = item
                 break
-        
+
         if not installer_pkg:
             log.error("Could not find XC8 installer package in DMG")
             return False
-        
+
         # Run installer
         result = subprocess.run(
             ["sudo", "installer", "-pkg", str(installer_pkg), "-target", "/"],
@@ -226,10 +223,10 @@ def install_xc8_macos(installer_path: Path) -> bool:
             text=True,
             timeout=600,  # 10 minutes timeout
         )
-        
+
         # Unmount DMG
         subprocess.run(["hdiutil", "detach", mount_point], capture_output=True)
-        
+
         if result.returncode == 0:
             log.info("XC8 installation completed successfully")
             return True
@@ -238,7 +235,7 @@ def install_xc8_macos(installer_path: Path) -> bool:
             if result.stderr:
                 log.error(f"Installation error: {result.stderr}")
             return False
-            
+
     except subprocess.TimeoutExpired:
         log.error("XC8 installation timed out")
         return False
@@ -332,15 +329,15 @@ def install_xc8_if_needed(version: Optional[str] = None, force: bool = False) ->
     return False
 
 
-def check_xc8_installation() -> dict:
+def check_xc8_installation() -> Dict[str, Any]:
     """Check XC8 installation status and return detailed information"""
     is_installed = is_xc8_installed()
-    result = {"installed": is_installed}
-    
+    result: Dict[str, Any] = {"installed": is_installed}
+
     if is_installed:
         detected_version = get_installed_xc8_version()
         result["version"] = detected_version
-        
+
         try:
             from .core import get_xc8_tool_path
             # Use detected version if available, otherwise try without version
@@ -349,7 +346,7 @@ def check_xc8_installation() -> dict:
             else:
                 xc8_path, _ = get_xc8_tool_path("cc")
             result["path"] = xc8_path
-            
+
             # Try to get version string
             result_proc = subprocess.run(
                 [xc8_path, "--version"],
@@ -367,5 +364,5 @@ def check_xc8_installation() -> dict:
 
         except Exception as e:
             result["error"] = str(e)
-    
+
     return result

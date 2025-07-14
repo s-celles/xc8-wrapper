@@ -8,9 +8,6 @@ __version__ = "0.1.0"
 __author__ = "Sébastien Celles"
 __email__ = "s.celles@gmail.com"
 
-# Export commonly used constants
-from .core import XC8_KNOWN_VERSIONS
-
 from .core import (
     SUPPORTED_XC8_TOOLS,
     get_xc8_tool_path,
@@ -30,6 +27,5 @@ __all__ = [
     "run_command",
     "handle_cc_tool",
     "SUPPORTED_XC8_TOOLS",
-    "XC8_KNOWN_VERSIONS",
     "log",
 ]

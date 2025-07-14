@@ -6,14 +6,12 @@ This module provides the main entry point for the XC8 toolchain wrapper using Ty
 """
 
 import sys
-from pathlib import Path
 from typing import Annotated, List, Optional
 
 import typer
 from colorama import init
-from typing_extensions import Literal
 
-from .core import SUPPORTED_XC8_TOOLS, handle_cc_tool
+from .core import handle_cc_tool
 from .install import check_xc8_installation, get_xc8_download_url, install_xc8_if_needed
 from .logger import log
 
@@ -37,7 +35,7 @@ def main_callback(
     version: Annotated[
         bool, typer.Option("--version", help="Show version information")
     ] = False,
-):
+) -> None:
     """XC8 toolchain wrapper for PIC microcontrollers"""
     if version:
         log.info(f"xc8-wrapper version {__version__}")
@@ -59,10 +57,10 @@ def install_command(
     url: Annotated[
         bool, typer.Option("--url", help="Show download URL for current platform")
     ] = False,
-):
+) -> None:
     """Install XC8 compiler"""
     log.info("=== XC8 INSTALLATION ===")
-    
+
     if url:
         from .install import get_platform_name
         platform_name = get_platform_name()
@@ -71,12 +69,12 @@ def install_command(
         log.info(f"XC8 v{version} download URL:")
         log.info(download_url)
         return
-    
+
     if check or not force:
         # Check installation status
         status = check_xc8_installation()
         log.info(f"XC8 installed: {'Yes' if status['installed'] else 'No'}")
-        
+
         if status["installed"]:
             if "version" in status:
                 log.info(f"Detected version: {status['version']}")
@@ -86,18 +84,18 @@ def install_command(
                 log.info(f"XC8 version: {status['version_string']}")
             if "error" in status:
                 log.warning(f"Warning: Could not get XC8 details: {status['error']}")
-        
+
         if check:
             raise typer.Exit(0 if status["installed"] else 1)
-    
+
     if force or not check_xc8_installation()["installed"]:
         if force:
             log.info(f"Force installing XC8 v{version}...")
         else:
             log.info(f"Installing XC8 v{version} if needed...")
-        
+
         success = install_xc8_if_needed(version, force=force)
-        
+
         if success:
             log.info("XC8 installation completed successfully")
             raise typer.Exit(0)
@@ -323,35 +321,35 @@ def cc_command(
         bool, typer.Option("-mshroud", help="Shroud (obfuscate) generated intermediate files")
     ] = False,
     # Additional options truncated for brevity - can be expanded as needed
-):
+) -> None:
     """C compiler, assembler, and linker (matches xc8-cc)"""
     log.info("=== XC8 COMPILER ===")
-    
+
     # Handle help options
     if target_help:
         log.info("Target help requested")
         # Would show target-specific help
         return
-    
+
     if print_devices:
         log.info("Supported devices would be listed here")
         # Would list supported devices
         return
-    
+
     if print_builtins:
         log.info("Built-in functions would be listed here")
         # Would list built-in functions
         return
-    
+
     # Validate required arguments for compilation
     if not files and not (print_devices or print_builtins or target_help):
         log.error("No input files specified")
         raise typer.Exit(1)
-    
+
     if not cpu and not (print_devices or print_builtins or target_help):
         log.error("CPU/device must be specified with -mcpu or --cpu")
         raise typer.Exit(1)
-    
+
     # Create args object compatible with existing handler
     class Args:
         def __init__(self):
@@ -360,43 +358,49 @@ def cc_command(
             self.xc8_version = xc8_version
             self.xc8_path = xc8_path
             self.files = files or []
-            
+
             # Preprocessor options
             self.define = define or []
             self.undefine = undefine or []
             self.include = include or []
             self.keep_comments = preprocess_comments
             self.preprocess_only = preprocess_only
-            
+
             # Compilation options
             self.compile_only = c
             self.assembly = assembly
             self.output = output
             self.verbose = verbose
-            
+
             # Library options
             self.library = library or []
             self.library_path = library_path or []
-            
+
             # Tool options
             self.linker_options = linker_options or []
             self.assembler_options = assembler_options or []
-            
+
             # Advanced options
             self.dry_run = dry_run
             self.save_temps = save_temps
             self.suppress_warnings = suppress_warnings
-            
+
             # Optimization
             optimization_flags = []
-            if og: optimization_flags.append("-Og")
-            if os: optimization_flags.append("-Os")
-            if o0: optimization_flags.append("-O0")
-            if o1: optimization_flags.append("-O1")
-            if o2: optimization_flags.append("-O2")
-            if o3: optimization_flags.append("-O3")
+            if og:
+                optimization_flags.append("-Og")
+            if os:
+                optimization_flags.append("-Os")
+            if o0:
+                optimization_flags.append("-O0")
+            if o1:
+                optimization_flags.append("-O1")
+            if o2:
+                optimization_flags.append("-O2")
+            if o3:
+                optimization_flags.append("-O3")
             self.optimization = optimization_flags
-            
+
             # Additional vendor-specific options
             self.addrqual = addrqual
             self.emi = emi
@@ -407,9 +411,9 @@ def cc_command(
             self.stack = stack
             self.heap = heap
             self.summary = summary
-    
+
     args = Args()
-    
+
     try:
         handle_cc_tool(args)
     except Exception as e:
@@ -428,7 +432,7 @@ def ar_command(
     verbose: Annotated[bool, typer.Option("-v", help="Verbose output")] = False,
     update: Annotated[bool, typer.Option("-u", help="Update only newer files")] = False,
     index: Annotated[bool, typer.Option("-s", help="Write an object-file index")] = False,
-):
+) -> None:
     """Archive/librarian tool (xc8-ar)"""
     log.info("=== XC8 ARCHIVER ===")
     log.error("AR tool is not yet implemented")

@@ -223,7 +223,7 @@ class TestHandleCCTool:
         args.std = None
         args.compile_flag = []
         args.link_flag = []
-        
+
         # Explicitly set attributes that might be checked by the function
         for attr in ['library', 'library_path', 'linker_options', 'assembler_options', 'files', 'output', 'dry_run']:
             setattr(args, attr, [] if attr in ['library', 'library_path', 'linker_options', 'assembler_options', 'files'] else None)
@@ -273,7 +273,7 @@ class TestHandleCCTool:
         args.files = ["main.c"]
         args.output = None
         args.dry_run = False
-        
+
         # Set all attributes that might be checked
         for attr in ['define', 'undefine', 'include', 'library', 'library_path', 'linker_options', 'assembler_options']:
             setattr(args, attr, [])

@@ -364,7 +364,7 @@ def handle_cc_tool(args: Any) -> None:
         except ValueError as e:
             log.error(str(e))
             sys.exit(1)
-    
+
     # Validate that CPU is provided for cc tool
     if not args.cpu:
         log.error("--cpu is required for cc tool")
@@ -376,10 +376,10 @@ def handle_cc_tool(args: Any) -> None:
 
     # Build compilation command directly from arguments (Typer style)
     cmd_args = [xc8_cc_path]
-    
+
     # Add CPU selection
     cmd_args.append(f"-mcpu={args.cpu}")
-    
+
     # Preprocessor flags
     if args.define and hasattr(args.define, '__iter__'):
         for define in args.define:
@@ -394,33 +394,33 @@ def handle_cc_tool(args: Any) -> None:
         cmd_args.append("-C")
     if args.preprocess_only:
         cmd_args.append("-E")
-    
+
     # Compilation mode flags
     if args.compile_only:
         cmd_args.append("-c")
     if hasattr(args, 'assembly') and args.assembly and not str(args.assembly).startswith('<Mock'):
         cmd_args.append("-S")
-    
+
     # Output file
     if args.output:
         cmd_args.extend(["-o", args.output])
-    
+
     # Verbose mode
     if args.verbose:
         cmd_args.append("-v")
-    
+
     # Warning control
     if args.suppress_warnings:
         cmd_args.append("-w")
-    
+
     # Save intermediate files
     if args.save_temps:
         cmd_args.append("-save-temps")
-    
+
     # Optimization flags
     if hasattr(args, 'optimization') and args.optimization and hasattr(args.optimization, '__iter__'):
         cmd_args.extend(args.optimization)
-    
+
     # Library flags
     if args.library and hasattr(args.library, '__iter__'):
         for lib in args.library:
@@ -428,17 +428,17 @@ def handle_cc_tool(args: Any) -> None:
     if args.library_path and hasattr(args.library_path, '__iter__'):
         for lib_path in args.library_path:
             cmd_args.append(f"-L{lib_path}")
-    
+
     # Linker options
     if args.linker_options and hasattr(args.linker_options, '__iter__'):
         for opt in args.linker_options:
             cmd_args.append(f"-Wl,{opt}")
-    
+
     # Assembler options
     if args.assembler_options and hasattr(args.assembler_options, '__iter__'):
         for opt in args.assembler_options:
             cmd_args.append(f"-Wa,{opt}")
-    
+
     # Advanced compiler options
     if hasattr(args, 'addrqual') and args.addrqual and not str(args.addrqual).startswith('<Mock'):
         cmd_args.append(f"-maddrqual={args.addrqual}")
@@ -458,11 +458,11 @@ def handle_cc_tool(args: Any) -> None:
         cmd_args.append(f"-mheap={args.heap}")
     if hasattr(args, 'summary') and args.summary and not str(args.summary).startswith('<Mock'):
         cmd_args.append(f"-msummary={args.summary}")
-    
+
     # Add source files
     if args.files and hasattr(args.files, '__iter__'):
         cmd_args.extend(args.files)
-    
+
     log.info(f"\n=== XC8 CC COMPILATION for {args.cpu} ===")
     log.info("Configuration:")
     log.info("  - Tool: XC8 CC (xc8-cc)")
@@ -475,7 +475,7 @@ def handle_cc_tool(args: Any) -> None:
             log.info(f"  - Source files: {args.files}")
     if args.output:
         log.info(f"  - Output: {args.output}")
-    
+
     # Show command if dry run
     if hasattr(args, 'dry_run') and args.dry_run:
         try:
@@ -483,13 +483,13 @@ def handle_cc_tool(args: Any) -> None:
         except (TypeError, ValueError):
             log.info(f"\nWould execute: {cmd_args}")
         return
-    
+
     # Execute compilation
     log.warning("Compilation in progress...")
     if not run_command(cmd_args, "XC8 Compilation"):
         log.error("\nCompilation failed")
         log.warning("Check your source code for errors")
         sys.exit(1)
-    
+
     log.info(f"\n🎉 SUCCESS! PIC {args.cpu} compilation completed with XC8 CC {version_info}!")
     log.info("Next step: Check output files or program device")

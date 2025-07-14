@@ -19,6 +19,8 @@ from unittest.mock import patch
 
 import pytest
 
+from xc8_wrapper.core import XC8_KNOWN_VERSIONS
+
 from xc8_wrapper.core import get_xc8_tool_path
 
 # XC8 download URLs by platform and version
@@ -36,9 +38,6 @@ XC8_DOWNLOAD_URLS = {
         "ProductDocuments/SoftwareTools/xc8-v{version}-full-install-macos-x64-installer.dmg"
     ),
 }
-
-# Import known versions from core module
-from xc8_wrapper.core import XC8_KNOWN_VERSIONS
 
 # Sample PIC C code for testing
 SAMPLE_PIC_CODE = """#include <xc.h>

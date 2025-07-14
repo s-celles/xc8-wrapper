@@ -4,7 +4,7 @@ Tests for CLI module
 Comprehensive test suite for the command-line interface functionality.
 """
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 import typer
@@ -62,7 +62,7 @@ class TestTyperCLI:
     def test_install_check_command(self, mock_check):
         """Test install check command"""
         mock_check.return_value = {"installed": True, "version": "3.00"}
-        
+
         result = self.runner.invoke(app, ["install", "--check"])
         assert result.exit_code == 0
         mock_check.assert_called_once()
@@ -73,7 +73,7 @@ class TestTyperCLI:
         """Test install URL command"""
         mock_platform.return_value = "windows"
         mock_url.return_value = "https://example.com/xc8.exe"
-        
+
         result = self.runner.invoke(app, ["install", "--url"])
         assert result.exit_code == 0
         # Platform name may be called multiple times, just check it was called
@@ -84,7 +84,7 @@ class TestTyperCLI:
     def test_cc_command_basic(self, mock_handle):
         """Test basic cc command"""
         mock_handle.return_value = None
-        
+
         result = self.runner.invoke(app, ["cc", "main.c", "--cpu", "PIC16F877A", "--xc8-version", "3.00"])
         assert result.exit_code == 0
         mock_handle.assert_called_once()
@@ -93,9 +93,9 @@ class TestTyperCLI:
     def test_cc_command_with_options(self, mock_handle):
         """Test cc command with various options"""
         mock_handle.return_value = None
-        
+
         result = self.runner.invoke(app, [
-            "cc", "main.c", 
+            "cc", "main.c",
             "--cpu", "PIC16F877A",
             "--xc8-version", "3.00",
             "-O2",
@@ -128,7 +128,7 @@ class TestTyperCLI:
         assert "ERROR" in result.stdout or result.exit_code == 1
 
 
-@pytest.mark.unit 
+@pytest.mark.unit
 @pytest.mark.cli
 class TestMainFunction:
     """Test main function"""
@@ -137,7 +137,7 @@ class TestMainFunction:
     def test_main_function_calls_app(self, mock_app):
         """Test that main function calls the Typer app"""
         mock_app.return_value = None
-        
+
         main(["--help"])
         mock_app.assert_called_once_with(["--help"])
 
@@ -145,7 +145,7 @@ class TestMainFunction:
         """Test main function handles KeyboardInterrupt"""
         with patch("xc8_wrapper.cli.app") as mock_app:
             mock_app.side_effect = KeyboardInterrupt()
-            
+
             with pytest.raises(SystemExit) as exc_info:
                 main()
             assert exc_info.value.code == 1
@@ -154,7 +154,7 @@ class TestMainFunction:
         """Test main function handles Typer Exit"""
         with patch("xc8_wrapper.cli.app") as mock_app:
             mock_app.side_effect = typer.Exit(code=42)
-            
+
             with pytest.raises(SystemExit) as exc_info:
                 main()
             assert exc_info.value.code == 42
@@ -163,7 +163,7 @@ class TestMainFunction:
         """Test main function handles unexpected errors"""
         with patch("xc8_wrapper.cli.app") as mock_app:
             mock_app.side_effect = Exception("Test error")
-            
+
             with pytest.raises(SystemExit) as exc_info:
                 main()
             assert exc_info.value.code == 1
@@ -182,7 +182,7 @@ class TestArgumentPassing:
     def test_cc_arguments_passed_correctly(self, mock_handle):
         """Test that CC arguments are passed correctly to the handler"""
         mock_handle.return_value = None
-        
+
         result = self.runner.invoke(app, [
             "cc", "main.c", "lib.c",
             "--cpu", "PIC18F4550",
@@ -196,13 +196,13 @@ class TestArgumentPassing:
             "-o", "output.hex",
             "-v"
         ])
-        
+
         assert result.exit_code == 0
         mock_handle.assert_called_once()
-        
+
         # Get the args object passed to handle_cc_tool
         args = mock_handle.call_args[0][0]
-        
+
         # Verify arguments are set correctly
         assert args.cpu == "PIC18F4550"
         assert args.xc8_version == "3.00"
@@ -219,7 +219,7 @@ class TestArgumentPassing:
     def test_cc_optimization_flags(self, mock_handle):
         """Test optimization flags are handled correctly"""
         mock_handle.return_value = None
-        
+
         result = self.runner.invoke(app, [
             "cc", "main.c",
             "--cpu", "PIC16F877A",
@@ -228,7 +228,7 @@ class TestArgumentPassing:
             "-Os",
             "-flocal"
         ])
-        
+
         assert result.exit_code == 0
         args = mock_handle.call_args[0][0]
         assert "-O2" in args.optimization
@@ -238,7 +238,7 @@ class TestArgumentPassing:
     def test_cc_advanced_options(self, mock_handle):
         """Test advanced vendor-specific options"""
         mock_handle.return_value = None
-        
+
         result = self.runner.invoke(app, [
             "cc", "main.c",
             "--cpu", "PIC16F877A",
@@ -248,7 +248,7 @@ class TestArgumentPassing:
             "-fmax-errors", "5",
             "-mstack", "compiled:auto:auto:auto:1000h"
         ])
-        
+
         assert result.exit_code == 0
         args = mock_handle.call_args[0][0]
         assert args.warn_level == "9"
@@ -274,7 +274,7 @@ class TestCLIIntegration:
             ["cc", "--help"],
             ["ar", "--help"]
         ]
-        
+
         for cmd in commands_to_test:
             result = self.runner.invoke(app, cmd)
             assert result.exit_code == 0, f"Command {' '.join(cmd)} failed"
@@ -295,7 +295,7 @@ class TestCLIIntegration:
             "path": "/path/to/xc8",
             "version_string": "XC8 v3.00"
         }
-        
+
         result = self.runner.invoke(app, ["install", "--check"])
         assert result.exit_code == 0
         # Logger output goes to different stream, check it was called correctly
