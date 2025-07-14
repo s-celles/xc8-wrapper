@@ -734,7 +734,9 @@ class TestCoreUtilities:
         assert version == "v3.00"  # Should use the latest version
 
     @patch("xc8_wrapper.core.find_available_xc8_versions")
-    def test_get_xc8_tool_path_no_version_or_path_no_installations(self, mock_find_versions) -> None:
+    def test_get_xc8_tool_path_no_version_or_path_no_installations(
+        self, mock_find_versions
+    ) -> None:
         """Test auto-detection when no XC8 installations are found (CI scenario)"""
         from xc8_wrapper.core import get_xc8_tool_path
 
