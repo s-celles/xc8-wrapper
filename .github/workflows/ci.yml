@@ -60,6 +60,20 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
+    - name: Install system dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget expect
+
+    - name: Check and install XC8 if needed (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        python install_xc8.py --check || python install_xc8.py --install --version 3.00
+      env:
+        INSTALL_XC8: "true"
+      continue-on-error: true
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -130,8 +144,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]  # Start with Linux only for XC8 installation
+        os: [ubuntu-latest, windows-latest, macos-latest]  # All platforms for compilation tests
         python-version: ['3.11']
+        include:
+          # Mark macOS as experimental - allowed to fail
+          - os: macos-latest
+            experimental: true
+
+    # Allow experimental platforms to fail
+    continue-on-error: ${{ matrix.experimental == true }}
 
     steps:
     - uses: actions/checkout@v4
@@ -147,6 +168,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y wget expect
 
+    - name: Install system dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        # Install wget if needed
+        brew install wget || true
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -156,14 +183,20 @@ jobs:
     - name: Check XC8 installation
       run: |
         python install_xc8.py --check
-      continue-on-error: true
 
-    - name: Install XC8 if needed
+    - name: Install XC8 if needed (Linux/macOS)
+      if: runner.os != 'Windows'
       run: |
         python install_xc8.py --install --version 3.00
       env:
         INSTALL_XC8: "true"
-      continue-on-error: true
+
+    - name: Install XC8 if needed (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        python install_xc8.py --install --version 3.00
+      env:
+        INSTALL_XC8: "true"
 
     - name: Run compilation tests
       run: |
