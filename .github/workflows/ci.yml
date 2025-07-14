@@ -180,19 +180,7 @@ jobs:
         python -m pip install --upgrade setuptools wheel
         pip install -e .[dev] -v
 
-    - name: Check XC8 installation
-      run: |
-        python install_xc8.py --check
-
-    - name: Install XC8 if needed (Linux/macOS)
-      if: runner.os != 'Windows'
-      run: |
-        python install_xc8.py --install --version 3.00
-      env:
-        INSTALL_XC8: "true"
-
-    - name: Install XC8 if needed (Windows)
-      if: runner.os == 'Windows'
+    - name: Install XC8 (all platforms)
       run: |
         python install_xc8.py --install --version 3.00
       env:
