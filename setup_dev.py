@@ -22,12 +22,12 @@ class Colors:
     END = "\033[0m"
 
 
-def print_colored(text, color):
+def print_colored(text: str, color: str) -> None:
     """Print colored text"""
     print(f"{color}{text}{Colors.END}")
 
 
-def run_command(cmd, description, check=True):
+def run_command(cmd: list[str], description: str, check: bool = True) -> bool:
     """Run a command and report results"""
     print_colored(f"🔧 {description}...", Colors.BLUE)
     print(f"   Command: {' '.join(cmd)}")
@@ -51,7 +51,7 @@ def run_command(cmd, description, check=True):
         return False
 
 
-def check_python_version():
+def check_python_version() -> bool:
     """Check if Python version is compatible"""
     version = sys.version_info
     if version.major != 3 or version.minor < 9:
@@ -63,7 +63,7 @@ def check_python_version():
     return True
 
 
-def check_git():
+def check_git() -> bool:
     """Check if git is available"""
     try:
         result = subprocess.run(["git", "--version"], capture_output=True, text=True)  # nosec B603 B607
@@ -78,7 +78,7 @@ def check_git():
         return False
 
 
-def setup_virtual_environment():
+def setup_virtual_environment() -> bool:
     """Set up virtual environment"""
     venv_path = Path(".venv")
 
@@ -91,7 +91,7 @@ def setup_virtual_environment():
     )
 
 
-def get_python_executable():
+def get_python_executable() -> Path:
     """Get the Python executable path for the virtual environment"""
     if os.name == "nt":  # Windows
         return Path(".venv") / "Scripts" / "python.exe"
@@ -99,7 +99,7 @@ def get_python_executable():
         return Path(".venv") / "bin" / "python"
 
 
-def install_package_dev():
+def install_package_dev() -> bool:
     """Install package in development mode"""
     python_exe = get_python_executable()
 
@@ -121,7 +121,7 @@ def install_package_dev():
     return True
 
 
-def setup_pre_commit():
+def setup_pre_commit() -> bool:
     """Set up pre-commit hooks"""
     python_exe = get_python_executable()
 
@@ -145,7 +145,7 @@ def setup_pre_commit():
     return True
 
 
-def run_initial_tests():
+def run_initial_tests() -> bool:
     """Run initial tests to verify setup"""
     python_exe = get_python_executable()
 
@@ -176,7 +176,7 @@ def run_initial_tests():
     return success_count == len(commands)
 
 
-def create_development_config():
+def create_development_config() -> None:
     """Create development configuration files"""
     configs = [
         (
@@ -252,7 +252,7 @@ def create_development_config():
             print_colored(f"ℹ️  {file_path} already exists", Colors.YELLOW)
 
 
-def main():
+def main() -> int:
     """Main setup function"""
     print_colored("🚀 XC8 Wrapper Development Setup", Colors.BOLD + Colors.CYAN)
     print("=" * 50)

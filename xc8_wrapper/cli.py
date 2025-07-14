@@ -108,7 +108,7 @@ def install_command(
 # CC (Compiler) command - matches vendor xc8-cc options
 @app.command("cc")
 def cc_command(
-    files: Annotated[List[str], typer.Argument(help="Source files to compile")] = None,
+    files: Annotated[Optional[List[str]], typer.Argument(help="Source files to compile")] = None,
     # Basic options matching vendor help
     c: Annotated[
         bool, typer.Option("-c", help="Compile/assemble to intermediate/object file")
@@ -127,17 +127,17 @@ def cc_command(
         Optional[str], typer.Option("-o", help="Specify output file")
     ] = None,
     define: Annotated[
-        List[str], typer.Option("-D", help="Define preprocessor symbol")
+        Optional[List[str]], typer.Option("-D", help="Define preprocessor symbol")
     ] = None,
     undefine: Annotated[
-        List[str], typer.Option("-U", help="Undefine preprocessor symbol")
+        Optional[List[str]], typer.Option("-U", help="Undefine preprocessor symbol")
     ] = None,
     include: Annotated[
-        List[str], typer.Option("-I", help="Specify include path")
+        Optional[List[str]], typer.Option("-I", help="Specify include path")
     ] = None,
-    library: Annotated[List[str], typer.Option("-l", help="Specify library")] = None,
+    library: Annotated[Optional[List[str]], typer.Option("-l", help="Specify library")] = None,
     library_path: Annotated[
-        List[str], typer.Option("-L", help="Specify library search path")
+        Optional[List[str]], typer.Option("-L", help="Specify library search path")
     ] = None,
     list_headers: Annotated[
         bool, typer.Option("-H", help="List included header files")
@@ -146,27 +146,27 @@ def cc_command(
         bool, typer.Option("-dM", help="List all defined macros")
     ] = False,
     linker_options: Annotated[
-        List[str],
+        Optional[List[str]],
         typer.Option("-Wl", help="Pass comma-separated options directly to the linker"),
     ] = None,
     xlinker: Annotated[
-        List[str], typer.Option("-Xlinker", help="Pass option directly to the linker")
+        Optional[List[str]], typer.Option("-Xlinker", help="Pass option directly to the linker")
     ] = None,
     assembler_options: Annotated[
-        List[str],
+        Optional[List[str]],
         typer.Option("-Wa", help="Pass comma-separated options on to the assembler"),
     ] = None,
     xparser: Annotated[
-        List[str], typer.Option("-Xparser", help="Pass option directly to the parser")
+        Optional[List[str]], typer.Option("-Xparser", help="Pass option directly to the parser")
     ] = None,
     xp1: Annotated[
-        List[str], typer.Option("-Xp1", help="Pass option directly to the parser")
+        Optional[List[str]], typer.Option("-Xp1", help="Pass option directly to the parser")
     ] = None,
     xclang: Annotated[
-        List[str], typer.Option("-Xclang", help="Pass option directly to the parser")
+        Optional[List[str]], typer.Option("-Xclang", help="Pass option directly to the parser")
     ] = None,
     xassembler: Annotated[
-        List[str],
+        Optional[List[str]],
         typer.Option("-Xassembler", help="Pass option directly to the assembler"),
     ] = None,
     language: Annotated[
@@ -181,13 +181,13 @@ def cc_command(
         ),
     ] = False,
     preprocessor_options: Annotated[
-        List[str],
+        Optional[List[str]],
         typer.Option(
             "-Wp", help="Pass comma-separated options directly to the preprocessor"
         ),
     ] = None,
     xpreprocessor: Annotated[
-        List[str],
+        Optional[List[str]],
         typer.Option("-Xpreprocessor", help="Pass option directly to the preprocessor"),
     ] = None,
     dry_run: Annotated[
@@ -383,7 +383,7 @@ def cc_command(
 
     # Create args object compatible with existing handler
     class Args:
-        def __init__(self):
+        def __init__(self) -> None:
             # Basic compilation options
             self.cpu = cpu
             self.xc8_version = xc8_version
@@ -463,7 +463,7 @@ def ar_command(
     ],
     archive: Annotated[str, typer.Argument(help="Archive file (.a)")],
     files: Annotated[
-        List[str], typer.Argument(help="Object files (.o, .p1) to process")
+        Optional[List[str]], typer.Argument(help="Object files (.o, .p1) to process")
     ] = None,
     verbose: Annotated[bool, typer.Option("-v", help="Verbose output")] = False,
     update: Annotated[bool, typer.Option("-u", help="Update only newer files")] = False,

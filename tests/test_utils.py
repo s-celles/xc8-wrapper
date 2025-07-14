@@ -197,10 +197,10 @@ class TestErrorHandling:
         assert path.endswith("xc8-cc") or path.endswith("xc8-cc.exe")
         assert "xc8" in path.lower()
 
-    def test_validate_xc8_tool_with_none_path(self):
-        """Test validation with None path"""
-        # No need to mock since we handle None before calling Path.exists()
-        result = validate_xc8_tool(None, "cc", "v3.00")
+    def test_validate_xc8_tool_with_empty_path(self):
+        """Test validation with empty path"""
+        # Empty path should return False
+        result = validate_xc8_tool("", "cc", "v3.00")
         assert result is False
 
 

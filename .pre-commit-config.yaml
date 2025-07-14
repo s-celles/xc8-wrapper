@@ -22,8 +22,8 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [types-colorama, typer, colorama, logbook]
-        args: [--ignore-missing-imports, --no-strict-optional, --allow-untyped-defs, --disable-error-code=misc]
-        exclude: ^(tests/|setup_dev\.py|run_tests\.py|demo\.py|diagnose_platform\.py|install_xc8\.py)
+        #args: [--no-strict-optional, --allow-untyped-defs, --disable-error-code=misc]
+        #exclude: ^(tests/|setup_dev\.py|run_tests\.py|demo\.py|diagnose_platform\.py|install_xc8\.py)
 
   - repo: https://github.com/pycqa/bandit
     rev: 1.8.6
