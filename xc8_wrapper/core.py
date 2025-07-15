@@ -258,38 +258,207 @@ def _validate_passthrough_arguments(args: List[str]) -> Tuple[bool, List[str]]:
     return True, validated_args
 
 
-def _validate_path_security(path: str) -> bool:
+def _looks_like_tool_path(path: str) -> bool:
     """
-    Validate file paths for security using pathlib and pattern checks.
+    Check if a path looks like a legitimate tool installation path.
+    Used as a fallback for paths that can't be resolved.
+    """
+    tool_indicators = [
+        "xc8",
+        "gcc",
+        "clang",
+        "microchip",
+        "mplab",
+        "bin",
+        "tools",
+        "compiler",
+        "toolchain",
+    ]
+
+    path_lower = path.lower()
+    return any(indicator in path_lower for indicator in tool_indicators)
+
+
+def _validate_path_security(path: str) -> bool:
+    r"""
+    Validate that a file path is secure and doesn't contain malicious patterns.
+
+    This function is designed to prevent path traversal attacks while allowing
+    legitimate file paths including Windows XC8 compiler installations.
 
     Args:
-        path: File path to validate
+        path (str): The file path to validate
 
     Returns:
         bool: True if path is safe, False otherwise
+
+    Security checks:
+    - No path traversal attempts (../ or ..\)
+    - No null bytes or control characters
+    - No suspicious special characters (except valid Windows paths)
+    - Valid path format for the current OS
+    - Reasonable path length
+    - No Windows reserved device names in inappropriate contexts
     """
-    try:
-        path_obj = Path(path)
-        # Disallow any path containing '..' in its parts (prevents traversal)
-        if any(part == ".." for part in path_obj.parts):
-            return False
-        # Additional checks for suspicious patterns
-        suspicious_patterns = ["../", "..\\", "//", "\\\\"]
-        for pattern in suspicious_patterns:
-            if pattern in path:
-                return False
-        # Use pathlib to resolve absolute path
-        resolved = path_obj.resolve()
-        # Only block if the path is exactly or starts with a dangerous system directory
-        dangerous_dirs = ["/etc", "/bin", "/usr/bin", "/system32", "windows/system32"]
-        path_str = str(resolved).lower()
-        for danger in dangerous_dirs:
-            if path_str == danger or path_str.startswith(danger + os.sep):
-                return False
-        return True
-    except (ValueError, OSError, RuntimeError):
-        # Any path resolution error means it's not safe
+    # Basic input validation
+    if not path or not isinstance(path, str):
         return False
+
+    # Strip whitespace for processing but check original had none
+    stripped_path = path.strip()
+    if stripped_path != path:
+        return False  # Reject paths with leading/trailing whitespace
+
+    # Check for null bytes and dangerous control characters
+    if "\x00" in path:
+        return False
+
+    # Check for other dangerous control characters (allow tab and newline in some contexts)
+    dangerous_chars = "".join(chr(i) for i in range(1, 32) if i not in (9, 10, 13))
+    if any(char in path for char in dangerous_chars):
+        return False
+
+    # Check path length (prevent DoS via extremely long paths)
+    if len(path) > 4096:  # Standard filesystem limit
+        return False
+
+    # Normalize the path to handle different separators and resolve . components
+    try:
+        normalized_path = os.path.normpath(path)
+    except (ValueError, TypeError, OSError):
+        return False
+
+    # Check for empty path after normalization
+    if not normalized_path or normalized_path in (".", ".."):
+        return False
+
+    # Critical: Check for path traversal attempts
+    # Split by both types of separators to catch mixed paths
+    path_components = re.split(r"[\\/]", normalized_path)
+
+    for component in path_components:
+        if component == "..":
+            return False
+        # Also check for encoded versions
+        if component in ("%2e%2e", "%2E%2E", "..%2f", "..%2F", "..%5c", "..%5C"):
+            return False
+
+    # Check for dangerous patterns using regex
+    dangerous_patterns = [
+        r"\.\.[\\/]",  # Path traversal: ../
+        r"[\\/]\.\.",  # Path traversal: /..
+        r"\.\.[\\\/]",  # Path traversal: ../ or ..\
+        r"\.\.%2[fF]",  # URL encoded traversal
+        r"\.\.%5[cC]",  # URL encoded traversal (backslash)
+        r"%2[eE]%2[eE]",  # Double URL encoded dots
+        r"\.{3,}",  # Multiple dots (suspicious)
+    ]
+
+    for pattern in dangerous_patterns:
+        if re.search(pattern, path, re.IGNORECASE):
+            return False
+
+    # Windows-specific validation
+    if os.name == "nt" or "\\" in path or ":" in path:
+        # Check for invalid Windows filename characters
+        # Valid: letters, numbers, spaces, and: . - _ ( ) [ ] { } ~ ! @ # $ % ^ & + = ; ' `
+        # Invalid: < > : " | ? * (except : for drive letters)
+        invalid_chars = r'[<>"|?*]'
+        if re.search(invalid_chars, path):
+            return False
+
+        # Handle colon validation for Windows drive letters
+        if ":" in path:
+            # Find all colon positions
+            colon_positions = [i for i, c in enumerate(path) if c == ":"]
+
+            for pos in colon_positions:
+                # Valid colon usage: single letter followed by colon (drive letter)
+                if pos == 1:  # C:, D:, etc.
+                    if not (path[0].isalpha() and (len(path) == 2 or path[2] in "/\\")):
+                        return False
+                else:
+                    # Any other colon position is invalid in Windows paths
+                    return False
+
+    # Check for Windows reserved device names
+    windows_reserved_names = {
+        "CON",
+        "PRN",
+        "AUX",
+        "NUL",
+        "CLOCK$",
+        "COM1",
+        "COM2",
+        "COM3",
+        "COM4",
+        "COM5",
+        "COM6",
+        "COM7",
+        "COM8",
+        "COM9",
+        "LPT1",
+        "LPT2",
+        "LPT3",
+        "LPT4",
+        "LPT5",
+        "LPT6",
+        "LPT7",
+        "LPT8",
+        "LPT9",
+    }
+
+    # Parse path components safely
+    try:
+        path_obj = PurePath(normalized_path)
+        path_parts = path_obj.parts
+    except (ValueError, OSError):
+        return False
+
+    # Check each path component
+    for i, part in enumerate(path_parts):
+        # Skip Windows drive letters (first component like 'C:')
+        if i == 0 and len(part) == 2 and part.endswith(":") and part[0].isalpha():
+            continue
+
+        # Skip empty parts and single dots
+        if not part or part == ".":
+            continue
+
+        # Check for reserved device names
+        # Remove extension to check base name
+        base_name = part.split(".")[0].upper()
+        if base_name in windows_reserved_names:
+            return False
+
+        # Check for names ending with spaces or dots (invalid on Windows)
+        if part.endswith(" ") or part.endswith("."):
+            return False
+
+    # Additional security checks for absolute paths
+    if os.path.isabs(normalized_path):
+        try:
+            # Try to resolve the path to catch potential issues
+            resolved_path = str(Path(normalized_path).resolve())
+
+            # Make sure resolution didn't introduce path traversal
+            if ".." in resolved_path.split(os.sep):
+                return False
+
+        except (OSError, ValueError, RuntimeError):
+            # If we can't resolve it safely, it might be problematic
+            # But allow it if it looks like a valid tool path
+            if not _looks_like_tool_path(normalized_path):
+                return False
+
+    # Final validation: check if path structure makes sense
+    try:
+        # This will validate the path syntax without accessing filesystem
+        PurePath(normalized_path)
+    except (ValueError, OSError):
+        return False
+
+    return True
 
 
 def get_xc8_tool_path(
