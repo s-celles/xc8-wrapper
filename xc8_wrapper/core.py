@@ -269,25 +269,22 @@ def _validate_path_security(path: str) -> bool:
         bool: True if path is safe, False otherwise
     """
     try:
-        # Use pathlib for secure path handling
-        path_obj = Path(path).resolve()
-
-        # Check for common directory traversal patterns
-        if ".." in Path(path).parts:
+        path_obj = Path(path)
+        # Disallow any path containing '..' in its parts (prevents traversal)
+        if any(part == ".." for part in path_obj.parts):
             return False
-
         # Additional checks for suspicious patterns
         suspicious_patterns = ["../", "..\\", "//", "\\\\"]
         for pattern in suspicious_patterns:
             if pattern in path:
                 return False
-
+        # Use pathlib to resolve absolute path
+        resolved = path_obj.resolve()
         # Check for system directories (basic protection)
         dangerous_dirs = ["/etc", "/bin", "/usr/bin", "/system32", "windows/system32"]
-        path_str = str(path_obj).lower()
+        path_str = str(resolved).lower()
         if any(danger in path_str for danger in dangerous_dirs):
             return False
-
         return True
     except (ValueError, OSError, RuntimeError):
         # Any path resolution error means it's not safe
