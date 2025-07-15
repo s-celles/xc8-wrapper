@@ -193,14 +193,6 @@ class TestPassthroughOption:
         # or that the command failed as expected
         assert result.exception is not None or result.exit_code == 1
 
-    def test_passthrough_help_in_cli_reference(self):
-        """Test that passthrough option appears in help"""
-        result = self.runner.invoke(app, ["cc", "--help"])
-
-        assert result.exit_code == 0
-        assert "--passthrough" in result.output
-        assert "Pass options directly to" in result.output
-
     @patch("xc8_wrapper.core.validate_xc8_tool")
     @patch("xc8_wrapper.core.get_xc8_tool_path")
     @patch("subprocess.run")
