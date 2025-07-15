@@ -6,11 +6,10 @@ This module tests the --passthrough option that allows passing raw arguments to 
 
 import pytest
 import shlex
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from typer.testing import CliRunner
 
 from xc8_wrapper.cli import app
-from xc8_wrapper.core import handle_cc_tool
 
 
 class TestPassthroughOption:
