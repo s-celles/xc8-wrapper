@@ -363,8 +363,9 @@ def cc_command(
     passthrough: Annotated[
         Optional[str],
         typer.Option(
-            "--passthrough", "-p",
-            help="Pass options directly to xc8-cc (e.g., '--passthrough=\"-mplib -gdwarf-3\"')"
+            "--passthrough",
+            "-p",
+            help="Pass options directly to xc8-cc (e.g., '--passthrough=\"-mplib -gdwarf-3\"')",
         ),
     ] = None,
     # Additional options truncated for brevity - can be expanded as needed
@@ -458,7 +459,7 @@ def cc_command(
             self.stack = stack
             self.heap = heap
             self.summary = summary
-            
+
             # Passthrough option
             self.passthrough = passthrough
 

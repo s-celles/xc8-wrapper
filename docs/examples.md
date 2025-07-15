@@ -380,7 +380,7 @@ The `--passthrough` option includes security validation to prevent potentially d
 ```bash
 # ❌ These will be blocked for security
 xc8-wrapper cc --cpu PIC16F877A --passthrough "& echo hacked" main.c
-xc8-wrapper cc --cpu PIC16F877A --passthrough "; rm -rf /" main.c  
+xc8-wrapper cc --cpu PIC16F877A --passthrough "; rm -rf /" main.c
 xc8-wrapper cc --cpu PIC16F877A --passthrough "|cat /etc/passwd" main.c
 
 # ✅ These are safe and allowed
