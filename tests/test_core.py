@@ -223,6 +223,7 @@ class TestHandleCCTool:
         args.std = None
         args.compile_flag = []
         args.link_flag = []
+        args.passthrough = ""  # Ensure passthrough is a string for shlex.split
 
         # Explicitly set attributes that might be checked by the function
         for attr in [
@@ -294,7 +295,7 @@ class TestHandleCCTool:
         args.files = ["main.c"]
         args.output = None
         args.dry_run = False
-
+        args.passthrough = ""  # Ensure passthrough is a string for shlex.split
         # Set all attributes that might be checked
         for attr in [
             "define",

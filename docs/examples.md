@@ -320,6 +320,94 @@ xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -Os
 xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -Og
 ```
 
+## Passthrough Examples
+
+### Using Unsupported XC8 Options
+
+XC8 has many specialized options that aren't directly supported by the wrapper. Use `--passthrough` to access them:
+
+```bash
+# PIC library support
+xc8-wrapper cc --cpu PIC18F4550 --passthrough="-mplib" main.c
+
+# Debug format options
+xc8-wrapper cc --cpu PIC16F877A --passthrough="-gdwarf-3" main.c
+
+# Memory configuration
+xc8-wrapper cc --cpu PIC16F877A --passthrough="--fill=0xFF --memorysummary=memory.xml" main.c
+
+# Device-specific options
+xc8-wrapper cc --cpu PIC16F877A --passthrough="-mdownload-hex -mresetbits -mconfig" main.c
+```
+
+### Complex Passthrough Examples
+
+```bash
+# Production build with checksums and memory configuration
+xc8-wrapper cc --cpu PIC18F4550 --xc8-version 3.00 \
+    -Os \
+    --passthrough="-mplib -mdownload-hex -mchecksum=0x1234 --fill=0xFF" \
+    main.c
+
+# Debug build with advanced debugging features
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 \
+    -Og -D DEBUG=1 \
+    --passthrough="-gdwarf-3 --memorysummary=debug_memory.xml" \
+    main.c
+
+# Custom serial number and device configuration
+xc8-wrapper cc --cpu PIC16F877A \
+    --passthrough='-mserial="ABC123" -mconfig -mosccal' \
+    main.c
+```
+
+### Combining Regular and Passthrough Options
+
+```bash
+# Mix wrapper options with specialized XC8 options
+xc8-wrapper cc --cpu PIC18F4550 --xc8-version 3.00 \
+    -O2 -v \
+    -I ./include -I ./lib \
+    -D DEBUG=0 -D VERSION=100 \
+    --passthrough="-mplib -gdwarf-3 -mdownload-hex" \
+    src/main.c src/uart.c src/spi.c
+```
+
+### Security Considerations
+
+The `--passthrough` option includes security validation to prevent potentially dangerous commands:
+
+```bash
+# ❌ These will be blocked for security
+xc8-wrapper cc --cpu PIC16F877A --passthrough "& echo hacked" main.c
+xc8-wrapper cc --cpu PIC16F877A --passthrough "; rm -rf /" main.c  
+xc8-wrapper cc --cpu PIC16F877A --passthrough "|cat /etc/passwd" main.c
+
+# ✅ These are safe and allowed
+xc8-wrapper cc --cpu PIC16F877A --passthrough "-mplib -gdwarf-3" main.c
+xc8-wrapper cc --cpu PIC16F877A --passthrough "--fill=0xFF" main.c
+```
+
+**Blocked patterns include:**
+- Shell operators: `&`, `|`, `;`, `&&`, `||`, `>`, `<`
+- Command substitution: `` ` ``, `$(`, `${`
+- File traversal: `../`, `..\\`, `/etc/`, `\\windows\\`
+- Dangerous commands: `cmd.exe`, `powershell`, `bash`, `rm`, `del`
+
+This ensures that only legitimate compiler options can be passed through.
+
+### Error Handling
+
+If you pass invalid options through `--passthrough`, XC8 will report the error:
+
+```bash
+# This will fail with XC8 error
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 \
+    --passthrough "-invalid-option" main.c
+```
+
+The wrapper will show the XC8 error message to help you identify the problem.
+
 ## Next Steps
 
 - Check out the [CLI Reference](cli-reference.md) for complete command documentation

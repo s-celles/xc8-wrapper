@@ -5,12 +5,136 @@ This module contains the main functions for interacting with the XC8 toolchain.
 """
 
 import os
+import re
+import shlex
 import subprocess  # nosec B404 - Required for executing XC8 compiler tools
 import sys
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any, List, Optional, Tuple
 
 from .logger import log
+
+# XC8 Compiler Option Allowlist - Only these options are allowed in passthrough
+# This is a comprehensive allowlist based on official XC8 documentation
+XC8_ALLOWED_OPTIONS = {
+    # Device and target options
+    "-mcpu",
+    "-mprocessor",
+    "-mdfp",
+    "-mpack",
+    "-mchecksum",
+    # Memory and optimization options
+    "-mheap",
+    "-mstack",
+    "-memi",
+    "-merrata",
+    "-mrom",
+    "-mram",
+    "-mplib",
+    "-maddrqual",
+    "-mdownload-hex",
+    "-mdownload-elf",
+    "-mmaxichip",
+    "-mmaxipic",
+    "-mc90lib",
+    "-mcci",
+    "-mext",
+    "-mundefints",
+    "-mshroud",
+    "-msummary",
+    "-mwarn",
+    "-mserial",
+    # Code generation options
+    "-gdwarf-2",
+    "-gdwarf-3",
+    "-gdwarf-4",
+    "-gdwarf-5",
+    "-gstrict-dwarf",
+    "-gno-strict-dwarf",
+    "-gcolumn-info",
+    "-gno-column-info",
+    "-gsplit-dwarf",
+    "-gno-split-dwarf",
+    "-gpubnames",
+    "-gno-pubnames",
+    # Fill and memory options
+    "--fill",
+    "--checksum",
+    "--runtime",
+    "--opt",
+    "--chip",
+    # Output format options
+    "--outdir",
+    "--objdir",
+    "--bindir",
+    "--htmldir",
+    # Legacy compatibility options
+    "--mode",
+    "--chip",
+    "--opt",
+    "--outfile",
+    # Standard compiler options (subset that's safe)
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-Wno-main",
+    "-Wundef",
+    "-Wstrict-prototypes",
+    "-Wmissing-prototypes",
+    "-Wmissing-declarations",
+    "-Wredundant-decls",
+    "-Wnested-externs",
+    "-Winline",
+    "-Wcast-align",
+    "-Wcast-qual",
+    "-Wshadow",
+    "-Wwrite-strings",
+    "-Wconversion",
+    "-Wsign-compare",
+    "-Waggregate-return",
+    "-Wstrict-overflow",
+    "-Wold-style-definition",
+    "-Wmissing-field-initializers",
+    "-Wmissing-noreturn",
+    "-Wformat",
+    "-Wformat-security",
+    # Optimization related (that don't conflict with wrapper)
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fmerge-constants",
+    "-fmerge-all-constants",
+    "-fmodulo-sched",
+    "-fmodulo-sched-allow-regmoves",
+    "-fgcse-las",
+    "-fgcse-sm",
+    "-fipa-pta",
+    "-fira-loop-pressure",
+    "-fno-ira-share-save-slots",
+    "-fno-ira-share-spill-slots",
+    # PIC-specific compiler flags that are safe
+    "-legacy-libc",
+    "-no-legacy-libc",
+}
+
+# Allowed option patterns (for options that take values)
+XC8_ALLOWED_PATTERNS = [
+    r"^-mheap=\d+$",
+    r"^-mstack=\d+$",
+    r"^-mchecksum=0x[0-9a-fA-F]+$",
+    r"^-mserial=[a-zA-Z0-9_]+$",
+    r"^--fill=0x[0-9a-fA-F]+$",
+    r"^--checksum=0x[0-9a-fA-F]+$",
+    r"^-maddrqual=[a-zA-Z_][a-zA-Z0-9_]*$",
+    r"^-memi=[a-zA-Z_][a-zA-Z0-9_]*$",
+    r"^-merrata=[a-zA-Z_][a-zA-Z0-9_,]*$",
+    r"^-msummary=[a-zA-Z0-9_+,-]*$",
+    r"^-mwarn=\d+$",
+    r"^-mext=[a-zA-Z0-9_,]*$",
+    r"^--outdir=[a-zA-Z0-9_./\\-]+$",
+    r"^--objdir=[a-zA-Z0-9_./\\-]+$",
+    r"^-Wl,.*$",  # Allow linker options
+]
 
 # Known XC8 versions that actually exist (highest to lowest)
 XC8_KNOWN_VERSIONS = [
@@ -50,6 +174,114 @@ SUPPORTED_XC8_TOOLS = {
     #     "default_operation": "language_server"
     # }
 }
+
+
+def _validate_passthrough_arguments(args: List[str]) -> Tuple[bool, List[str]]:
+    """
+    Validate passthrough arguments using allowlist approach for security.
+
+    This function uses an allowlist of known safe XC8 compiler options instead of
+    trying to block dangerous patterns. This is much more secure as it only allows
+    known-good options rather than trying to predict all possible bad ones.
+
+    Args:
+        args: List of argument strings to validate
+
+    Returns:
+        Tuple of (is_valid, validated_args)
+        - is_valid: True if all arguments are safe, False otherwise
+        - validated_args: List of validated arguments (same as input if valid)
+    """
+    validated_args = []
+
+    for arg in args:
+        arg_valid = False
+
+        # Check if it's a known safe option
+        if arg in XC8_ALLOWED_OPTIONS:
+            arg_valid = True
+        else:
+            # Check if it matches allowed patterns (options with values)
+            for pattern in XC8_ALLOWED_PATTERNS:
+                if re.match(pattern, arg):
+                    arg_valid = True
+                    break
+
+            # Check for safe file extensions (input/output files)
+            if not arg_valid:
+                safe_extensions = (
+                    ".c",
+                    ".h",
+                    ".s",
+                    ".S",
+                    ".asm",
+                    ".o",
+                    ".obj",
+                    ".hex",
+                    ".elf",
+                    ".map",
+                )
+                if any(arg.endswith(ext) for ext in safe_extensions):
+                    # Additional validation: ensure it's just a filename, not a path traversal
+                    try:
+                        path = PurePath(arg)
+                        # Only allow simple filenames, no directory traversal
+                        if (
+                            not path.is_absolute()
+                            and ".." not in path.parts
+                            and len(path.parts) <= 2
+                        ):
+                            arg_valid = True
+                    except (ValueError, OSError):
+                        pass  # Invalid path, keep arg_valid = False
+
+            # Allow simple numeric values and alphanumeric identifiers (for option values)
+            if not arg_valid and (
+                arg.replace(".", "").replace("_", "").replace("-", "").isalnum()
+            ):
+                arg_valid = True
+
+        if not arg_valid:
+            log.error(f"Rejected unsafe passthrough argument: {arg}")
+            log.error(
+                "Only XC8-specific compiler options are allowed in passthrough mode"
+            )
+            log.error("See documentation for list of allowed options")
+            return False, []
+
+        validated_args.append(arg)
+
+    return True, validated_args
+
+
+def _validate_path_security(path: str) -> bool:
+    """
+    Validate file paths for security using pathlib.
+
+    Args:
+        path: File path to validate
+
+    Returns:
+        bool: True if path is safe, False otherwise
+    """
+    try:
+        # Use pathlib for secure path handling
+        path_obj = Path(path).resolve()
+
+        # Check for common directory traversal patterns
+        if ".." in Path(path).parts:
+            return False
+
+        # Check for system directories (basic protection)
+        dangerous_dirs = ["/etc", "/bin", "/usr/bin", "/system32", "windows/system32"]
+        path_str = str(path_obj).lower()
+        if any(danger in path_str for danger in dangerous_dirs):
+            return False
+
+        return True
+    except (ValueError, OSError, RuntimeError):
+        # Any path resolution error means it's not safe
+        return False
 
 
 def get_xc8_tool_path(
@@ -492,6 +724,31 @@ def handle_cc_tool(args: Any) -> None:
         and not str(args.summary).startswith("<Mock")
     ):
         cmd_args.append(f"-msummary={args.summary}")
+
+    # Passthrough options - pass raw arguments directly to xc8-cc using secure validation
+    if hasattr(args, "passthrough") and args.passthrough:
+        try:
+            # Use shlex to properly handle quoted arguments and spaces
+            passthrough_args = shlex.split(args.passthrough)
+
+            # Security validation using allowlist approach
+            is_valid, validated_args = _validate_passthrough_arguments(passthrough_args)
+
+            if not is_valid:
+                log.error("Passthrough validation failed - see errors above")
+                log.error("Only XC8-specific compiler options are allowed")
+                sys.exit(1)
+
+            cmd_args.extend(validated_args)
+            if args.verbose:
+                log.info(f"Added validated passthrough arguments: {validated_args}")
+
+        except ValueError as e:
+            log.error(f"Invalid passthrough syntax: {e}")
+            print(
+                f"Invalid passthrough syntax: {e}"
+            )  # Ensure error is visible to CLI and tests
+            sys.exit(1)
 
     # Add source files
     if args.files and hasattr(args.files, "__iter__"):

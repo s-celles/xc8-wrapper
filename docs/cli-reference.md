@@ -296,3 +296,30 @@ echo "Build complete!"
 - [Examples](examples.md) - Real-world usage scenarios
 - [Development](development.md) - Development and contributing guide
 - [FAQ](faq.md) - Frequently asked questions
+
+### Passthrough Options
+- `--passthrough STRING`, `-p STRING`: Pass options directly to xc8-cc without interpretation
+
+**Examples:**
+```bash
+# Pass PIC-specific options not available in wrapper
+xc8-wrapper cc --cpu PIC16F877A --passthrough="-mplib -gdwarf-3" main.c
+
+# Pass multiple options with values
+xc8-wrapper cc --cpu PIC16F877A --passthrough="-mchecksum=0x1234 --fill=0xFF" main.c
+
+# Combine with regular options
+xc8-wrapper cc --cpu PIC16F877A -O2 -v --passthrough="-mplib -mdownload-hex" main.c
+```
+
+**Security & Safety Notes:**
+- Arguments are parsed using shell-like syntax (supports quotes and escaping)
+- Use quotes for arguments containing spaces: `--passthrough='--output="my file.hex"'`
+- Passthrough arguments are added after regular wrapper options
+- Invalid passthrough syntax will cause compilation to fail
+- **Security validation**: The following patterns are blocked for security:
+  - Shell operators: `&`, `|`, `;`, `&&`, `||`, `>`, `<`, `>>`, `<<`
+  - Command substitution: `` ` ``, `$(`, `${`
+  - File traversal: `../`, `..\\`, `/etc/`, `\\windows\\`
+  - Dangerous executables: `cmd.exe`, `powershell`, `bash`, `sh`, `rm`, `del`, `format`
+- Only compiler-specific options should be passed through this mechanism

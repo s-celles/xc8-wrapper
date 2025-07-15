@@ -359,6 +359,14 @@ def cc_command(
             "-mshroud", help="Shroud (obfuscate) generated intermediate files"
         ),
     ] = False,
+    # Passthrough option for raw xc8-cc arguments
+    passthrough: Annotated[
+        Optional[str],
+        typer.Option(
+            "--passthrough", "-p",
+            help="Pass options directly to xc8-cc (e.g., '--passthrough=\"-mplib -gdwarf-3\"')"
+        ),
+    ] = None,
     # Additional options truncated for brevity - can be expanded as needed
 ) -> None:
     """C compiler, assembler, and linker (matches xc8-cc)"""
@@ -450,6 +458,9 @@ def cc_command(
             self.stack = stack
             self.heap = heap
             self.summary = summary
+            
+            # Passthrough option
+            self.passthrough = passthrough
 
     args = Args()
 
