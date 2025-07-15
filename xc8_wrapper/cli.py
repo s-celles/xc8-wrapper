@@ -398,15 +398,6 @@ def cc_command(
         # Would list built-in functions
         return
 
-    # Validate required arguments for compilation
-    if not files and not (print_devices or print_builtins or target_help):
-        log.error("No input files specified")
-        raise typer.Exit(1)
-
-    if not cpu and not (print_devices or print_builtins or target_help):
-        log.error("CPU/device must be specified with -mcpu or --cpu")
-        raise typer.Exit(1)
-
     # Create args object compatible with existing handler
     class Args:
         def __init__(self) -> None:
@@ -473,6 +464,22 @@ def cc_command(
             self.passthrough = passthrough
 
     args = Args()
+
+    if passthrough:
+        try:
+            handle_cc_tool(args)
+        except Exception as e:
+            log.error(f"Compilation failed: {e}")
+            raise typer.Exit(1)
+
+    # Validate required arguments for compilation
+    if not files and not (print_devices or print_builtins or target_help):
+        log.error("No input files specified")
+        raise typer.Exit(1)
+
+    if not cpu and not (print_devices or print_builtins or target_help):
+        log.error("CPU/device must be specified with -mcpu or --cpu")
+        raise typer.Exit(1)
 
     try:
         handle_cc_tool(args)

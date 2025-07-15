@@ -777,7 +777,7 @@ def handle_cc_tool(args: Any) -> None:
         sys.exit(1)
 
     # Validate that CPU is provided for cc tool
-    if not args.cpu:
+    if not args.passthrough and not args.cpu:
         log.error("--cpu is required for cc tool")
         sys.exit(1)
 
@@ -785,7 +785,8 @@ def handle_cc_tool(args: Any) -> None:
     cmd_args = [xc8_cc_path]
 
     # Add CPU selection
-    cmd_args.append(f"-mcpu={args.cpu}")
+    if not args.passthrough:
+        cmd_args.append(f"-mcpu={args.cpu}")
 
     # Preprocessor flags
     if args.define and hasattr(args.define, "__iter__"):
@@ -949,13 +950,20 @@ def handle_cc_tool(args: Any) -> None:
         return
 
     # Execute compilation
-    log.warning("Compilation in progress...")
-    if not run_command(cmd_args, "XC8 Compilation"):
-        log.error("\nCompilation failed")
-        log.warning("Check your source code for errors")
-        sys.exit(1)
+    if not args.passthrough:
+        log.warning("Compilation in progress...")
+        if not run_command(cmd_args, "XC8 Compilation"):
+            log.error("\nCompilation failed")
+            log.warning("Check your source code for errors")
+            sys.exit(1)
 
-    log.info(
-        f"\n🎉 SUCCESS! PIC {args.cpu} compilation completed with XC8 CC {version_info}!"
-    )
-    log.info("Next step: Check output files or program device")
+        log.info(
+            f"\n🎉 SUCCESS! PIC {args.cpu} compilation completed with XC8 CC {version_info}!"
+        )
+        log.info("Next step: Check output files or program device")
+    else:
+        log.warning("Command in progress...")
+        if not run_command(cmd_args, "XC8 Compilation Command"):
+            log.error("\nCompilation failed")
+            log.warning("Check your options and source files for errors")
+            sys.exit(1)
