@@ -211,10 +211,14 @@ def _validate_passthrough_arguments(args: List[str]) -> Tuple[bool, List[str]]:
             if not arg_valid:
                 safe_extensions = (
                     ".c",
+                    ".cpp",
                     ".h",
+                    ".hpp",
                     ".s",
                     ".S",
                     ".asm",
+                    ".inc",
+                    ".as",
                     ".o",
                     ".obj",
                     ".hex",
@@ -256,7 +260,7 @@ def _validate_passthrough_arguments(args: List[str]) -> Tuple[bool, List[str]]:
 
 def _validate_path_security(path: str) -> bool:
     """
-    Validate file paths for security using pathlib.
+    Validate file paths for security using pathlib and pattern checks.
 
     Args:
         path: File path to validate
@@ -271,6 +275,12 @@ def _validate_path_security(path: str) -> bool:
         # Check for common directory traversal patterns
         if ".." in Path(path).parts:
             return False
+
+        # Additional checks for suspicious patterns
+        suspicious_patterns = ["../", "..\\", "//", "\\\\"]
+        for pattern in suspicious_patterns:
+            if pattern in path:
+                return False
 
         # Check for system directories (basic protection)
         dangerous_dirs = ["/etc", "/bin", "/usr/bin", "/system32", "windows/system32"]
@@ -483,33 +493,6 @@ def run_command(cmd: List[str], description: str) -> bool:
 
     except Exception as e:
         log.error(f"Error running {description}: {e}")
-        return False
-
-
-def _validate_path_security(path: str) -> bool:
-    """
-    Validate that a path is safe to use
-
-    Args:
-        path: Path to validate
-
-    Returns:
-        bool: True if path is safe, False otherwise
-    """
-    try:
-        # Check for path traversal attempts
-        if ".." in path:
-            return False
-
-        # Additional checks for suspicious patterns
-        suspicious_patterns = ["../", "..\\", "//", "\\\\"]
-        for pattern in suspicious_patterns:
-            if pattern in path:
-                return False
-
-        return True
-    except (OSError, ValueError):
-        # Invalid path
         return False
 
 
