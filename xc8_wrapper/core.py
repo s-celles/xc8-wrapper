@@ -280,11 +280,12 @@ def _validate_path_security(path: str) -> bool:
                 return False
         # Use pathlib to resolve absolute path
         resolved = path_obj.resolve()
-        # Check for system directories (basic protection)
+        # Only block if the path is exactly or starts with a dangerous system directory
         dangerous_dirs = ["/etc", "/bin", "/usr/bin", "/system32", "windows/system32"]
         path_str = str(resolved).lower()
-        if any(danger in path_str for danger in dangerous_dirs):
-            return False
+        for danger in dangerous_dirs:
+            if path_str == danger or path_str.startswith(danger + os.sep):
+                return False
         return True
     except (ValueError, OSError, RuntimeError):
         # Any path resolution error means it's not safe
