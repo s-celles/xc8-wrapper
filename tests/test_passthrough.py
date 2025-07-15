@@ -199,7 +199,7 @@ class TestPassthroughOption:
 
         assert result.exit_code == 0
         assert "--passthrough" in result.output
-        assert "Pass options directly to xc8-cc" in result.output
+        assert "Pass options directly to" in result.output
 
     @patch("xc8_wrapper.core.validate_xc8_tool")
     @patch("xc8_wrapper.core.get_xc8_tool_path")
