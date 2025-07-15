@@ -616,12 +616,12 @@ def run_command(cmd: List[str], description: str) -> bool:
         "xc8.exe",
         "xc8",
         # Test executables - allow for testing purposes
-        "echo",
-        "test",
-        "python",
-        "python.exe",
-        "false",
-        "true",
+        # "echo",
+        # "test",
+        # "python",
+        # "python.exe",
+        # "false",
+        # "true",
     ]
 
     # Check if the executable name (basename) is in our allowed list
@@ -716,22 +716,28 @@ def get_latest_xc8_version() -> Optional[str]:
     return versions[0] if versions else None
 
 
-def handle_cc_tool(args: Any) -> None:
+def get_xc8_validated_tool_path(
+    tool_name: str, version: Optional[str], custom_path: Optional[str]
+) -> Tuple[str, str]:
     """
-    Handle xc8-cc.exe compilation and linking operations
+    get the validated path to an XC8 tool
 
     Args:
-        args: Parsed command line arguments
+       tool_name (str): Name of the tool to find
+        version (str): Version of the tool to find
+        custom_path (str): Path to the tool to find
 
+    Returns:
+        tuple: (tool_path, version_info_string)
     Raises:
-        SystemExit: If compilation fails or requirements are not met
+        SystemExit: If no tool path can be determined or if validation fails
     """
     # Validate that either version or path is provided, or try auto-detection
-    if not args.xc8_version and not args.xc8_path:
+    if not version and not custom_path:
         log.info("No XC8 version or path specified, attempting auto-detection...")
         # Try to use default XC8 installation
         try:
-            xc8_cc_path, version_info = get_xc8_tool_path("cc")
+            xc8_cc_path, version_info = get_xc8_tool_path(tool_name)
             log.info(f"Auto-detected XC8: {version_info}")
         except ValueError as e:
             log.error(
@@ -743,19 +749,36 @@ def handle_cc_tool(args: Any) -> None:
         # Get XC8 CC tool path with provided version/path
         try:
             xc8_cc_path, version_info = get_xc8_tool_path(
-                "cc", args.xc8_version, args.xc8_path
+                tool_name, version, custom_path
             )
         except ValueError as e:
             log.error(str(e))
             sys.exit(1)
 
-    # Validate that CPU is provided for cc tool
-    if not args.cpu:
-        log.error("--cpu is required for cc tool")
-        sys.exit(1)
+    return xc8_cc_path, version_info
+
+
+def handle_cc_tool(args: Any) -> None:
+    """
+    Handle xc8-cc.exe compilation and linking operations
+
+    Args:
+        args: Parsed command line arguments
+
+    Raises:
+        SystemExit: If compilation fails or requirements are not met
+    """
+    xc8_cc_path, version_info = get_xc8_validated_tool_path(
+        "cc", args.xc8_version, args.xc8_path
+    )
 
     # Validate XC8 CC tool
     if not validate_xc8_tool(xc8_cc_path, "cc", version_info):
+        sys.exit(1)
+
+    # Validate that CPU is provided for cc tool
+    if not args.cpu:
+        log.error("--cpu is required for cc tool")
         sys.exit(1)
 
     # Build compilation command directly from arguments (Typer style)

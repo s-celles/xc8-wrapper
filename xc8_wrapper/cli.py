@@ -11,7 +11,7 @@ from typing import Annotated, List, Optional
 import typer
 from colorama import init
 
-from .core import handle_cc_tool
+from .core import handle_cc_tool, get_xc8_validated_tool_path, run_command
 from .install import check_xc8_installation, get_xc8_download_url, install_xc8_if_needed
 from .logger import log
 
@@ -369,9 +369,18 @@ def cc_command(
         ),
     ] = None,
     # Additional options truncated for brevity - can be expanded as needed
+    xc8_help: Annotated[
+        bool, typer.Option("--xc8-help", help="Show help for xc8-cc and exit")
+    ] = False,
 ) -> None:
     """C compiler, assembler, and linker (matches xc8-cc)"""
     log.info("=== XC8 COMPILER ===")
+
+    # Handle xc8-cc help option
+    if xc8_help:
+        xc8_cc_path, _ = get_xc8_validated_tool_path("cc", xc8_version, xc8_path)
+        run_command([xc8_cc_path, "--help"], "XC8 Compiler Help")
+        return
 
     # Handle help options
     if target_help:

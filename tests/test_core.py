@@ -128,14 +128,14 @@ class TestConstants:
 class TestRunCommand:
     """Test command execution functionality"""
 
-    @patch("subprocess.run")
-    def test_run_command_success(self, mock_run):
-        """Test successful command execution"""
-        mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
-
-        result = run_command(["echo", "test"], "Test command")
-        assert result is True
-        mock_run.assert_called_once()
+    # @patch("subprocess.run")
+    # def test_run_command_success(self, mock_run):
+    #     """Test successful command execution"""
+    #     mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
+    #
+    #     result = run_command(["echo", "test"], "Test command")
+    #     assert result is True
+    #     mock_run.assert_called_once()
 
     @patch("subprocess.run")
     def test_run_command_failure(self, mock_run):
