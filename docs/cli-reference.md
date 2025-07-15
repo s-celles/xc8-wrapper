@@ -313,11 +313,14 @@ xc8-wrapper cc --cpu PIC16F877A -O2 -v --passthrough="-mplib -mdownload-hex" mai
 ```
 
 **Security & Safety Notes:**
+
 - Arguments are parsed using shell-like syntax (supports quotes and escaping)
 - Use quotes for arguments containing spaces: `--passthrough='--output="my file.hex"'`
 - Passthrough arguments are added after regular wrapper options
 - Invalid passthrough syntax will cause compilation to fail
+
 - **Security validation**: The following patterns are blocked for security:
+
   - Shell operators: `&`, `|`, `;`, `&&`, `||`, `>`, `<`, `>>`, `<<`
   - Command substitution: `` ` ``, `$(`, `${`
   - File traversal: `../`, `..\\`, `/etc/`, `\\windows\\`
