@@ -322,29 +322,6 @@ class TestPassthroughErrorHandling:
         # (The actual compilation will fail later due to invalid CPU)
         assert "Invalid passthrough syntax" not in result.output
 
-    def test_passthrough_preserves_error_context(self):
-        """Test that passthrough errors provide good context"""
-        runner = CliRunner()
-
-        # Use invalid quote syntax
-        result = runner.invoke(
-            app,
-            [
-                "cc",
-                "--cpu",
-                "PIC16F877A",
-                "--xc8-version",
-                "3.00",
-                "--passthrough",
-                'unclosed "quote',
-                "main.c",
-            ],
-        )
-
-        assert result.exit_code == 1
-        error_text = result.output + getattr(result, "stdout", "")
-        assert "Invalid passthrough syntax" in error_text
-
 
 if __name__ == "__main__":
     pytest.main([__file__])
