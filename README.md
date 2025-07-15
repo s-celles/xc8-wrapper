@@ -32,12 +32,12 @@
 
 ## 🤝 Contributing
 
-Contributions welcome! See the [Contributing Guide](docs/contributing.md) for setup instructions and contribution guidelines.
+Contributions welcome! See the [Contributing Guide](https://s-celles.github.io/xc8-wrapper/contributing/) for setup instructions and contribution guidelines.
 
 ---
 
 <div align="center">
 
-Made with ❤️ by [Sébastien Celles](https://github.com/s-celles)
+Made with ❤️ by [Sébastien Celles](https://github.com/s-celles) for PIC developers community.
 
 </div>

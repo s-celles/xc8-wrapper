@@ -5,24 +5,31 @@ Complete reference for the XC8 Wrapper command-line interface.
 ## Basic Syntax
 
 ```bash
-xc8-wrapper [OPTIONS]
+xc8-wrapper [GLOBAL_OPTIONS] COMMAND [COMMAND_OPTIONS] [FILES...]
 ```
 
-## Global Options
+### Available Commands
+- `install`: Install XC8 compiler
+- `cc`: C compiler, assembler, and linker (equivalent to xc8-cc)
+- `ar`: Archive/librarian tool (not yet implemented)
 
-### Help and Version
+### Global Options
 - `--help`, `-h`: Show help message and exit
 - `--version`: Show program version and exit
 
-### Tool Selection
-- `--tool {cc}`: XC8 tool to use (currently only 'cc' is supported)
+## CC Command (C Compiler)
+
+### Basic Usage
+```bash
+xc8-wrapper cc [OPTIONS] [FILES...]
+```
 
 ### XC8 Compiler Location
 - `--xc8-version VERSION`: XC8 toolchain version (e.g., '3.00', '2.40')
 - `--xc8-path PATH`: Full path to XC8 tool executable (overrides version)
 
 ### Target Configuration
-- `--cpu CPU`: Target microcontroller (**required** for cc tool)
+- `--cpu CPU`, `-mcpu CPU`: Target microcontroller (**required**)
 
 ## Preprocessor Options
 
@@ -33,25 +40,25 @@ xc8-wrapper [OPTIONS]
 **Examples:**
 ```bash
 # Define single symbols
-xc8-wrapper --cpu PIC16F877A -D DEBUG
+xc8-wrapper cc --cpu PIC16F877A -D DEBUG
 
 # Define with values
-xc8-wrapper --cpu PIC16F877A -D _XTAL_FREQ=20000000 -D LED_PIN=0
+xc8-wrapper cc --cpu PIC16F877A -D _XTAL_FREQ=20000000 -D LED_PIN=0
 
 # Multiple definitions
-xc8-wrapper --cpu PIC16F877A -D DEBUG=1 -D VERSION=2 -D BOARD_REV=3
+xc8-wrapper cc --cpu PIC16F877A -D DEBUG=1 -D VERSION=2 -D BOARD_REV=3
 ```
 
 ### Include Paths
-- `-I PATH`, `--include PATH`: Add include directory
+- `-I PATH`: Add include directory
 
 **Examples:**
 ```bash
 # Single include path
-xc8-wrapper --cpu PIC16F877A -I ./headers
+xc8-wrapper cc --cpu PIC16F877A -I ./headers
 
 # Multiple include paths
-xc8-wrapper --cpu PIC16F877A -I ./include -I ./lib -I ../common
+xc8-wrapper cc --cpu PIC16F877A -I ./include -I ./lib -I ../common
 ```
 
 ### Preprocessor Control
@@ -84,13 +91,13 @@ xc8-wrapper --cpu PIC16F877A -I ./include -I ./lib -I ../common
 **Examples:**
 ```bash
 # No optimization (debugging)
-xc8-wrapper --cpu PIC16F877A -O0
+xc8-wrapper cc --cpu PIC16F877A -O0
 
 # Size optimization (resource-constrained projects)
-xc8-wrapper --cpu PIC16F877A -Os
+xc8-wrapper cc --cpu PIC16F877A -Os
 
 # Speed optimization (performance-critical code)
-xc8-wrapper --cpu PIC16F877A -O2
+xc8-wrapper cc --cpu PIC16F877A -O2
 ```
 
 ## Language Standards
@@ -106,10 +113,10 @@ xc8-wrapper --cpu PIC16F877A -O2
 **Examples:**
 ```bash
 # Use C99 standard
-xc8-wrapper --cpu PIC16F877A --std c99
+xc8-wrapper cc --cpu PIC16F877A --std c99
 
 # Use C11 standard (default)
-xc8-wrapper --cpu PIC16F877A --std c11
+xc8-wrapper cc --cpu PIC16F877A --std c11
 ```
 
 ## Custom Flags
@@ -135,30 +142,26 @@ xc8-wrapper --cpu PIC16F877A \
 
 ## File and Directory Options
 
-### Input/Output Configuration
-- `--source-dir DIR`: Source directory (default: 'src')
-- `--build-dir DIR`: Build directory (default: 'build')
-- `--main-c-file FILE`: Main C source file (default: 'main.c')
+### Input Files
+- `FILES...`: Source files to compile (C files, assembly files, object files)
+
+### Output Control
+- `-o FILE`: Specify output file name
 
 ### Output Files
-- `--output-hex FILE`: Output HEX file name (default: 'main.hex')
-- `--output-elf FILE`: Output ELF file name (default: 'main.elf')
-- `--output-p1 FILE`: Output object file name (default: 'main.p1')
-- `--output-map FILE`: Output MAP file name (default: 'main.map')
-- `--memory-file FILE`: Memory summary file (default: 'memoryfile.xml')
+- `-o FILE`: Output file name
+- `--save-temps`: Do not delete intermediate files
 
 **Examples:**
 ```bash
-# Custom project structure
-xc8-wrapper --cpu PIC16F877A \
-    --source-dir firmware \
-    --build-dir output \
-    --main-c-file blink.c
+# Basic compilation with default output
+xc8-wrapper cc --cpu PIC16F877A main.c
 
-# Custom output files
-xc8-wrapper --cpu PIC16F877A \
-    --output-hex led_blink.hex \
-    --output-elf led_blink.elf
+# Custom output file
+xc8-wrapper cc --cpu PIC16F877A -o firmware.hex main.c
+
+# Save intermediate files for debugging
+xc8-wrapper cc --cpu PIC16F877A --save-temps main.c
 ```
 
 ## Common Command Patterns
@@ -167,50 +170,45 @@ xc8-wrapper --cpu PIC16F877A \
 
 **Quick compile (development):**
 ```bash
-xc8-wrapper --cpu PIC16F877A --xc8-version 3.00 -O0 --verbose
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 -O0 -v main.c
 ```
 
 **Production build:**
 ```bash
-xc8-wrapper --cpu PIC16F877A --xc8-version 3.00 -Os --std c99
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 -Os --std c99 main.c
 ```
 
 **Debug build:**
 ```bash
-xc8-wrapper --cpu PIC16F877A --xc8-version 3.00 -Og -D DEBUG=1 --save-temps
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 -Og -D DEBUG=1 --save-temps main.c
 ```
 
 ### Project-Specific Examples
 
-**Library project:**
+**Multi-file compilation:**
 ```bash
-xc8-wrapper --cpu PIC16F877A --xc8-version 3.00 \
-    --compile-only \
-    -I ./include \
-    -D LIBRARY_VERSION=1.0
-```
+# Compile multiple source files
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c uart.c spi.c
 
-**Multi-file project:**
-```bash
-# Note: Currently only single-file compilation is supported
-# Multi-file support planned for future versions
+# With custom includes and optimization
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 \
+    -I ./include -I ./lib \
+    -D VERSION=100 -O2 \
+    main.c uart.c spi.c
 ```
 
 ### Testing and Validation
 
 **Preprocessor output:**
 ```bash
-xc8-wrapper --cpu PIC16F877A --xc8-version 3.00 \
-    --preprocess-only \
-    --keep-comments \
-    --list-headers
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 \
+    -E -C -H main.c
 ```
 
 **Assembly generation:**
 ```bash
-xc8-wrapper --cpu PIC16F877A --xc8-version 3.00 \
-    --assembly-only \
-    --verbose
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 \
+    -S -v main.c
 ```
 
 ## Platform-Specific Notes
@@ -227,9 +225,8 @@ xc8-wrapper --cpu PIC16F877A --xc8-version 3.00 \
 
 ### Common Error Messages
 
-**"Unsupported XC8 tool"**
-- Only 'cc' tool is currently supported
-- Solution: Use `--tool cc`
+**Solutions**:
+1. **Use the cc subcommand**: `xc8-wrapper cc --cpu PIC16F877A`
 
 **"XC8 not found"**
 - XC8 compiler not detected in standard locations
@@ -245,12 +242,12 @@ xc8-wrapper --cpu PIC16F877A --xc8-version 3.00 \
 
 **"Source file not found"**
 - Source file doesn't exist in specified location
-- Solutions: Check file path, use `--source-dir` and `--main-c-file`
+- Solutions: Check file path, specify correct file name
 
 ### Debugging Tips
 
-1. **Use verbose output**: Add `--verbose` to see detailed execution
-2. **Check file paths**: Verify source and build directories exist
+1. **Use verbose output**: Add `-v` to see detailed execution
+2. **Check file paths**: Verify source files exist in current directory
 3. **Validate XC8**: Test XC8 directly with `xc8-cc --version`
 4. **Save intermediates**: Use `--save-temps` to inspect generated files
 
@@ -259,11 +256,11 @@ xc8-wrapper --cpu PIC16F877A --xc8-version 3.00 \
 ### Custom XC8 Installation
 ```bash
 # Using custom XC8 path
-xc8-wrapper --xc8-path "/custom/path/to/xc8-cc" --cpu PIC16F877A
+xc8-wrapper cc --xc8-path "/custom/path/to/xc8-cc" --cpu PIC16F877A main.c
 
 # Multiple XC8 versions
-xc8-wrapper --xc8-version 2.40 --cpu PIC16F877A  # Legacy project
-xc8-wrapper --xc8-version 3.00 --cpu PIC16F877A  # Current project
+xc8-wrapper cc --xc8-version 2.40 --cpu PIC16F877A main.c  # Legacy project
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A main.c  # Current project
 ```
 
 ### Integration with Build Systems
@@ -274,10 +271,10 @@ CHIP = PIC16F877A
 XC8_VERSION = 3.00
 
 build:
-	xc8-wrapper --cpu $(CHIP) --xc8-version $(XC8_VERSION) -O2
+	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -O2 main.c
 
 debug:
-	xc8-wrapper --cpu $(CHIP) --xc8-version $(XC8_VERSION) -Og -D DEBUG=1
+	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -Og -D DEBUG=1 main.c
 ```
 
 **Shell script integration:**
@@ -289,7 +286,7 @@ CHIP="${1:-PIC16F877A}"
 VERSION="${2:-3.00}"
 
 echo "Building for $CHIP with XC8 $VERSION..."
-xc8-wrapper --cpu "$CHIP" --xc8-version "$VERSION" -O2 --verbose
+xc8-wrapper cc --cpu "$CHIP" --xc8-version "$VERSION" -O2 main.c
 echo "Build complete!"
 ```
 
@@ -297,5 +294,5 @@ echo "Build complete!"
 
 - [Getting Started](getting-started.md) - Basic usage examples
 - [Examples](examples.md) - Real-world usage scenarios
-- [Configuration](configuration.md) - Advanced configuration options
+- [Development](development.md) - Development and contributing guide
 - [FAQ](faq.md) - Frequently asked questions

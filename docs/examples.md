@@ -48,7 +48,7 @@ int main(void) {
 
 **Compilation:**
 ```bash
-xc8-wrapper --tool cc --cpu PIC16F876A --xc8-version 3.00
+xc8-wrapper cc --cpu PIC16F876A --xc8-version 3.00 main.c
 ```
 
 ### Advanced Project with Custom Paths
@@ -69,16 +69,15 @@ advanced_project/
 
 **Compilation:**
 ```bash
-xc8-wrapper --tool cc --cpu PIC18F4550 --xc8-version 3.00 \
-    --source-dir firmware \
-    --build-dir output \
-    --main-c-file main.c \
+xc8-wrapper cc --cpu PIC18F4550 --xc8-version 3.00 \
     -I ./include \
     -I ./lib \
     -D DEBUG=1 \
     -D VERSION=100 \
     -O2 \
-    --verbose
+    firmware/main.c firmware/uart.c
+```
+    -v
 ```
 
 ## Platform-Specific Examples
@@ -87,10 +86,10 @@ xc8-wrapper --tool cc --cpu PIC18F4550 --xc8-version 3.00 \
 
 ```bash
 # Using specific XC8 version
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c
 
 # Using custom XC8 path
-xc8-wrapper --tool cc --cpu PIC16F877A \
+xc8-wrapper cc --cpu PIC16F877A \
     --xc8-path "C:\Program Files\Microchip\xc8\v3.00\bin\xc8-cc.exe"
 ```
 
@@ -98,10 +97,10 @@ xc8-wrapper --tool cc --cpu PIC16F877A \
 
 ```bash
 # Standard installation path detection
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c
 
 # Custom installation
-xc8-wrapper --tool cc --cpu PIC16F877A \
+xc8-wrapper cc --cpu PIC16F877A \
     --xc8-path "/opt/microchip/xc8/v3.00/bin/xc8-cc"
 ```
 
@@ -111,19 +110,19 @@ xc8-wrapper --tool cc --cpu PIC16F877A \
 
 ```bash
 # Debug configuration with verbose output
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 \
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c \
     -Og \
     -D DEBUG=1 \
     -D _DEBUG=1 \
     --save-temps \
-    --verbose
+    -v
 ```
 
 ### Release Build
 
 ```bash
 # Optimized release build
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 \
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c \
     -Os \
     -D NDEBUG=1 \
     --std c99
@@ -133,7 +132,7 @@ xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 \
 
 ```bash
 # Production build with custom file names
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 \
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c \
     -O2 \
     --output-hex firmware_v1.0.hex \
     --output-elf firmware_v1.0.elf \
@@ -155,11 +154,11 @@ all: build
 
 # Build target
 build:
-	xc8-wrapper --tool cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -O2
+	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -O2
 
 # Debug target
 debug:
-	xc8-wrapper --tool cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -Og -D DEBUG=1
+	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -Og -D DEBUG=1
 
 # Clean target
 clean:
@@ -167,7 +166,7 @@ clean:
 
 # Release target
 release: clean
-	xc8-wrapper --tool cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -Os
+	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -Os
 
 .PHONY: all build debug clean release
 ```
@@ -184,7 +183,7 @@ set PROJECT_NAME=my_project
 
 echo Building %PROJECT_NAME% for %CHIP%...
 
-xc8-wrapper --tool cc --cpu %CHIP% --xc8-version %XC8_VERSION% -O2 --verbose
+xc8-wrapper cc --cpu %CHIP% --xc8-version %XC8_VERSION% -O2 -v main.c
 
 if %ERRORLEVEL% equ 0 (
     echo Build successful!
@@ -210,7 +209,7 @@ PROJECT_NAME="my_project"
 
 echo "Building $PROJECT_NAME for $CHIP with XC8 v$XC8_VERSION..."
 
-xc8-wrapper --tool cc --cpu "$CHIP" --xc8-version "$XC8_VERSION" -O2 --verbose
+xc8-wrapper cc --cpu "$CHIP" --xc8-version "$XC8_VERSION" -O2 -v main.c
 
 if [ $? -eq 0 ]; then
     echo "✅ Build successful!"
@@ -257,7 +256,7 @@ jobs:
 
     - name: Build firmware
       run: |
-        xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 -O2
+        xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -O2
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
@@ -273,25 +272,25 @@ jobs:
 **Issue: XC8 not found**
 ```bash
 # Check if XC8 is installed
-xc8-wrapper --tool cc --cpu PIC16F877A --help
+xc8-wrapper cc --cpu PIC16F877A --help
 
 # Use specific path
-xc8-wrapper --tool cc --cpu PIC16F877A \
+xc8-wrapper cc --cpu PIC16F877A \
     --xc8-path "/path/to/xc8-cc"
 ```
 
 **Issue: Compilation errors**
 ```bash
 # Enable verbose output for debugging
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 \
-    --verbose \
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c \
+    -v \
     --save-temps
 ```
 
 **Issue: Custom include paths**
 ```bash
 # Add multiple include directories
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 \
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c \
     -I ./include \
     -I ./lib \
     -I ../common
@@ -303,22 +302,22 @@ xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 \
 
 ```bash
 # No optimization (fastest compilation)
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 -O0
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -O0
 
 # Basic optimization
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 -O1
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -O1
 
 # Standard optimization (recommended)
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 -O2
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -O2
 
 # Aggressive optimization
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 -O3
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -O3
 
 # Size optimization (for resource-constrained devices)
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 -Os
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -Os
 
 # Debug-friendly optimization
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 -Og
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -Og
 ```
 
 ## Next Steps
@@ -326,3 +325,4 @@ xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 -Og
 - Check out the [CLI Reference](cli-reference.md) for complete command documentation
 - Read the [Getting Started](getting-started.md) guide for step-by-step tutorials
 - Visit the [FAQ](faq.md) for answers to common questions
+

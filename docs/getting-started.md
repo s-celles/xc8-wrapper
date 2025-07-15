@@ -78,7 +78,7 @@ void main(void) {
 Now let's compile the project:
 
 ```bash
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A main.c
 ```
 
 **Note:** XC8 Wrapper uses a colored logging system where:
@@ -159,26 +159,25 @@ The most important file is `main.hex` - this is what you'll upload to your PIC m
 
 ```bash
 # Minimal command
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A main.c
 
-# With custom directories
+# With custom directories (not currently supported - specify files directly)
 xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A \
-    --source-dir my_src \
-    --build-dir my_build \
-    --main-c-file my_main.c
+    -I ./include \
+    src/main.c src/uart.c
 ```
 
 ### Optimization Options
 
 ```bash
 # No optimization (fastest compile)
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -O0
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -O0 main.c
 
 # Size optimization (smallest code)
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -Os
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -Os main.c
 
 # Speed optimization
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -O2
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -O2 main.c
 ```
 
 ### Adding Preprocessor Definitions
@@ -188,7 +187,8 @@ xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -O2
 xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A \
     -D DEBUG=1 \
     -D LED_PIN=0 \
-    -D _XTAL_FREQ=20000000
+    -D _XTAL_FREQ=20000000 \
+    main.c
 ```
 
 ### Including Header Paths
@@ -197,14 +197,15 @@ xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A \
 # Add include directories
 xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A \
     -I ./include \
-    -I ./lib/headers
+    -I ./lib/headers \
+    main.c
 ```
 
 ### Verbose Output
 
 ```bash
 # See detailed compilation process
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A --verbose
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -v main.c
 ```
 
 ## Popular PIC Microcontrollers
@@ -214,28 +215,28 @@ Here are some commonly used PIC microcontrollers and their XC8 Wrapper commands:
 ### PIC16F Series
 ```bash
 # PIC16F877A (40-pin, popular for learning)
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A main.c
 
 # PIC16F84A (18-pin, simple projects)
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F84A
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F84A main.c
 
 # PIC16F628A (18-pin with more features)
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F628A
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F628A main.c
 ```
 
 ### PIC18F Series
 ```bash
 # PIC18F4550 (USB-capable)
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC18F4550
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC18F4550 main.c
 
 # PIC18F4520 (Enhanced mid-range)
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC18F4520
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC18F4520 main.c
 ```
 
 ### PIC12F Series
 ```bash
 # PIC12F675 (8-pin, tiny projects)
-xc8-wrapper cc --xc8-version 3.00 --cpu PIC12F675
+xc8-wrapper cc --xc8-version 3.00 --cpu PIC12F675 main.c
 ```
 
 ## Project Templates
@@ -295,7 +296,7 @@ Now that you've successfully compiled your first project:
 
 1. **Learn more commands**: Check the [CLI Reference](cli-reference.md)
 2. **See more examples**: Browse [Examples](examples.md)
-3. **Configure your setup**: Read [Configuration](configuration.md)
+3. **Get help**: Read the [FAQ](faq.md) or [create an issue](https://github.com/s-celles/xc8-wrapper/issues)
 4. **Programming**: Use your preferred PIC programmer to upload `main.hex`
 
 ## Troubleshooting
@@ -303,8 +304,8 @@ Now that you've successfully compiled your first project:
 ### Common Issues
 
 **"Source file not found"**
-- Check that `src/main.c` exists
-- Use `--source-dir` and `--main-c-file` to specify different locations
+- Check that your source file exists in the current directory
+- Specify the correct source file: `xc8-wrapper cc --cpu PIC16F877A mysrc.c`
 
 **"XC8 not found"**
 - Verify XC8 installation: `xc8-cc --version`
@@ -313,7 +314,7 @@ Now that you've successfully compiled your first project:
 
 **"Compilation failed"**
 - Check your C code for syntax errors
-- Use `--verbose` to see detailed error messages
+- Use `-v` to see detailed error messages
 - Ensure proper configuration bits for your target MCU
 
 **"CPU not supported"**

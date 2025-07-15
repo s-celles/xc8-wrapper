@@ -32,12 +32,12 @@ pip install -e .[dev]
 
 **A:** Use the `--xc8-version` flag:
 ```bash
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c
 ```
 
 Or specify the exact path:
 ```bash
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-path "/path/to/xc8-cc"
+xc8-wrapper cc --cpu PIC16F877A --xc8-path "/path/to/xc8-cc" main.c
 ```
 
 ### Q: What microcontrollers are supported?
@@ -60,7 +60,7 @@ Multi-file support is planned for future versions.
 
 **A:** Yes! Use `--compile-flag` and `--link-flag`:
 ```bash
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 \
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 \
     --compile-flag "-Wall" \
     --link-flag "-Wl,--gc-sections"
 ```
@@ -75,7 +75,7 @@ xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 \
 
 If installed elsewhere, use `--xc8-path`:
 ```bash
-xc8-wrapper --tool cc --cpu PIC16F877A \
+xc8-wrapper cc --cpu PIC16F877A \
     --xc8-path "C:\CustomPath\xc8\v3.00\bin\xc8-cc.exe"
 ```
 
@@ -90,7 +90,7 @@ xc8-wrapper --tool cc --cpu PIC16F877A \
 
 For custom installations:
 ```bash
-xc8-wrapper --tool cc --cpu PIC16F877A \
+xc8-wrapper cc --cpu PIC16F877A \
     --xc8-path "/custom/path/xc8/v3.00/bin/xc8-cc"
 ```
 
@@ -107,14 +107,14 @@ chmod +x /path/to/xc8/bin/xc8-cc
 
 **A:** Currently only the `cc` tool is supported. Use:
 ```bash
-xc8-wrapper --tool cc --cpu PIC16F877A
+xc8-wrapper cc --cpu PIC16F877A main.c
 ```
 
 ### Q: "CPU is required for cc tool"
 
 **A:** Always specify the target microcontroller:
 ```bash
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c
 ```
 
 ### Q: "Source file not found: src/main.c"
@@ -122,7 +122,7 @@ xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00
 **A:** Ensure your source file exists. Default location is `src/main.c`. To use a different structure:
 ```bash
 # Custom source directory and file
-xc8-wrapper --tool cc --cpu PIC16F877A \
+xc8-wrapper cc --cpu PIC16F877A \
     --source-dir my_src \
     --main-c-file my_main.c
 ```
@@ -136,9 +136,9 @@ xc8-wrapper --tool cc --cpu PIC16F877A \
 
 ### Q: Compilation succeeds but no output files
 
-**A:** Check the build directory (default: `build/`). Use `--verbose` for detailed output:
+**A:** Check the build directory (default: `build/`). Use `-v` for detailed output:
 ```bash
-xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 --verbose
+xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 -v
 ```
 
 ## Performance Questions
@@ -191,20 +191,20 @@ xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00 --verbose
 **Makefile:**
 ```makefile
 build:
-	xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00
+	xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c
 ```
 
 **CMake:**
 ```cmake
 add_custom_target(firmware
-    COMMAND xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00
+    COMMAND xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c
 )
 ```
 
 **GitHub Actions:**
 ```yaml
 - name: Build firmware
-  run: xc8-wrapper --tool cc --cpu PIC16F877A --xc8-version 3.00
+  run: xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c
 ```
 
 ### Q: Can I use XC8 Wrapper with Docker?

@@ -449,10 +449,10 @@ After installation, you can use the wrapper in multiple ways:
 
 ```bash
 # Command-line tool
-xc8-wrapper --cpu PIC16F876A --xc8-version 3.00
+xc8-wrapper cc --cpu PIC16F876A --xc8-version 3.00 main.c
 
 # Python module
-python -m xc8_wrapper.cli --cpu PIC16F876A --xc8-version 3.00
+python -m xc8_wrapper.cli cc --cpu PIC16F876A --xc8-version 3.00 main.c
 
 # Python API
 from xc8_wrapper import get_xc8_tool_path, handle_cc_tool
