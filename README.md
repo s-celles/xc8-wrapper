@@ -38,6 +38,6 @@ Contributions welcome! See the [Contributing Guide](https://s-celles.github.io/x
 
 <div align="center">
 
-Made with ❤️ by [Sébastien Celles](https://github.com/s-celles) for PIC developers community.
+Made with ❤️ by [Sébastien Celles](https://github.com/s-celles) for the PIC developer community.
 
 </div>
