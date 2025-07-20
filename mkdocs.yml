@@ -55,6 +55,8 @@ theme:
     edit: material/pencil
     view: material/eye
 
+edit_uri: edit/main/docs/
+
 # Navigation structure
 nav:
   - Home: index.md
