@@ -51,6 +51,83 @@ int main(void) {
 xc8-wrapper cc --cpu PIC16F876A --xc8-version 3.00 main.c
 ```
 
+### Simple Assembly Project (PIC16F876A)
+
+This example demonstrates basic assembly programming using the XC8 Wrapper assembler.
+
+**Project Structure:**
+```
+my_asm_project/
+├── src/
+│   └── blink.s
+└── build/
+```
+
+**blink.s:**
+```assembly
+; Simple LED blink in assembly for PIC16F876A
+; LED connected to RC0
+
+#include <xc.inc>
+
+; Configuration bits
+config FOSC = HS        ; High speed crystal
+config WDTE = OFF       ; Watchdog timer disabled
+config PWRTE = ON       ; Power-up timer enabled
+config BOREN = ON       ; Brown-out reset enabled
+config LVP = OFF        ; Low voltage programming disabled
+config CPD = OFF        ; Data EEPROM code protection off
+config WRT = OFF        ; Flash program memory write protection off
+config CP = OFF         ; Flash program memory code protection off
+
+; Variable declarations
+psect udata_bank0
+delay_count1: ds 1
+delay_count2: ds 1
+
+; Reset vector
+psect reset_vec,global,class=CODE,delta=2
+    pagesel MAIN
+    goto    MAIN
+
+; Main program
+psect code,global,class=CODE,delta=2
+MAIN:
+    ; Set bank 1 for TRIS registers
+    bsf STATUS, RP0
+    clrf TRISC          ; PORTC as output
+    bcf STATUS, RP0     ; Back to bank 0
+    
+    clrf PORTC          ; Initialize PORTC
+
+MAIN_LOOP:
+    bsf PORTC, 0        ; Turn on LED (RC0)
+    call DELAY          ; Wait
+    bcf PORTC, 0        ; Turn off LED
+    call DELAY          ; Wait
+    goto MAIN_LOOP      ; Repeat
+
+DELAY:
+    movlw 0xFF
+    movwf delay_count1
+DELAY_OUTER:
+    movlw 0xFF
+    movwf delay_count2
+DELAY_INNER:
+    decfsz delay_count2, f
+    goto DELAY_INNER
+    decfsz delay_count1, f
+    goto DELAY_OUTER
+    return
+
+END
+```
+
+**Assembly:**
+```bash
+xc8-wrapper as --cpu PIC16F876A --xc8-version 3.00 blink.s
+```
+
 ### Advanced Project with Custom Paths
 
 **Project Structure:**
@@ -128,6 +205,26 @@ xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c \
     --std c99
 ```
 
+### Assembly Builds
+
+```bash
+# Debug assembly build with verbose output
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 \
+    -v \
+    --passthrough="-g -list -map" \
+    main.s
+
+# Optimized assembly build with Intel HEX output
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 \
+    --passthrough="-inhx32 -map" \
+    main.s
+
+# Assembly with custom output file
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 \
+    -o firmware.hex \
+    main.s
+```
+
 ### Production Build with Custom Output
 
 ```bash
@@ -149,16 +246,28 @@ PROJECT = my_project
 CHIP = PIC16F877A
 XC8_VERSION = 3.00
 
+# Source files
+C_SOURCES = main.c uart.c
+ASM_SOURCES = startup.s interrupts.s
+
 # Default target
 all: build
 
-# Build target
+# Build C project
 build:
-	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -O2
+	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -O2 $(C_SOURCES)
 
-# Debug target
+# Build assembly project
+build-asm:
+	xc8-wrapper as --cpu $(CHIP) --xc8-version $(XC8_VERSION) $(ASM_SOURCES)
+
+# Debug targets
 debug:
-	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -Og -D DEBUG=1
+	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -Og -D DEBUG=1 $(C_SOURCES)
+
+debug-asm:
+	xc8-wrapper as --cpu $(CHIP) --xc8-version $(XC8_VERSION) \
+		--passthrough="-g -list -map" $(ASM_SOURCES)
 
 # Clean target
 clean:
@@ -166,9 +275,9 @@ clean:
 
 # Release target
 release: clean
-	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -Os
+	xc8-wrapper cc --cpu $(CHIP) --xc8-version $(XC8_VERSION) -Os $(C_SOURCES)
 
-.PHONY: all build debug clean release
+.PHONY: all build build-asm debug debug-asm clean release
 ```
 
 ### Batch Script (Windows)
@@ -180,10 +289,19 @@ setlocal
 set CHIP=PIC16F877A
 set XC8_VERSION=3.00
 set PROJECT_NAME=my_project
+set BUILD_TYPE=%1
+
+if "%BUILD_TYPE%"=="" set BUILD_TYPE=c
 
 echo Building %PROJECT_NAME% for %CHIP%...
 
-xc8-wrapper cc --cpu %CHIP% --xc8-version %XC8_VERSION% -O2 -v main.c
+if "%BUILD_TYPE%"=="asm" (
+    echo Building assembly project...
+    xc8-wrapper as --cpu %CHIP% --xc8-version %XC8_VERSION% -v main.s
+) else (
+    echo Building C project...
+    xc8-wrapper cc --cpu %CHIP% --xc8-version %XC8_VERSION% -O2 -v main.c
+)
 
 if %ERRORLEVEL% equ 0 (
     echo Build successful!
@@ -205,11 +323,18 @@ set -e
 
 CHIP="${1:-PIC16F877A}"
 XC8_VERSION="${2:-3.00}"
+BUILD_TYPE="${3:-c}"
 PROJECT_NAME="my_project"
 
 echo "Building $PROJECT_NAME for $CHIP with XC8 v$XC8_VERSION..."
 
-xc8-wrapper cc --cpu "$CHIP" --xc8-version "$XC8_VERSION" -O2 -v main.c
+if [ "$BUILD_TYPE" = "asm" ]; then
+    echo "Building assembly project..."
+    xc8-wrapper as --cpu "$CHIP" --xc8-version "$XC8_VERSION" -v main.s
+else
+    echo "Building C project..."
+    xc8-wrapper cc --cpu "$CHIP" --xc8-version "$XC8_VERSION" -O2 -v main.c
+fi
 
 if [ $? -eq 0 ]; then
     echo "✅ Build successful!"
@@ -256,7 +381,13 @@ jobs:
 
     - name: Build firmware
       run: |
+        # Build C firmware
         xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -O2
+        
+        # Build assembly firmware (if present)
+        if [ -f main.s ]; then
+          xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 main.s
+        fi
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
@@ -279,12 +410,30 @@ xc8-wrapper cc --cpu PIC16F877A \
     --xc8-path "/path/to/xc8-cc"
 ```
 
+**Issue: PIC-AS not found**
+```bash
+# Check if PIC-AS is installed
+xc8-wrapper as --cpu PIC16F877A --pic-as-help
+
+# Use specific path
+xc8-wrapper as --cpu PIC16F877A \
+    --xc8-path "/path/to/pic-as"
+```
+
 **Issue: Compilation errors**
 ```bash
 # Enable verbose output for debugging
 xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c \
     -v \
     --save-temps
+```
+
+**Issue: Assembly errors**
+```bash
+# Enable verbose output for assembly debugging
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 main.s \
+    -v \
+    --passthrough="-list -map"
 ```
 
 **Issue: Custom include paths**
@@ -340,6 +489,27 @@ xc8-wrapper cc --cpu PIC16F877A --passthrough="--fill=0xFF --memorysummary=memor
 xc8-wrapper cc --cpu PIC16F877A --passthrough="-mdownload-hex -mresetbits -mconfig" main.c
 ```
 
+### Using Unsupported PIC-AS Options
+
+PIC-AS assembler has many specialized options for assembly projects. Use `--passthrough` to access them:
+
+```bash
+# Generate listing file and map
+xc8-wrapper as --cpu PIC16F877A --passthrough="-list -map" main.s
+
+# Intel HEX output format
+xc8-wrapper as --cpu PIC18F4550 --passthrough="-inhx32" main.s
+
+# Debug information in assembly
+xc8-wrapper as --cpu PIC16F877A --passthrough="-g -gdwarf-3" main.s
+
+# PIC14 family specific options
+xc8-wrapper as --cpu PIC16F877A --passthrough="-mpic14 -msummary" main.s
+
+# PIC18 family specific options  
+xc8-wrapper as --cpu PIC18F4550 --passthrough="-mpic16 -mwarn=3" main.s
+```
+
 ### Complex Passthrough Examples
 
 ```bash
@@ -359,6 +529,16 @@ xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 \
 xc8-wrapper cc --cpu PIC16F877A \
     --passthrough='-mserial="ABC123" -mconfig -mosccal' \
     main.c
+
+# Assembly with comprehensive output and debugging
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 \
+    --passthrough="-list -map -g -gdwarf-3 -inhx32" \
+    main.s
+
+# Assembly production build with optimization markers
+xc8-wrapper as --cpu PIC18F4550 --xc8-version 3.00 \
+    --passthrough="-mpic16 -mwarn=0 -inhx32 -map" \
+    production.s
 ```
 
 ### Combining Regular and Passthrough Options
@@ -371,6 +551,13 @@ xc8-wrapper cc --cpu PIC18F4550 --xc8-version 3.00 \
     -D DEBUG=0 -D VERSION=100 \
     --passthrough="-mplib -gdwarf-3 -mdownload-hex" \
     src/main.c src/uart.c src/spi.c
+
+# Mix assembly wrapper options with specialized PIC-AS options
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 \
+    -v \
+    -o firmware.hex \
+    --passthrough="-list -map -g" \
+    src/main.s src/interrupts.s
 ```
 
 ### Security Considerations
@@ -398,15 +585,19 @@ This ensures that only legitimate compiler options can be passed through.
 
 ### Error Handling
 
-If you pass invalid options through `--passthrough`, XC8 will report the error:
+If you pass invalid options through `--passthrough`, XC8 or PIC-AS will report the error:
 
 ```bash
 # This will fail with XC8 error
 xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 \
     --passthrough "-invalid-option" main.c
+
+# This will fail with PIC-AS error
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 \
+    --passthrough "-invalid-asm-option" main.s
 ```
 
-The wrapper will show the XC8 error message to help you identify the problem.
+The wrapper will show the XC8 or PIC-AS error message to help you identify the problem.
 
 ## Next Steps
 

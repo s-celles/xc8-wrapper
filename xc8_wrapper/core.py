@@ -115,6 +115,28 @@ XC8_ALLOWED_OPTIONS = {
     # PIC-specific compiler flags that are safe
     "-legacy-libc",
     "-no-legacy-libc",
+    # PIC-AS specific options
+    "-Wa",  # Pass options to assembler
+    "-x",   # Specify language
+    "-o",   # Output file
+    "-c",   # Compile to object file
+    "-v",   # Verbose
+    "-w",   # Suppress warnings
+    "-g",   # Generate debug information
+    "--help",  # Help
+    "--version",  # Version
+    # PIC-AS assembler-specific options
+    "-msummary",  # Summary information
+    "-mwarn",     # Warning level
+    "-mpic14",    # PIC14 family
+    "-mpic16",    # PIC16 family
+    "-map",       # Generate map file
+    "-list",      # Generate listing file
+    "-inhx32",    # Intel HEX 32-bit format
+    "-inhx8m",    # Intel HEX 8M format
+    "-intel",     # Intel HEX format
+    "-motorola",  # Motorola S-record format
+    "-binary",    # Binary format
 }
 
 # Allowed option patterns (for options that take values)
@@ -134,6 +156,10 @@ XC8_ALLOWED_PATTERNS = [
     r"^--outdir=[a-zA-Z0-9_./\\-]+$",
     r"^--objdir=[a-zA-Z0-9_./\\-]+$",
     r"^-Wl,.*$",  # Allow linker options
+    # PIC-AS specific patterns
+    r"^-mcpu=[a-zA-Z0-9_]+$",  # Device selection
+    r"^-o\s+[a-zA-Z0-9_./\\-]+$",  # Output file with space
+    r"^-o[a-zA-Z0-9_./\\-]+$",  # Output file without space
 ]
 
 # Known XC8 versions that actually exist (highest to lowest)
@@ -161,6 +187,11 @@ SUPPORTED_XC8_TOOLS = {
         "executable": "xc8-cc",
         "description": "C compiler, assembler, and linker",
         "default_operation": "compile_and_link",
+    },
+    "as": {
+        "executable": "pic-as",
+        "description": "PIC assembler",
+        "default_operation": "assemble",
     },
     # Future tools can be added here:
     # "ar": {
@@ -226,14 +257,14 @@ def _validate_passthrough_arguments(args: List[str]) -> Tuple[bool, List[str]]:
                     ".map",
                 )
                 if any(arg.endswith(ext) for ext in safe_extensions):
-                    # Additional validation: ensure it's just a filename, not a path traversal
+                    # Additional validation: ensure it's a safe path
                     try:
                         path = PurePath(arg)
-                        # Only allow simple filenames, no directory traversal
+                        # Allow reasonable relative paths with limited upward traversal
                         if (
                             not path.is_absolute()
-                            and ".." not in path.parts
-                            and len(path.parts) <= 2
+                            and len(path.parts) <= 10  # Reasonable path depth limit
+                            and path.parts.count("..") <= 3  # Limit upward traversal
                         ):
                             arg_valid = True
                     except (ValueError, OSError):
@@ -510,27 +541,49 @@ def get_xc8_tool_path(
     if not all(c.isalnum() or c in ".-_" for c in version):
         raise ValueError(f"Invalid version format: {version}")
 
-    # Determine platform-specific installation path
-    if sys.platform.startswith("win"):
-        # Windows: Check both 64-bit and 32-bit Program Files locations
-        possible_paths = [
-            Path("C:/Program Files/Microchip/xc8") / f"v{version}" / "bin",
-            Path("C:/Program Files (x86)/Microchip/xc8") / f"v{version}" / "bin",
-        ]
-    elif sys.platform.startswith("darwin"):
-        # macOS: Check /Applications first, then /opt as fallback
-        possible_paths = [
-            Path("/Applications/microchip/xc8") / f"v{version}" / "bin",
-            Path("/opt/microchip/xc8") / f"v{version}" / "bin",
-        ]
-    else:
-        # Linux and other Unix-like systems: Check standard installation paths
-        possible_paths = [
-            Path("/opt/microchip/bin"),
-            Path("/usr/local/microchip/bin"),
-            Path("/opt/microchip/xc8") / f"v{version}" / "bin",
-            Path("/usr/local/microchip/xc8") / f"v{version}" / "bin",
-        ]
+    # Determine platform-specific installation path based on tool
+    if tool_name == "as":  # pic-as is in a different subdirectory
+        if sys.platform.startswith("win"):
+            # Windows: pic-as is in pic-as/bin subdirectory
+            possible_paths = [
+                Path("C:/Program Files/Microchip/xc8") / f"v{version}" / "pic-as" / "bin",
+                Path("C:/Program Files (x86)/Microchip/xc8") / f"v{version}" / "pic-as" / "bin",
+            ]
+        elif sys.platform.startswith("darwin"):
+            # macOS: pic-as is in pic-as/bin subdirectory
+            possible_paths = [
+                Path("/Applications/microchip/xc8") / f"v{version}" / "pic-as" / "bin",
+                Path("/opt/microchip/xc8") / f"v{version}" / "pic-as" / "bin",
+            ]
+        else:
+            # Linux and other Unix-like systems: pic-as is in pic-as/bin subdirectory
+            possible_paths = [
+                Path("/opt/microchip/xc8") / f"v{version}" / "pic-as" / "bin",
+                Path("/usr/local/microchip/xc8") / f"v{version}" / "pic-as" / "bin",
+                Path("/opt/microchip/bin"),  # Fallback for system-wide installation
+                Path("/usr/local/microchip/bin"),  # Fallback for system-wide installation
+            ]
+    else:  # xc8-cc and other tools are in the main bin directory
+        if sys.platform.startswith("win"):
+            # Windows: Check both 64-bit and 32-bit Program Files locations
+            possible_paths = [
+                Path("C:/Program Files/Microchip/xc8") / f"v{version}" / "bin",
+                Path("C:/Program Files (x86)/Microchip/xc8") / f"v{version}" / "bin",
+            ]
+        elif sys.platform.startswith("darwin"):
+            # macOS: Check /Applications first, then /opt as fallback
+            possible_paths = [
+                Path("/Applications/microchip/xc8") / f"v{version}" / "bin",
+                Path("/opt/microchip/xc8") / f"v{version}" / "bin",
+            ]
+        else:
+            # Linux and other Unix-like systems: Check standard installation paths
+            possible_paths = [
+                Path("/opt/microchip/bin"),
+                Path("/usr/local/microchip/bin"),
+                Path("/opt/microchip/xc8") / f"v{version}" / "bin",
+                Path("/usr/local/microchip/xc8") / f"v{version}" / "bin",
+            ]
 
     # Find the first existing path
     xc8_path = None
@@ -615,6 +668,8 @@ def run_command(cmd: List[str], description: str) -> bool:
         "xc8-cc",
         "xc8.exe",
         "xc8",
+        "pic-as.exe",
+        "pic-as",
         # Test executables - allow for testing purposes
         # "echo",
         # "test",
@@ -967,3 +1022,111 @@ def handle_cc_tool(args: Any) -> None:
             log.error("\nCompilation failed")
             log.warning("Check your options and source files for errors")
             sys.exit(1)
+
+
+def handle_as_tool(args: Any) -> None:
+    """
+    Handle pic-as assembler operations
+
+    Args:
+        args: Parsed command line arguments
+
+    Raises:
+        SystemExit: If assembly fails or requirements are not met
+    """
+    pic_as_path, version_info = get_xc8_validated_tool_path(
+        "as", args.xc8_version, args.xc8_path
+    )
+
+    # Validate PIC-AS tool
+    if not validate_xc8_tool(pic_as_path, "as", version_info):
+        sys.exit(1)
+
+    # Build assembly command
+    cmd_args = [pic_as_path]
+
+    # Essential options only
+    # Add CPU selection if provided and not in passthrough mode
+    if not args.passthrough and hasattr(args, "cpu") and args.cpu:
+        cmd_args.append(f"-mcpu={args.cpu}")
+
+    # Add output file if specified
+    if hasattr(args, "output") and args.output:
+        cmd_args.extend(["-o", args.output])
+
+    # Verbose mode
+    if hasattr(args, "verbose") and args.verbose:
+        cmd_args.append("-v")
+
+    # Passthrough options - pass raw arguments directly to pic-as using secure validation
+    if hasattr(args, "passthrough") and args.passthrough:
+        try:
+            # Use shlex to properly handle quoted arguments and spaces
+            passthrough_args = shlex.split(args.passthrough)
+
+            # Security validation using allowlist approach
+            is_valid, validated_args = _validate_passthrough_arguments(passthrough_args)
+
+            if not is_valid:
+                log.error("Passthrough validation failed - see errors above")
+                log.error("Only PIC-AS assembler options are allowed")
+                sys.exit(1)
+
+            cmd_args.extend(validated_args)
+            if hasattr(args, "verbose") and args.verbose:
+                log.info(f"Added validated passthrough arguments: {validated_args}")
+
+        except ValueError as e:
+            log.error(f"Invalid passthrough syntax: {e}")
+            print(
+                f"Invalid passthrough syntax: {e}"
+            )  # Ensure error is visible to CLI and tests
+            sys.exit(1)
+
+    # Add source files
+    if hasattr(args, "files") and args.files and hasattr(args.files, "__iter__"):
+        cmd_args.extend(args.files)
+
+    # Determine target info for logging
+    target_info = args.cpu if hasattr(args, "cpu") and args.cpu else "PIC device"
+    
+    log.info(f"\n=== PIC ASSEMBLER for {target_info} ===")
+    log.info("Configuration:")
+    log.info("  - Tool: PIC-AS (pic-as)")
+    log.info(f"  - Version: {version_info}")
+    if hasattr(args, "cpu") and args.cpu:
+        log.info(f"  - Target MCU: {args.cpu}")
+    if hasattr(args, "files") and args.files and hasattr(args.files, "__iter__"):
+        try:
+            log.info(f"  - Source files: {', '.join(str(f) for f in args.files)}")
+        except (TypeError, ValueError):
+            log.info(f"  - Source files: {args.files}")
+    if hasattr(args, "output") and args.output:
+        log.info(f"  - Output: {args.output}")
+
+    # Show command if dry run
+    if hasattr(args, "dry_run") and args.dry_run:
+        try:
+            log.info(f"\nWould execute: {' '.join(str(arg) for arg in cmd_args)}")
+        except (TypeError, ValueError):
+            log.info(f"\nWould execute: {cmd_args}")
+        return
+
+    # Execute assembly
+    if hasattr(args, "passthrough") and args.passthrough:
+        log.warning("Command in progress...")
+        if not run_command(cmd_args, "PIC Assembly Command"):
+            log.error("\nAssembly failed")
+            log.warning("Check your options and source files for errors")
+            sys.exit(1)
+    else:
+        log.warning("Assembly in progress...")
+        if not run_command(cmd_args, "PIC Assembly"):
+            log.error("\nAssembly failed")
+            log.warning("Check your assembly source code for errors")
+            sys.exit(1)
+
+        log.info(
+            f"\n🎉 SUCCESS! PIC {target_info} assembly completed with PIC-AS {version_info}!"
+        )
+        log.info("Next step: Check output files or program device")

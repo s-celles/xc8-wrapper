@@ -11,6 +11,7 @@ xc8-wrapper [GLOBAL_OPTIONS] COMMAND [COMMAND_OPTIONS] [FILES...]
 ### Available Commands
 - `install`: Install XC8 compiler
 - `cc`: C compiler, assembler, and linker (equivalent to xc8-cc)
+- `as`: PIC assembler (equivalent to pic-as)
 - `ar`: Archive/librarian tool (not yet implemented)
 
 ### Global Options
@@ -326,3 +327,96 @@ xc8-wrapper cc --cpu PIC16F877A -O2 -v --passthrough="-mplib -mdownload-hex" mai
   - File traversal: `../`, `..\\`, `/etc/`, `\\windows\\`
   - Dangerous executables: `cmd.exe`, `powershell`, `bash`, `sh`, `rm`, `del`, `format`
 - Only compiler-specific options should be passed through this mechanism
+
+## AS Command (PIC Assembler)
+
+### Basic Usage
+```bash
+xc8-wrapper as [OPTIONS] [FILES...]
+```
+
+### XC8 Assembler Location
+- `--xc8-version VERSION`: XC8 toolchain version (e.g., '3.00', '2.40')
+- `--xc8-path PATH`: Full path to pic-as executable (overrides version)
+
+### Target Configuration
+- `--cpu CPU`, `-mcpu CPU`: Target microcontroller (**required**)
+
+### Assembly Options
+
+#### Output Control
+- `-o FILE`: Specify output file name
+- `-v`, `--verbose`: Enable verbose output
+- `-###`, `--dry-run`: Show command lines but do not execute
+
+#### Help Options
+- `--pic-as-help`: Show help for pic-as and exit
+
+### Passthrough Options
+- `--passthrough STRING`, `-p STRING`: Pass options directly to pic-as without interpretation
+
+**Examples:**
+```bash
+# Basic assembly compilation
+xc8-wrapper as --cpu PIC16F877A main.s
+
+# Assembly with custom output file
+xc8-wrapper as --cpu PIC16F877A -o firmware.hex main.s
+
+# Assembly with verbose output
+xc8-wrapper as --cpu PIC16F877A -v main.s
+
+# Assembly with listing and map files
+xc8-wrapper as --cpu PIC16F877A --passthrough="-list -map" main.s
+
+# Intel HEX output with debug info
+xc8-wrapper as --cpu PIC18F4550 --passthrough="-inhx32 -g" main.s
+
+# PIC14 family assembly
+xc8-wrapper as --cpu PIC16F877A --passthrough="-mpic14 -mwarn=3" main.s
+```
+
+### Common PIC-AS Options (via Passthrough)
+
+#### Output Formats
+- `-inhx32`: Intel HEX 32-bit format (default)
+- `-inhx8m`: Intel HEX 8M format  
+- `-binary`: Binary output format
+- `-motorola`: Motorola S-record format
+
+#### Debug and Listing
+- `-g`: Generate debug information
+- `-gdwarf-3`: Generate DWARF-3 debug format
+- `-list`: Generate listing file
+- `-map`: Generate map file
+
+#### Device Family Options
+- `-mpic14`: PIC14 family (PIC16F series)
+- `-mpic16`: PIC16 family (PIC18F series)
+
+#### Warning Control
+- `-mwarn=LEVEL`: Set warning level (0-3)
+
+**Security & Safety Notes:**
+
+The same security validation applies to the AS command as the CC command:
+- Shell operators and command substitution are blocked
+- File traversal patterns are blocked  
+- Only assembler-specific options should be passed through
+
+### Assembly Development Workflow
+
+**Development build:**
+```bash
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 -v --passthrough="-list -map -g" main.s
+```
+
+**Production build:**
+```bash
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 --passthrough="-inhx32" main.s
+```
+
+**Debug build:**
+```bash
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 --passthrough="-g -gdwarf-3 -list" main.s
+```

@@ -21,6 +21,8 @@ XC8 Wrapper is a Python-based command-line tool that provides a modern, user-fri
 - **🎨 Rich terminal output** with colors and progress indicators
 - **⚡ Smart XC8 detection** that finds your compiler installation automatically
 - **🧪 Comprehensive testing** with 78%+ code coverage
+- **📝 Assembly support** with pic-as assembler integration
+- **⚙️ Flexible passthrough** for advanced XC8 and pic-as options
 
 ## 🚀 Quick Start
 
@@ -43,11 +45,17 @@ xc8-wrapper --help
 # Install XC8
 xc8-wrapper install
 
-# Compile a simple PIC project
+# Compile a C project
 xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A main.c
 
 # Compile with optimization and verbose output
 xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A -O2 -v main.c
+
+# Assemble an assembly project
+xc8-wrapper as --xc8-version 3.00 --cpu PIC16F877A main.s
+
+# Assembly with listing and debug information
+xc8-wrapper as --xc8-version 3.00 --cpu PIC16F877A --passthrough="-list -map -g" main.s
 ```
 
 ## Getting Started
@@ -109,8 +117,11 @@ Complete your PIC development workflow with our companion project:
 # Complete workflow example
 pip install xc8-wrapper ipecmd-wrapper
 
-# 1. Compile with XC8 Wrapper
+# 1. Compile C code with XC8 Wrapper
 xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A main.c
+
+# OR: Assemble assembly code with XC8 Wrapper
+xc8-wrapper as --xc8-version 3.00 --cpu PIC16F877A main.s
 
 # 2. Program with IPECMD Wrapper
 ipecmd-wrapper -P 16F877A -T PK3 -F dist/main.hex -W 5.0

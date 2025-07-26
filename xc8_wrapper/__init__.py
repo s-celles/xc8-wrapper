@@ -14,6 +14,7 @@ from .core import (
     find_available_xc8_versions,
     get_latest_xc8_version,
     handle_cc_tool,
+    handle_as_tool,
     run_command,
     validate_xc8_tool,
 )
@@ -26,6 +27,7 @@ __all__ = [
     "validate_xc8_tool",
     "run_command",
     "handle_cc_tool",
+    "handle_as_tool",
     "SUPPORTED_XC8_TOOLS",
     "log",
 ]

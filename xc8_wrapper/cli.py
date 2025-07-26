@@ -11,7 +11,7 @@ from typing import Annotated, List, Optional
 import typer
 from colorama import init
 
-from .core import handle_cc_tool, get_xc8_validated_tool_path, run_command
+from .core import handle_cc_tool, handle_as_tool, get_xc8_validated_tool_path, run_command
 from .install import check_xc8_installation, get_xc8_download_url, install_xc8_if_needed
 from .logger import log
 
@@ -485,6 +485,88 @@ def cc_command(
         handle_cc_tool(args)
     except Exception as e:
         log.error(f"Compilation failed: {e}")
+        raise typer.Exit(1)
+
+
+# PIC-AS (Assembler) command - supports PIC assembler operations
+@app.command("as")
+def as_command(
+    files: Annotated[
+        Optional[List[str]], typer.Argument(help="Assembly source files to assemble")
+    ] = None,
+    # Essential options only
+    output: Annotated[
+        Optional[str], typer.Option("-o", help="Specify output file")
+    ] = None,
+    verbose: Annotated[bool, typer.Option("-v", help="Verbose")] = False,
+    # CPU selection
+    cpu: Annotated[
+        Optional[str], typer.Option("-mcpu", "--cpu", help="Select target device")
+    ] = None,
+    dry_run: Annotated[
+        bool, typer.Option("-###", help="Show command lines but do not execute")
+    ] = False,
+    # XC8 wrapper specific options
+    xc8_version: Annotated[
+        Optional[str],
+        typer.Option("--xc8-version", help="XC8 toolchain version to use"),
+    ] = None,
+    xc8_path: Annotated[
+        Optional[str],
+        typer.Option("--xc8-path", help="Full path to pic-as executable"),
+    ] = None,
+    # Passthrough option for raw pic-as arguments - this is the main way to use pic-as options
+    passthrough: Annotated[
+        Optional[str],
+        typer.Option(
+            "--passthrough",
+            "-p",
+            help="Pass options directly to pic-as (e.g., '--passthrough=\"-mpic14 -g -inhx32\"')",
+        ),
+    ] = None,
+    # Help options
+    pic_as_help: Annotated[
+        bool, typer.Option("--pic-as-help", help="Show help for pic-as and exit")
+    ] = False,
+) -> None:
+    """PIC assembler - use --passthrough for most pic-as options"""
+    log.info("=== PIC ASSEMBLER ===")
+
+    # Handle pic-as help option
+    if pic_as_help:
+        pic_as_path, _ = get_xc8_validated_tool_path("as", xc8_version, xc8_path)
+        run_command([pic_as_path, "--help"], "PIC Assembler Help")
+        return
+
+    # Create args object compatible with existing handler
+    class Args:
+        def __init__(self) -> None:
+            # Basic assembler options
+            self.cpu = cpu
+            self.xc8_version = xc8_version
+            self.xc8_path = xc8_path
+            self.files = files or []
+
+            # Assembly options
+            self.output = output
+            self.verbose = verbose
+            self.dry_run = dry_run
+
+            # Passthrough option
+            self.passthrough = passthrough
+
+    args = Args()
+
+    # Validate required arguments for assembly (unless using passthrough with all args)
+    if not passthrough and not files:
+        log.error("No input assembly files specified")
+        log.error("Either provide assembly files or use --passthrough with complete command")
+        raise typer.Exit(1)
+
+    try:
+        handle_as_tool(args)
+    except Exception as e:
+        log.error(f"Assembly failed: {e}")
         raise typer.Exit(1)
 
 

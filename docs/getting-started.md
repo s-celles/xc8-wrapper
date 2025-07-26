@@ -155,7 +155,7 @@ The most important file is `main.hex` - this is what you'll upload to your PIC m
 
 ## Common Usage Patterns
 
-### Basic Compilation
+### Basic C Compilation
 
 ```bash
 # Minimal command
@@ -165,6 +165,103 @@ xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A main.c
 xc8-wrapper cc --xc8-version 3.00 --cpu PIC16F877A \
     -I ./include \
     src/main.c src/uart.c
+```
+
+### Assembly Programming
+
+XC8 Wrapper also supports PIC assembly programming using the `as` (assembler) command:
+
+```bash
+# Basic assembly compilation
+xc8-wrapper as --cpu PIC16F876A main.s
+
+# With custom output file
+xc8-wrapper as --cpu PIC16F876A -o output/firmware.hex main.s
+
+# Verbose assembly output
+xc8-wrapper as --cpu PIC16F876A -v main.s
+
+# Assembly with listing and debug info
+xc8-wrapper as --cpu PIC16F876A --passthrough="-list -map -g" main.s
+
+# Intel HEX format output
+xc8-wrapper as --cpu PIC18F4550 --passthrough="-inhx32" main.s
+```
+
+#### Assembly Example
+
+Create a file `src/blink.s` for a simple LED blink in assembly:
+
+```assembly
+; LED Blink in PIC Assembly for PIC16F876A
+PROCESSOR 16F876A
+
+; Configuration bits
+config FOSC=HS, WDTE=OFF, PWRTE=OFF, BOREN=ON, LVP=OFF, CPD=OFF, WRT=OFF, CP=OFF
+
+; Register definitions
+STATUS  equ 0x03
+RP0     equ 5
+TRISC   equ 0x87    ; Bank 1
+PORTC   equ 0x07    ; Bank 0
+
+; Variables
+psect udata_shr,global,class=COMMON,space=1,delta=1,noexec
+delay_count1: ds 1
+delay_count2: ds 1
+
+; Reset vector
+psect resetVect,global,class=CODE,delta=2
+    pagesel MAIN
+    goto    MAIN
+
+; Main program
+psect code,global,class=CODE,delta=2
+MAIN:
+    ; Set bank 1 for TRIS registers
+    bsf STATUS, RP0
+    clrf TRISC          ; PORTC as output
+    bcf STATUS, RP0     ; Back to bank 0
+    
+    clrf PORTC          ; Initialize PORTC
+
+MAIN_LOOP:
+    bsf PORTC, 0        ; Turn on LED (RC0)
+    call DELAY          ; Wait
+    bcf PORTC, 0        ; Turn off LED
+    call DELAY          ; Wait
+    goto MAIN_LOOP      ; Repeat
+
+DELAY:
+    movlw 0xFF
+    movwf delay_count1
+DELAY_OUTER:
+    movlw 0xFF
+    movwf delay_count2
+DELAY_INNER:
+    decfsz delay_count2, f
+    goto DELAY_INNER
+    decfsz delay_count1, f
+    goto DELAY_OUTER
+    return
+
+END
+```
+
+Compile it with:
+
+```bash
+xc8-wrapper as --cpu PIC16F876A blink.s
+```
+
+For more advanced assembly options:
+
+```bash
+# With listing file and debug information
+xc8-wrapper as --cpu PIC16F876A --passthrough="-list -map -g" blink.s
+
+# Intel HEX format with verbose output
+xc8-wrapper as --cpu PIC16F876A -v --passthrough="-inhx32" blink.s
 ```
 
 ### Optimization Options

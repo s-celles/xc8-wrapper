@@ -65,6 +65,69 @@ xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 \
     --link-flag "-Wl,--gc-sections"
 ```
 
+## Assembly Questions
+
+### Q: Does XC8 Wrapper support assembly programming?
+
+**A:** Yes! Use the `as` command for PIC assembly:
+```bash
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 main.s
+```
+
+### Q: What assembly formats are supported?
+
+**A:** XC8 Wrapper supports PIC assembly using the pic-as assembler that comes with XC8. It supports:
+- PIC14 family (PIC16F series)
+- PIC16 family (PIC18F series) 
+- Intel HEX output format
+- Motorola S-record format
+- Binary format
+
+### Q: How do I generate listing files in assembly?
+
+**A:** Use the `--passthrough` option to pass pic-as specific flags:
+```bash
+xc8-wrapper as --cpu PIC16F877A --passthrough="-list -map" main.s
+```
+
+### Q: How do I debug assembly code?
+
+**A:** Enable debug information generation:
+```bash
+xc8-wrapper as --cpu PIC16F877A --passthrough="-g -gdwarf-3 -list" main.s
+```
+
+### Q: Can I mix C and assembly files?
+
+**A:** Currently, XC8 Wrapper handles C and assembly separately. For mixed projects:
+1. Assemble your `.s` files with `xc8-wrapper as`
+2. Compile your `.c` files with `xc8-wrapper cc`
+3. Use XC8 directly for linking mixed object files
+
+Mixed-language project support is planned for future versions.
+
+### Q: What's the difference between using `cc` and `as` commands?
+
+**A:** 
+- `cc` command: Compiles C source files using `xc8-cc`
+- `as` command: Assembles assembly source files using `pic-as`
+
+Both are part of the XC8 toolchain but serve different purposes.
+
+### Q: How do I specify output format for assembly?
+
+**A:** Use passthrough options:
+```bash
+# Intel HEX format (default)
+xc8-wrapper as --cpu PIC16F877A --passthrough="-inhx32" main.s
+
+# Motorola S-record format
+xc8-wrapper as --cpu PIC16F877A --passthrough="-motorola" main.s
+
+# Binary format
+xc8-wrapper as --cpu PIC16F877A --passthrough="-binary" main.s
+```
+
 ## Platform-Specific Questions
 
 ### Q: XC8 Wrapper can't find my XC8 installation on Windows
@@ -105,16 +168,37 @@ chmod +x /path/to/xc8/bin/xc8-cc
 
 ### Q: "Unsupported XC8 tool: xyz"
 
-**A:** Currently only the `cc` tool is supported. Use:
+**A:** Currently only the `cc` and `as` tools are supported. Use:
 ```bash
+# For C compilation
 xc8-wrapper cc --cpu PIC16F877A main.c
+
+# For assembly
+xc8-wrapper as --cpu PIC16F877A main.s
 ```
 
-### Q: "CPU is required for cc tool"
+### Q: "CPU is required for cc tool" or "CPU is required for as tool"
 
 **A:** Always specify the target microcontroller:
 ```bash
+# For C
 xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c
+
+# For assembly
+xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 main.s
+```
+
+### Q: "PIC-AS executable not found"
+
+**A:** This means pic-as isn't found. Solutions:
+1. Ensure XC8 is properly installed (pic-as comes with XC8)
+2. Use `--xc8-path` to specify the path to pic-as
+3. Check that pic-as has execute permissions (Linux/macOS)
+
+```bash
+# Specify pic-as path explicitly
+xc8-wrapper as --cpu PIC16F877A \
+    --xc8-path "/path/to/pic-as" main.s
 ```
 
 ### Q: "Source file not found: src/main.c"
