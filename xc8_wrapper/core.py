@@ -174,6 +174,16 @@ XC8_ALLOWED_PATTERNS = [
     r"^-Wl,.*$",  # Pass options to linker
     r"^-o\s+[a-zA-Z0-9_./\\-]+$",  # Output file with space
     r"^-o[a-zA-Z0-9_./\\-]+$",  # Output file without space
+    # File path patterns (comprehensive for Windows and Unix paths)
+    r"^[A-Za-z]:[\\\/].*\.(c|s|asm|S|inc|as|h|hpp|hex|elf|o|obj|lib|a)$",  # Windows absolute paths
+    r"^[\/].*\.(c|s|asm|S|inc|as|h|hpp|hex|elf|o|obj|lib|a)$",  # Unix absolute paths
+    r"^[\.\/\\].*\.(c|s|asm|S|inc|as|h|hpp|hex|elf|o|obj|lib|a)$",  # Relative paths
+    r"^.*\.(c|s|asm|S|inc|as|h|hpp|hex|elf|o|obj|lib|a)$",  # Simple filenames
+    # Output file patterns
+    r"^-o$",  # Output flag standalone
+    r"^[A-Za-z]:[\\\/].*\.(hex|elf|bin|obj|o)$",  # Windows output paths
+    r"^[\/].*\.(hex|elf|bin|obj|o)$",  # Unix output paths
+    r"^[\.\/\\].*\.(hex|elf|bin|obj|o)$",  # Relative output paths
 ]
 
 # Known XC8 versions that actually exist (highest to lowest)
