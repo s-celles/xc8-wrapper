@@ -117,26 +117,32 @@ XC8_ALLOWED_OPTIONS = {
     "-no-legacy-libc",
     # PIC-AS specific options
     "-Wa",  # Pass options to assembler
-    "-x",   # Specify language
-    "-o",   # Output file
-    "-c",   # Compile to object file
-    "-v",   # Verbose
-    "-w",   # Suppress warnings
-    "-g",   # Generate debug information
+    "-x",  # Specify language
+    "-o",  # Output file
+    "-c",  # Compile to object file
+    "-v",  # Verbose
+    "-w",  # Suppress warnings
+    "-g",  # Generate debug information
     "--help",  # Help
     "--version",  # Version
     # PIC-AS assembler-specific options
     "-msummary",  # Summary information
-    "-mwarn",     # Warning level
-    "-mpic14",    # PIC14 family
-    "-mpic16",    # PIC16 family
-    "-map",       # Generate map file
-    "-list",      # Generate listing file
-    "-inhx32",    # Intel HEX 32-bit format
-    "-inhx8m",    # Intel HEX 8M format
-    "-intel",     # Intel HEX format
+    "-mwarn",  # Warning level
+    "-mpic14",  # PIC14 family
+    "-mpic16",  # PIC16 family
+    "-map",  # Generate map file
+    "-list",  # Generate listing file
+    "-inhx32",  # Intel HEX 32-bit format
+    "-inhx8m",  # Intel HEX 8M format
+    "-intel",  # Intel HEX format
     "-motorola",  # Motorola S-record format
-    "-binary",    # Binary format
+    "-binary",  # Binary format
+    # Preprocessor options
+    "-D",  # Define preprocessor symbol
+    "-U",  # Undefine preprocessor symbol
+    "-I",  # Include directory
+    # Language and preprocessing options
+    "-xassembler-with-cpp",  # Enable C preprocessor for assembly files
 }
 
 # Allowed option patterns (for options that take values)
@@ -158,6 +164,14 @@ XC8_ALLOWED_PATTERNS = [
     r"^-Wl,.*$",  # Allow linker options
     # PIC-AS specific patterns
     r"^-mcpu=[a-zA-Z0-9_]+$",  # Device selection
+    # Preprocessor patterns
+    r"^-D[A-Za-z_][A-Za-z0-9_]*$",  # Define without value
+    r"^-D[A-Za-z_][A-Za-z0-9_]*=.*$",  # Define with value
+    r"^-U[A-Za-z_][A-Za-z0-9_]*$",  # Undefine
+    r"^-I[a-zA-Z0-9_./\\-]+$",  # Include directory
+    # Assembler passthrough options
+    r"^-Wa,.*$",  # Pass options to assembler
+    r"^-Wl,.*$",  # Pass options to linker
     r"^-o\s+[a-zA-Z0-9_./\\-]+$",  # Output file with space
     r"^-o[a-zA-Z0-9_./\\-]+$",  # Output file without space
 ]
@@ -546,8 +560,14 @@ def get_xc8_tool_path(
         if sys.platform.startswith("win"):
             # Windows: pic-as is in pic-as/bin subdirectory
             possible_paths = [
-                Path("C:/Program Files/Microchip/xc8") / f"v{version}" / "pic-as" / "bin",
-                Path("C:/Program Files (x86)/Microchip/xc8") / f"v{version}" / "pic-as" / "bin",
+                Path("C:/Program Files/Microchip/xc8")
+                / f"v{version}"
+                / "pic-as"
+                / "bin",
+                Path("C:/Program Files (x86)/Microchip/xc8")
+                / f"v{version}"
+                / "pic-as"
+                / "bin",
             ]
         elif sys.platform.startswith("darwin"):
             # macOS: pic-as is in pic-as/bin subdirectory
@@ -561,7 +581,9 @@ def get_xc8_tool_path(
                 Path("/opt/microchip/xc8") / f"v{version}" / "pic-as" / "bin",
                 Path("/usr/local/microchip/xc8") / f"v{version}" / "pic-as" / "bin",
                 Path("/opt/microchip/bin"),  # Fallback for system-wide installation
-                Path("/usr/local/microchip/bin"),  # Fallback for system-wide installation
+                Path(
+                    "/usr/local/microchip/bin"
+                ),  # Fallback for system-wide installation
             ]
     else:  # xc8-cc and other tools are in the main bin directory
         if sys.platform.startswith("win"):
@@ -1089,7 +1111,7 @@ def handle_as_tool(args: Any) -> None:
 
     # Determine target info for logging
     target_info = args.cpu if hasattr(args, "cpu") and args.cpu else "PIC device"
-    
+
     log.info(f"\n=== PIC ASSEMBLER for {target_info} ===")
     log.info("Configuration:")
     log.info("  - Tool: PIC-AS (pic-as)")

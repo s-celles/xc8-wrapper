@@ -11,7 +11,12 @@ from typing import Annotated, List, Optional
 import typer
 from colorama import init
 
-from .core import handle_cc_tool, handle_as_tool, get_xc8_validated_tool_path, run_command
+from .core import (
+    handle_cc_tool,
+    handle_as_tool,
+    get_xc8_validated_tool_path,
+    run_command,
+)
 from .install import check_xc8_installation, get_xc8_download_url, install_xc8_if_needed
 from .logger import log
 
@@ -468,11 +473,12 @@ def cc_command(
     if passthrough:
         try:
             handle_cc_tool(args)
+            return  # Exit after successful passthrough execution
         except Exception as e:
             log.error(f"Compilation failed: {e}")
             raise typer.Exit(1)
 
-    # Validate required arguments for compilation
+    # Validate required arguments for compilation (only if not passthrough)
     if not files and not (print_devices or print_builtins or target_help):
         log.error("No input files specified")
         raise typer.Exit(1)
@@ -560,7 +566,9 @@ def as_command(
     # Validate required arguments for assembly (unless using passthrough with all args)
     if not passthrough and not files:
         log.error("No input assembly files specified")
-        log.error("Either provide assembly files or use --passthrough with complete command")
+        log.error(
+            "Either provide assembly files or use --passthrough with complete command"
+        )
         raise typer.Exit(1)
 
     try:
