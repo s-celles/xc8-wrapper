@@ -2,6 +2,7 @@
 
 <div align="center">
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/s-celles/xc8-wrapper)
 [![CI](https://github.com/s-celles/xc8-wrapper/actions/workflows/ci.yml/badge.svg)](https://github.com/s-celles/xc8-wrapper/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/s-celles/xc8-wrapper/branch/main/graph/badge.svg)](https://codecov.io/gh/s-celles/xc8-wrapper)
 [![PyPI version](https://badge.fury.io/py/xc8-wrapper.svg)](https://badge.fury.io/py/xc8-wrapper)
