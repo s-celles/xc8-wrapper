@@ -97,7 +97,7 @@ MAIN:
     bsf STATUS, RP0
     clrf TRISC          ; PORTC as output
     bcf STATUS, RP0     ; Back to bank 0
-    
+
     clrf PORTC          ; Initialize PORTC
 
 MAIN_LOOP:
@@ -383,7 +383,7 @@ jobs:
       run: |
         # Build C firmware
         xc8-wrapper cc --cpu PIC16F877A --xc8-version 3.00 main.c -O2
-        
+
         # Build assembly firmware (if present)
         if [ -f main.s ]; then
           xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 main.s
@@ -506,7 +506,7 @@ xc8-wrapper as --cpu PIC16F877A --passthrough="-g -gdwarf-3" main.s
 # PIC14 family specific options
 xc8-wrapper as --cpu PIC16F877A --passthrough="-mpic14 -msummary" main.s
 
-# PIC18 family specific options  
+# PIC18 family specific options
 xc8-wrapper as --cpu PIC18F4550 --passthrough="-mpic16 -mwarn=3" main.s
 ```
 

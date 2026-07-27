@@ -380,7 +380,7 @@ xc8-wrapper as --cpu PIC16F877A --passthrough="-mpic14 -mwarn=3" main.s
 
 #### Output Formats
 - `-inhx32`: Intel HEX 32-bit format (default)
-- `-inhx8m`: Intel HEX 8M format  
+- `-inhx8m`: Intel HEX 8M format
 - `-binary`: Binary output format
 - `-motorola`: Motorola S-record format
 
@@ -401,7 +401,7 @@ xc8-wrapper as --cpu PIC16F877A --passthrough="-mpic14 -mwarn=3" main.s
 
 The same security validation applies to the AS command as the CC command:
 - Shell operators and command substitution are blocked
-- File traversal patterns are blocked  
+- File traversal patterns are blocked
 - Only assembler-specific options should be passed through
 
 ### Assembly Development Workflow

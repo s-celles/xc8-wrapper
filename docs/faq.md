@@ -78,7 +78,7 @@ xc8-wrapper as --cpu PIC16F877A --xc8-version 3.00 main.s
 
 **A:** XC8 Wrapper supports PIC assembly using the pic-as assembler that comes with XC8. It supports:
 - PIC14 family (PIC16F series)
-- PIC16 family (PIC18F series) 
+- PIC16 family (PIC18F series)
 - Intel HEX output format
 - Motorola S-record format
 - Binary format
@@ -108,7 +108,7 @@ Mixed-language project support is planned for future versions.
 
 ### Q: What's the difference between using `cc` and `as` commands?
 
-**A:** 
+**A:**
 - `cc` command: Compiles C source files using `xc8-cc`
 - `as` command: Assembles assembly source files using `pic-as`
 
