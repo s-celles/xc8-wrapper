@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -15,7 +15,7 @@ repos:
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.12.4
+    rev: v0.16.0
     hooks:
       # Run the linter.
       #- id: ruff-check
@@ -24,7 +24,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.17.0
+    rev: v2.3.0
     hooks:
       - id: mypy
         additional_dependencies: [types-colorama, typer, colorama, logbook]
@@ -32,14 +32,14 @@ repos:
         #exclude: ^(tests/|setup_dev\.py|run_tests\.py|demo\.py|diagnose_platform\.py|install_xc8\.py)
 
   - repo: https://github.com/pycqa/bandit
-    rev: 1.8.6
+    rev: 1.9.4
     hooks:
       - id: bandit
         args: [-r, xc8_wrapper/]
         exclude: tests/
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.8.3
+    rev: v4.16.5
     hooks:
       - id: commitizen-branch
         stages: [pre-push]
