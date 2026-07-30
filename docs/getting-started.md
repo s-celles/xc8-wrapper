@@ -222,7 +222,7 @@ MAIN:
     bsf STATUS, RP0
     clrf TRISC          ; PORTC as output
     bcf STATUS, RP0     ; Back to bank 0
-    
+
     clrf PORTC          ; Initialize PORTC
 
 MAIN_LOOP:

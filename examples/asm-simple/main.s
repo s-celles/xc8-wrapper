@@ -5,19 +5,19 @@
  * @author Generated Code
  * @date 2025
  * @version 1.0
- * 
+ *
  * @brief Main features:
  * - LED blinking on PORTC RC2 every 500ms
  * - Uses Timer0 with prescaler 1:256 for timing
  * - External 4MHz crystal oscillator
  * - Port configuration with detailed documentation
- * 
+ *
  * @note Hardware requirements:
  * - PIC16F876A microcontroller
  * - 4MHz crystal with 22pF capacitors
  * - LED with series resistor on RC2
  * - 5V power supply
- * 
+ *
  * @warning Ensure proper crystal connections for reliable operation
  */
 
@@ -88,7 +88,7 @@ PSECT code,class=CODE,delta=2
 MAIN:
     ; Port configuration
     BANKSEL TRISC
-    
+
     /**
      * @brief Port C configuration
      * @details Must account for LEDs and system signals
@@ -97,7 +97,7 @@ MAIN:
      */
     MOVLW   0b00100000     ; RC5 input, others output
     MOVWF   TRISC
-    
+
     /**
      * @brief Port A configuration
      * @details Must account for LEDs, push buttons and MONO signal
@@ -107,7 +107,7 @@ MAIN:
      */
     MOVLW   0b00010110     ; RA1, RA2, RA4 inputs, others output
     MOVWF   TRISA
-    
+
     /**
      * @brief Port B configuration
      * @details Configuration according to system needs
@@ -116,7 +116,7 @@ MAIN:
      */
     MOVLW   0b00000000     ; All PORTB outputs
     MOVWF   TRISB
-    
+
     /**
      * @brief Analog-to-digital converter configuration
      * @details Configure pins as digital or analog inputs
@@ -126,7 +126,7 @@ MAIN:
      */
     MOVLW   0b00000110     ; Disable ADC, all digital
     MOVWF   ADCON1
-    
+
     /**
      * @brief Timer0 configuration
      * @details Configure Timer0 for timing delays
@@ -141,7 +141,7 @@ MAIN:
      */
     MOVLW   0b10000111     ; Prescaler 1:256
     MOVWF   OPTION_REG
-    
+
     /**
      * @brief Port initialization
      * @details Initialize all ports to known state
@@ -149,7 +149,7 @@ MAIN:
      */
     ; Switch to bank 0
     BANKSEL PORTC
-    
+
     ; Clear all ports
     CLRF    PORTC
     CLRF    PORTA
@@ -165,11 +165,11 @@ MAIN_LOOP:
     ; Turn ON LED4 (RC2)
     BSF     PORTC, LED4     ; Using LED4 constant (bit 2)
     CALL    DELAY_500MS
-    
+
     ; Turn OFF LED4 (RC2)
     BCF     PORTC, LED4     ; Using LED4 constant (bit 2)
     CALL    DELAY_500MS
-    
+
     GOTO    MAIN_LOOP
 
 /**
@@ -184,7 +184,7 @@ MAIN_LOOP:
 DELAY_500MS:
     MOVLW   8               ; 8 overflows for ~500ms
     MOVWF   OVERFLOW_COUNT
-    
+
 /**
  * @brief Timer0 overflow counting loop
  * @details Wait for specified number of Timer0 overflows
@@ -205,10 +205,10 @@ TIMER_LOOP:
 WAIT_OVERFLOW:
     BTFSS   INTCON, 2       ; Check TMR0IF flag
     GOTO    WAIT_OVERFLOW
-    
+
     DECFSZ  OVERFLOW_COUNT, F
     GOTO    TIMER_LOOP
-    
+
     RETURN
 
 /**
