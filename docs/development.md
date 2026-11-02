@@ -215,17 +215,19 @@ import pytest
 from unittest.mock import patch, MagicMock
 from xc8_wrapper.core import get_xc8_tool_path
 
+
 def test_get_xc8_tool_path_success():
     """Test successful XC8 tool path detection."""
-    with patch('pathlib.Path.exists', return_value=True):
-        result = get_xc8_tool_path('cc', '3.00')
+    with patch("pathlib.Path.exists", return_value=True):
+        result = get_xc8_tool_path("cc", "3.00")
         assert result is not None
-        assert 'xc8-cc' in str(result)
+        assert "xc8-cc" in str(result)
+
 
 def test_get_xc8_tool_path_not_found():
     """Test XC8 tool path when not found."""
-    with patch('pathlib.Path.exists', return_value=False):
-        result = get_xc8_tool_path('cc', '3.00')
+    with patch("pathlib.Path.exists", return_value=False):
+        result = get_xc8_tool_path("cc", "3.00")
         assert result is None
 ```
 
@@ -253,10 +255,12 @@ All functions must have type annotations:
 from pathlib import Path
 from typing import Optional, List
 
+
 def get_xc8_tool_path(tool: str, version: str) -> Optional[Path]:
     """Get the path to an XC8 tool executable."""
     # Implementation here
     pass
+
 
 def run_command(args: List[str], cwd: Optional[Path] = None) -> int:
     """Run a command and return the exit code."""
